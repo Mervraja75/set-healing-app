@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
@@ -9,6 +10,10 @@ export default function HomeScreen() {
       <Text style={styles.welcome}>
         Welcome to your healing journey.
       </Text>
+
+      <Link href="/login" asChild>
+        <Text style={styles.loginLink}>Go to Login →</Text>
+      </Link>
     </View>
   );
 }
@@ -36,5 +41,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#9D4EDD',
     textAlign: 'center',
+  },
+  loginLink: {
+    marginTop: 30,
+    fontSize: 18,
+    color: '#5A189A',
   },
 });
