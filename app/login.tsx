@@ -8,7 +8,7 @@ import { Link } from 'expo-router';
 // useState: manages form field values inside the component
 import { useState } from 'react';
 
-// Core React Native components for layout and UI inputs
+// Core React Native components
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // -------------------------------
@@ -19,64 +19,72 @@ export default function LoginScreen() {
   // -------------------------------
   // State (form fields)
   // -------------------------------
-  const [email, setEmail] = useState('');        // Stores user email input
-  const [password, setPassword] = useState('');  // Stores user password input
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // -------------------------------
   // Handlers
   // -------------------------------
   const handleLogin = () => {
-    console.log('Email:', email);        // Temporary log for testing input values
-    console.log('Password:', password);  // Firebase login will replace this later
+    console.log('Email:', email);
+    console.log('Password:', password);
   };
 
   // -------------------------------
   // UI Layout
   // -------------------------------
   return (
-    <View style={styles.container}>  {/* Main screen container */}
+    <>
+      {/* Main screen container */}
+      <View style={styles.container}>
 
-      {/* Back navigation to the Home screen */}
-      <Link href="/" asChild>
-        <Text style={styles.back}>← Back</Text>
-      </Link>
+        {/* Back navigation */}
+        <Link href="/" asChild>
+          <Text style={styles.back}>← Back</Text>
+        </Link>
 
-      {/* Screen title */}
-      <Text style={styles.title}>Login</Text>
+        {/* Screen title */}
+        <Text style={styles.title}>Login</Text>
 
-      {/* Email input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
-        autoCapitalize="none"       // Prevents iOS from capitalizing first letter
-        onChangeText={setEmail}     // Updates email state
-        value={email}               // Binds input value to state
-      />
+        {/* Email field */}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          autoCapitalize="none"
+          onChangeText={setEmail}
+          value={email}
+        />
 
-      {/* Password input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
-        secureTextEntry             // Masks password characters
-        onChangeText={setPassword}  // Updates password state
-        value={password}            // Binds input value to state
-      />
+        {/* Password field */}
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          onChangeText={setPassword}
+          value={password}
+        />
 
-      {/* Login button - triggers handleLogin */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+        {/* Login button */}
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
 
-      {/* Navigation to the Register screen */}
-      <Link href="/register" asChild>
-        <Text style={styles.registerLink}>
-          Don't have an account? Create one →
-        </Text>
-      </Link>
+        {/* Navigation to Categories for testing */}
+        <Link href="/categories" asChild>
+          <Text style={styles.categoriesLink}>Continue to Categories →</Text>
+        </Link>
 
-    </View>
+        {/* Navigation to Register */}
+        <Link href="/register" asChild>
+          <Text style={styles.registerLink}>
+            Don't have an account? Create one →
+          </Text>
+        </Link>
+
+      </View>
+    </>
   );
 }
 
@@ -85,48 +93,54 @@ export default function LoginScreen() {
 // -------------------------------
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                    // Full height of screen
-    justifyContent: 'center',   // Centers content vertically
-    padding: 20,                // Inner spacing around UI
-    backgroundColor: '#F8F6FF', // Light background color
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#F8F6FF',
   },
   back: {
-    fontSize: 18,       // Back text size
-    color: '#5A189A',   // Purple color for navigation
-    marginBottom: 20,   // Spacing below the back link
+    fontSize: 18,
+    color: '#5A189A',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,       // Large title size
-    marginBottom: 30,   // Spacing below title
+    fontSize: 28,
+    marginBottom: 30,
     textAlign: 'center',
     fontWeight: 'bold',
-    color: '#3A0CA3',   // Darker purple shade
+    color: '#3A0CA3',
   },
   input: {
-    height: 50,               // Standard input height
-    borderWidth: 1,           // Input border
-    borderColor: '#DDD',      // Light gray border
-    borderRadius: 10,         // Rounded corners
-    marginBottom: 15,         // Spacing between inputs
-    paddingHorizontal: 15,    // Inner horizontal padding
-    backgroundColor: '#FFF',  // White input background
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFF',
   },
   button: {
-    backgroundColor: '#5A189A',  // Purple button color
-    paddingVertical: 15,         // Vertical padding inside button
-    borderRadius: 10,            // Rounded corners
-    marginTop: 10,               // Space above the button
+    backgroundColor: '#5A189A',
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 10,
   },
   buttonText: {
-    color: '#FFF',           // White button text
+    color: '#FFF',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
   },
   registerLink: {
-    marginTop: 20,           // Space above the register link
+    marginTop: 20,
     textAlign: 'center',
-    color: '#5A189A',        // Purple link color
+    color: '#5A189A',
+    fontSize: 16,
+  },
+  categoriesLink: {
+    marginTop: 20,
+    textAlign: 'center',
+    color: '#5A189A',
     fontSize: 16,
   },
 });

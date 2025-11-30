@@ -1,14 +1,8 @@
 // -------------------------------
 // Imports
 // -------------------------------
-
-// Link: enables screen-to-screen navigation via Expo Router
 import { Link } from 'expo-router';
-
-// useState: manages local form field values
 import { useState } from 'react';
-
-// Core UI components for building the registration form
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // -------------------------------
@@ -19,69 +13,71 @@ export default function RegisterScreen() {
   // -------------------------------
   // State (form fields)
   // -------------------------------
-  const [name, setName] = useState('');       // Stores full name input
-  const [email, setEmail] = useState('');     // Stores email input
-  const [password, setPassword] = useState(''); // Stores password input
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // -------------------------------
   // Handlers (pre-Firebase)
   // -------------------------------
   const handleRegister = () => {
-    console.log("Name:", name);        // Temporary logs for testing
+    console.log("Name:", name);
     console.log("Email:", email);
     console.log("Password:", password);
-    // Firebase signup will be implemented on Day 7
   };
 
   // -------------------------------
   // UI Layout
   // -------------------------------
   return (
-    <View style={styles.container}> {/* Main container for screen */}
+    <>
+      {/* Main container for screen */}
+      <View style={styles.container}>
 
-      {/* Back navigation to Login screen */}
-      <Link href="/login" asChild>
-        <Text style={styles.back}>← Back to Login</Text>
-      </Link>
+        {/* Back navigation to Login screen */}
+        <Link href="/login" asChild>
+          <Text style={styles.back}>← Back to Login</Text>
+        </Link>
 
-      {/* Screen title */}
-      <Text style={styles.title}>Create Account</Text>
+        {/* Screen title */}
+        <Text style={styles.title}>Create Account</Text>
 
-      {/* Full Name input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        placeholderTextColor="#888"
-        onChangeText={setName}     // Updates full name state
-        value={name}               // Binds field to state
-      />
+        {/* Full Name Input */}
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          placeholderTextColor="#888"
+          onChangeText={setName}
+          value={name}
+        />
 
-      {/* Email input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
-        autoCapitalize="none"      // Prevents automatic uppercase (iOS)
-        onChangeText={setEmail}    // Updates email state
-        value={email}              // Binds field to state
-      />
+        {/* Email Input */}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          autoCapitalize="none"
+          onChangeText={setEmail}
+          value={email}
+        />
 
-      {/* Password input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
-        secureTextEntry            // Hides password characters
-        onChangeText={setPassword} // Updates password state
-        value={password}           // Binds field to state
-      />
+        {/* Password Input */}
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          onChangeText={setPassword}
+          value={password}
+        />
 
-      {/* Registration button - triggers handleRegister */}
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+        {/* Sign Up Button */}
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
 
-    </View>
+      </View>
+    </>
   );
 }
 
@@ -90,40 +86,40 @@ export default function RegisterScreen() {
 // -------------------------------
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                     // Full height layout
-    justifyContent: 'center',    // Center vertically
-    padding: 20,                 // Inner padding around form
-    backgroundColor: '#F8F6FF',  // Light lavender background
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#F8F6FF',
   },
   back: {
-    fontSize: 18,         // Size of back navigation text
-    color: '#5A189A',     // Purple navigation text color
-    marginBottom: 20,     // Space below back link
+    fontSize: 18,
+    color: '#5A189A',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,         // Large screen title
-    marginBottom: 30,     // Space below title
-    textAlign: 'center',  // Centered title
+    fontSize: 28,
+    marginBottom: 30,
+    textAlign: 'center',
     fontWeight: 'bold',
     color: '#3A0CA3',
   },
   input: {
-    height: 50,               // Standard form input height
-    borderWidth: 1,           // Light border for input field
-    borderColor: '#DDD',      // Light gray border
-    borderRadius: 10,         // Rounded corners
-    marginBottom: 15,         // Space below each input
-    paddingHorizontal: 15,    // Inner padding left/right
-    backgroundColor: '#FFF',  // White input background
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFF',
   },
   button: {
-    backgroundColor: '#5A189A', // Purple action button
-    paddingVertical: 15,        // Button height
-    borderRadius: 10,           // Rounded corners
-    marginTop: 10,              // Space above button
+    backgroundColor: '#5A189A',
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginTop: 10,
   },
   buttonText: {
-    color: '#FFF',           // White text on button
+    color: '#FFF',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
