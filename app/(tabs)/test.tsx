@@ -1,9 +1,13 @@
+//THIS IS THE SANDBOX SCREEN
+//A PLACE TO TEST OUT NEW COMPONENTS
+//EXPERIMENTAL FILE W/O TOUCHING THE APP
+
 // -------------------------------
 // Imports
 // -------------------------------
 
-import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 
 // -------------------------------
 // Export (Test Screen Component)
