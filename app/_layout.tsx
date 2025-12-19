@@ -12,31 +12,33 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
 
-        {/* Login Screen */}
+        {/* Auth Screens (NO TABS) */}
         <Stack.Screen
           name="login"
           options={{ headerShown: false }}
         />
-
-        {/* Home Screen */}
         <Stack.Screen
-          name="index"
-          options={{ title: 'Home' }}
+          name="register"
+          options={{ headerShown: false }}
         />
 
-        {/* Test Screen */}
-        <Stack.Screen
-          name="test"
-          options={{ title: 'Test' }}
-        />
-
-        {/* Tabs (kept for future use) */}
+        {/* Main App (WITH TABS) */}
         <Stack.Screen
           name="(tabs)"
           options={{ headerShown: false }}
         />
 
-        {/* Modal (unchanged) */}
+        {/* Extra Screens */}
+        <Stack.Screen
+          name="categories"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="test"
+          options={{ headerShown: false }}
+        />
+
+        {/* Modal */}
         <Stack.Screen
           name="modal"
           options={{ presentation: 'modal', title: 'Modal' }}

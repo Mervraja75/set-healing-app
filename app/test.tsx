@@ -1,7 +1,6 @@
 // =======================================
-// THIS IS THE SANDBOX SCREEN
-// A PLACE TO TEST OUT NEW COMPONENTS
-// EXPERIMENTAL FILE W/O TOUCHING THE APP
+// PLAYER SCREEN (Day 13)
+// Basic Audio Player UI
 // =======================================
 
 // -------------------------------
@@ -21,7 +20,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Audio } from 'expo-av';
 
 // -------------------------------
-// Export (Test Screen Component)
+// Player Screen Component
 // -------------------------------
 
 export default function TestScreen() {
@@ -53,7 +52,7 @@ export default function TestScreen() {
 
     // Load sound file
     const { sound: newSound } = await Audio.Sound.createAsync(
-      require('../assets/sounds/test-tone.mp3')
+      require('../assets/sounds/test.mp3')
     );
 
     setSound(newSound);
@@ -82,24 +81,27 @@ export default function TestScreen() {
   return (
     <View style={styles.container}>
 
-      {/* Screen Title */}
-      <Text style={styles.title}>Test Screen</Text>
+      {/* Category Label */}
+      <Text style={styles.category}>Calm</Text>
 
-      {/* Info Message */}
+      {/* Screen Title */}
+      <Text style={styles.title}>Relaxing Frequency</Text>
+
+      {/* Description */}
       <Text style={styles.info}>
-        Sandbox for testing components & audio
+        Take a moment to breathe and listen.
       </Text>
 
       {/* Play / Stop Button */}
       <TouchableOpacity style={styles.button} onPress={handleSoundToggle}>
         <Text style={styles.buttonText}>
-          {isPlaying ? 'Stop Sound' : 'Play Sound'}
+          {isPlaying ? 'Stop' : 'Play'}
         </Text>
       </TouchableOpacity>
 
       {/* Back Navigation */}
-      <Link href="/" asChild>
-        <Text style={styles.back}>Go Back Home</Text>
+      <Link href="/categories" asChild>
+        <Text style={styles.back}>← Back to Categories</Text>
       </Link>
 
     </View>
@@ -118,6 +120,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F8F6FF',
+    padding: 24,
+  },
+
+  // Category Label
+  category: {
+    fontSize: 14,
+    color: '#5A189A',
+    marginBottom: 6,
+    letterSpacing: 1,
   },
 
   // Screen Title
@@ -126,22 +137,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A0CA3',
     marginBottom: 10,
+    textAlign: 'center',
   },
 
   // Info Text
   info: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#555',
-    marginBottom: 25,
+    marginBottom: 35,
     textAlign: 'center',
   },
 
   // Play / Stop Button
   button: {
     backgroundColor: '#5A189A',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 50,
+    marginBottom: 30,
   },
 
   buttonText: {
@@ -150,11 +163,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // Go Back Link
+  // Back Link
   back: {
-    marginTop: 30,
     fontSize: 16,
-    color: '#3A0CA3',
+    color: '#5A189A',
     textAlign: 'center',
   },
 

@@ -2,8 +2,8 @@
 // Imports
 // -------------------------------
 
-// Link: used for screen navigation through Expo Router
-import { Link } from 'expo-router';
+// Expo Router navigation
+import { Link, useRouter } from 'expo-router';
 
 // useState: manages form field values inside the component
 import { useState } from 'react';
@@ -17,6 +17,11 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 export default function LoginScreen() {
 
   // -------------------------------
+  // Router
+  // -------------------------------
+  const router = useRouter();
+
+  // -------------------------------
   // State (form fields)
   // -------------------------------
   const [email, setEmail] = useState('');
@@ -26,65 +31,57 @@ export default function LoginScreen() {
   // Handlers
   // -------------------------------
   const handleLogin = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
+    // Temporary login (no auth yet)
+    router.replace('/(tabs)');
   };
 
   // -------------------------------
   // UI Layout
   // -------------------------------
   return (
-    <>
-      {/* Main screen container */}
-      <View style={styles.container}>
+    <View style={styles.container}>
 
-        {/* Back navigation */}
-        <Link href="/" asChild>
-          <Text style={styles.back}>← Back</Text>
-        </Link>
+      {/* App Title */}
+      <Text style={styles.title}>Healing Frequency</Text>
 
-        {/* Screen title */}
-        <Text style={styles.title}>Login</Text>
+      {/* Subtitle */}
+      <Text style={styles.subtitle}>
+        Relax • Focus • Breathe
+      </Text>
 
-        {/* Email field */}
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          autoCapitalize="none"
-          onChangeText={setEmail}
-          value={email}
-        />
+      {/* Email field */}
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        onChangeText={setEmail}
+        value={email}
+      />
 
-        {/* Password field */}
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          secureTextEntry
-          onChangeText={setPassword}
-          value={password}
-        />
+      {/* Password field */}
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#888"
+        secureTextEntry
+        onChangeText={setPassword}
+        value={password}
+      />
 
-        {/* Login button */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
+      {/* Login button */}
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
 
-        {/* Navigation to Categories for testing */}
-        <Link href="/categories" asChild>
-          <Text style={styles.categoriesLink}>Continue to Categories →</Text>
-        </Link>
+      {/* Navigation to Register */}
+      <Link href="/register" asChild>
+        <Text style={styles.registerLink}>
+          Don’t have an account? Create one →
+        </Text>
+      </Link>
 
-        {/* Navigation to Register */}
-        <Link href="/register" asChild>
-          <Text style={styles.registerLink}>
-            Don't have an account? Create one →
-          </Text>
-        </Link>
-
-      </View>
-    </>
+    </View>
   );
 }
 
@@ -95,20 +92,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
     backgroundColor: '#F8F6FF',
   },
-  back: {
-    fontSize: 18,
-    color: '#5A189A',
-    marginBottom: 20,
-  },
   title: {
-    fontSize: 28,
-    marginBottom: 30,
+    fontSize: 30,
+    marginBottom: 6,
     textAlign: 'center',
     fontWeight: 'bold',
     color: '#3A0CA3',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#5A189A',
+    marginBottom: 30,
   },
   input: {
     height: 50,
@@ -132,13 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   registerLink: {
-    marginTop: 20,
-    textAlign: 'center',
-    color: '#5A189A',
-    fontSize: 16,
-  },
-  categoriesLink: {
-    marginTop: 20,
+    marginTop: 25,
     textAlign: 'center',
     color: '#5A189A',
     fontSize: 16,

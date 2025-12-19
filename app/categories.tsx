@@ -2,48 +2,59 @@
 // Imports
 // -------------------------------
 import { Link } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+// -------------------------------
+// Static Categories (UI only)
+// -------------------------------
+const CATEGORIES = [
+  {
+    id: 'sleep',
+    title: 'Sleep',
+    description: 'Slow frequencies for rest and deep sleep',
+  },
+  {
+    id: 'calm',
+    title: 'Calm',
+    description: 'Relaxing sounds to ease the mind',
+  },
+  {
+    id: 'focus',
+    title: 'Focus',
+    description: 'Frequencies to support concentration',
+  },
+  {
+    id: 'energy',
+    title: 'Energy',
+    description: 'Uplifting tones for alertness',
+  },
+];
 
 // -------------------------------
 // Categories Screen Component
 // -------------------------------
 export default function CategoriesScreen() {
-
-  // -------------------------------
-  // UI Layout
-  // -------------------------------
   return (
-    <>
-      {/* Main layout container */}
-      <View style={styles.container}>
+    <View style={styles.container}>
 
-        {/* Screen Title */}
-        <Text style={styles.title}>Select a Category</Text>
+      {/* Screen Title */}
+      <Text style={styles.title}>Select a Category</Text>
 
-        {/* Placeholder categories */}
-        <TouchableOpacity style={styles.categoryBox}>
-          <Text style={styles.categoryText}>Headache Relief</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryBox}>
-          <Text style={styles.categoryText}>Stomach Pain</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryBox}>
-          <Text style={styles.categoryText}>Anxiety / Stress</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryBox}>
-          <Text style={styles.categoryText}>Back Pain</Text>
-        </TouchableOpacity>
-
-        {/* Back Navigation */}
-        <Link href="/login" asChild>
-          <Text style={styles.back}>← Back to Login</Text>
+      {/* Category Cards */}
+      {CATEGORIES.map((category) => (
+        <Link key={category.id} href="/test" asChild>
+          <View style={styles.categoryBox}>
+            <Text style={styles.categoryText}>
+              {category.title}
+            </Text>
+            <Text style={styles.categoryDescription}>
+              {category.description}
+            </Text>
+          </View>
         </Link>
+      ))}
 
-      </View>
-    </>
+    </View>
   );
 }
 
@@ -52,9 +63,9 @@ export default function CategoriesScreen() {
 // -------------------------------
 const styles = StyleSheet.create({
   container: {
-    flex: 1,                     // Full height
-    paddingTop: 80,              // Space from top
-    paddingHorizontal: 20,       // Side padding
+    flex: 1,
+    paddingTop: 80,
+    paddingHorizontal: 20,
     backgroundColor: '#F8F6FF',
   },
   title: {
@@ -68,19 +79,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     paddingVertical: 18,
     paddingHorizontal: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: '#DDD',
   },
   categoryText: {
     fontSize: 18,
+    fontWeight: 'bold',
     color: '#5A189A',
+    marginBottom: 4,
   },
-  back: {
-    marginTop: 30,
-    fontSize: 16,
-    color: '#5A189A',
-    textAlign: 'center',
+  categoryDescription: {
+    fontSize: 14,
+    color: '#555',
   },
 });
