@@ -1,120 +1,141 @@
 // =======================================
-// PLAYER SCREEN (Day 13)
-// Basic Audio Player UI
+// PLAYER SCREEN (Day 20)
+// Persist Play State + UX Improvements
 // =======================================
 
 // -------------------------------
 // Imports
 // -------------------------------
-
-// Expo Router navigation
-import { Link } from 'expo-router';
-
-// React hooks
+import { Audio } from 'expo-av';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-
-// React Native UI components
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// Expo Audio API
-import { Audio } from 'expo-av';
+import { usePlayer } from '@/context/PlayerContext';
+
+// -------------------------------
+// Sound Map
+// -------------------------------
+const SOUND_MAP: Record<string, any> = {
+  sleep: require('../assets/sounds/sleep.mp3'),
+  calm: require('../assets/sounds/calm.mp3'),
+  focus: require('../assets/sounds/focus.mp3'),
+  energy: require('../assets/sounds/energy.mp3'),
+};
 
 // -------------------------------
 // Player Screen Component
 // -------------------------------
-
 export default function TestScreen() {
+  // -------------------------------
+  // Route params
+  // -------------------------------
+  const { title, description, sound } = useLocalSearchParams<{
+    title?: string;
+    description?: string;
+    sound?: string;
+  }>();
 
   // -------------------------------
-  // State
+  // Global player state
   // -------------------------------
-
-  // Holds the loaded sound instance
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-
-  // Track whether audio is playing
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, setIsPlaying } = usePlayer();
 
   // -------------------------------
-  // Play / Stop Sound Handler
+  // Local state
   // -------------------------------
+  const [audio, setAudio] = useState<Audio.Sound | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSoundToggle = async () => {
+  // -------------------------------
+  // Play / Stop Handler
+  // -------------------------------
+  const handleToggleSound = async () => {
+    if (isLoading) return;
 
-    // If sound is already playing → stop & unload
-    if (sound) {
-      await sound.stopAsync();
-      await sound.unloadAsync();
-      setSound(null);
+    // Stop audio
+    if (audio) {
+      setIsLoading(true);
+      await audio.stopAsync();
+      await audio.unloadAsync();
+      setAudio(null);
       setIsPlaying(false);
+      setIsLoading(false);
       return;
     }
 
-    // Load sound file
-    const { sound: newSound } = await Audio.Sound.createAsync(
-      require('../assets/sounds/test.mp3')
-    );
+    // Play audio
+    try {
+      setIsLoading(true);
 
-    setSound(newSound);
-    setIsPlaying(true);
+      const source = SOUND_MAP[sound ?? 'sleep'];
+      const { sound: newSound } = await Audio.Sound.createAsync(source);
 
-    // Play sound
-    await newSound.playAsync();
+      setAudio(newSound);
+      setIsPlaying(true);
+      await newSound.playAsync();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // -------------------------------
-  // Cleanup when leaving screen
+  // Auto-resume if playing
   // -------------------------------
+  useEffect(() => {
+    if (isPlaying && !audio) {
+      handleToggleSound();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // -------------------------------
+  // Cleanup on unmount
+  // -------------------------------
   useEffect(() => {
     return () => {
-      if (sound) {
-        sound.unloadAsync();
+      if (audio) {
+        audio.unloadAsync();
       }
     };
-  }, [sound]);
+  }, [audio]);
 
   // -------------------------------
   // UI Layout
   // -------------------------------
-
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>{title ?? 'Category'}</Text>
 
-      {/* Category Label */}
-      <Text style={styles.category}>Calm</Text>
-
-      {/* Screen Title */}
-      <Text style={styles.title}>Relaxing Frequency</Text>
-
-      {/* Description */}
-      <Text style={styles.info}>
-        Take a moment to breathe and listen.
+      <Text style={styles.description}>
+        {description ?? 'Listen and relax.'}
       </Text>
 
-      {/* Play / Stop Button */}
-      <TouchableOpacity style={styles.button} onPress={handleSoundToggle}>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          isLoading && styles.buttonDisabled,
+        ]}
+        onPress={handleToggleSound}
+        disabled={isLoading}
+        activeOpacity={0.8}
+      >
         <Text style={styles.buttonText}>
-          {isPlaying ? 'Stop' : 'Play'}
+          {isLoading ? 'Loading…' : isPlaying ? 'Stop' : 'Play'}
         </Text>
       </TouchableOpacity>
 
-      {/* Back Navigation */}
       <Link href="/categories" asChild>
         <Text style={styles.back}>← Back to Categories</Text>
       </Link>
-
     </View>
   );
 }
 
 // -------------------------------
-// Styles (UI)
+// Styles
 // -------------------------------
-
 const styles = StyleSheet.create({
-
-  // Main Layout
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -122,33 +143,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F6FF',
     padding: 24,
   },
-
-  // Category Label
-  category: {
-    fontSize: 14,
-    color: '#5A189A',
-    marginBottom: 6,
-    letterSpacing: 1,
-  },
-
-  // Screen Title
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#3A0CA3',
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: 'center',
   },
-
-  // Info Text
-  info: {
+  description: {
     fontSize: 15,
     color: '#555',
-    marginBottom: 35,
     textAlign: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 10,
   },
-
-  // Play / Stop Button
   button: {
     backgroundColor: '#5A189A',
     paddingVertical: 16,
@@ -156,18 +164,16 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 30,
   },
-
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   buttonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
-
-  // Back Link
   back: {
     fontSize: 16,
     color: '#5A189A',
-    textAlign: 'center',
   },
-
 });

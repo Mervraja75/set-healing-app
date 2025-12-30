@@ -18,66 +18,70 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
 
   // -------------------------------
-  // Handlers (pre-Firebase)
+  // Handlers (pre-auth)
   // -------------------------------
   const handleRegister = () => {
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Password:", password);
+    console.log('Name:', name);
+    console.log('Email:', email);
+    console.log('Password:', password);
   };
 
   // -------------------------------
   // UI Layout
   // -------------------------------
   return (
-    <>
-      {/* Main container for screen */}
-      <View style={styles.container}>
+    <View style={styles.container}>
 
-        {/* Back navigation to Login screen */}
-        <Link href="/login" asChild>
-          <Text style={styles.back}>← Back to Login</Text>
-        </Link>
+      {/* Screen Title */}
+      <Text style={styles.title}>Create Account</Text>
 
-        {/* Screen title */}
-        <Text style={styles.title}>Create Account</Text>
+      {/* Subtitle */}
+      <Text style={styles.subtitle}>
+        Start your healing journey
+      </Text>
 
-        {/* Full Name Input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          placeholderTextColor="#888"
-          onChangeText={setName}
-          value={name}
-        />
+      {/* Full Name Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        placeholderTextColor="#888"
+        onChangeText={setName}
+        value={name}
+      />
 
-        {/* Email Input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          autoCapitalize="none"
-          onChangeText={setEmail}
-          value={email}
-        />
+      {/* Email Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        onChangeText={setEmail}
+        value={email}
+      />
 
-        {/* Password Input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          secureTextEntry
-          onChangeText={setPassword}
-          value={password}
-        />
+      {/* Password Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#888"
+        secureTextEntry
+        onChangeText={setPassword}
+        value={password}
+      />
 
-        {/* Sign Up Button */}
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
+      {/* Sign Up Button */}
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
 
-      </View>
-    </>
+      {/* Navigation back to Login */}
+      <Link href="/login" asChild>
+        <Text style={styles.loginLink}>
+          Already have an account? Login →
+        </Text>
+      </Link>
+
+    </View>
   );
 }
 
@@ -88,20 +92,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
     backgroundColor: '#F8F6FF',
   },
-  back: {
-    fontSize: 18,
-    color: '#5A189A',
-    marginBottom: 20,
-  },
   title: {
-    fontSize: 28,
-    marginBottom: 30,
+    fontSize: 30,
+    marginBottom: 6,
     textAlign: 'center',
     fontWeight: 'bold',
     color: '#3A0CA3',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#5A189A',
+    marginBottom: 30,
   },
   input: {
     height: 50,
@@ -122,6 +127,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
+  },
+  loginLink: {
+    marginTop: 25,
+    textAlign: 'center',
+    color: '#5A189A',
     fontSize: 16,
   },
 });

@@ -1,8 +1,9 @@
 // -------------------------------
 // Imports
 // -------------------------------
+import { usePlayer } from '@/context/PlayerContext';
 import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // -------------------------------
 // Static Categories (UI only)
@@ -34,26 +35,41 @@ const CATEGORIES = [
 // Categories Screen Component
 // -------------------------------
 export default function CategoriesScreen() {
+  // ✅ Hook MUST be inside the component
+  const { setLastCategory } = usePlayer();
+
   return (
     <View style={styles.container}>
-
       {/* Screen Title */}
       <Text style={styles.title}>Select a Category</Text>
 
       {/* Category Cards */}
       {CATEGORIES.map((category) => (
-        <Link key={category.id} href="/test" asChild>
-          <View style={styles.categoryBox}>
+        <Link
+          key={category.id}
+          href={{
+            pathname: '/test',
+            params: {
+              title: category.title,
+              description: category.description,
+              sound: category.id,
+            },
+          }}
+          asChild
+        >
+          <Pressable
+            style={styles.categoryBox}
+            onPress={() => setLastCategory(category.title)}
+          >
             <Text style={styles.categoryText}>
               {category.title}
             </Text>
             <Text style={styles.categoryDescription}>
               {category.description}
             </Text>
-          </View>
+          </Pressable>
         </Link>
       ))}
-
     </View>
   );
 }
