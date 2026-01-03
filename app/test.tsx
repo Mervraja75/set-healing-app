@@ -1,11 +1,8 @@
 // =======================================
 // PLAYER SCREEN (Day 20)
-// Persist Play State + UX Improvements
+// Stable version using expo-av
 // =======================================
 
-// -------------------------------
-// Imports
-// -------------------------------
 import { Audio } from 'expo-av';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -27,33 +24,20 @@ const SOUND_MAP: Record<string, any> = {
 // Player Screen Component
 // -------------------------------
 export default function TestScreen() {
-  // -------------------------------
-  // Route params
-  // -------------------------------
   const { title, description, sound } = useLocalSearchParams<{
     title?: string;
     description?: string;
     sound?: string;
   }>();
 
-  // -------------------------------
-  // Global player state
-  // -------------------------------
   const { isPlaying, setIsPlaying } = usePlayer();
 
-  // -------------------------------
-  // Local state
-  // -------------------------------
   const [audio, setAudio] = useState<Audio.Sound | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // -------------------------------
-  // Play / Stop Handler
-  // -------------------------------
   const handleToggleSound = async () => {
     if (isLoading) return;
 
-    // Stop audio
     if (audio) {
       setIsLoading(true);
       await audio.stopAsync();
@@ -64,13 +48,10 @@ export default function TestScreen() {
       return;
     }
 
-    // Play audio
     try {
       setIsLoading(true);
-
       const source = SOUND_MAP[sound ?? 'sleep'];
       const { sound: newSound } = await Audio.Sound.createAsync(source);
-
       setAudio(newSound);
       setIsPlaying(true);
       await newSound.playAsync();
@@ -79,9 +60,6 @@ export default function TestScreen() {
     }
   };
 
-  // -------------------------------
-  // Auto-resume if playing
-  // -------------------------------
   useEffect(() => {
     if (isPlaying && !audio) {
       handleToggleSound();
@@ -89,9 +67,6 @@ export default function TestScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // -------------------------------
-  // Cleanup on unmount
-  // -------------------------------
   useEffect(() => {
     return () => {
       if (audio) {
@@ -100,9 +75,6 @@ export default function TestScreen() {
     };
   }, [audio]);
 
-  // -------------------------------
-  // UI Layout
-  // -------------------------------
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title ?? 'Category'}</Text>
@@ -112,13 +84,9 @@ export default function TestScreen() {
       </Text>
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          isLoading && styles.buttonDisabled,
-        ]}
+        style={[styles.button, isLoading && styles.buttonDisabled]}
         onPress={handleToggleSound}
         disabled={isLoading}
-        activeOpacity={0.8}
       >
         <Text style={styles.buttonText}>
           {isLoading ? 'Loading…' : isPlaying ? 'Stop' : 'Play'}
@@ -155,7 +123,6 @@ const styles = StyleSheet.create({
     color: '#555',
     textAlign: 'center',
     marginBottom: 40,
-    paddingHorizontal: 10,
   },
   button: {
     backgroundColor: '#5A189A',
