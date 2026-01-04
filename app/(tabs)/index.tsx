@@ -2,36 +2,86 @@
 // Imports
 // -------------------------------
 import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // -------------------------------
 // Home Screen Component
 // -------------------------------
 export default function HomeScreen() {
-
-  // -------------------------------
-  // UI Layout
-  // -------------------------------
   return (
     <View style={styles.container}>
 
-      {/* App Title */}
-      <Text style={styles.title}>Healing Frequency</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Healing Frequency</Text>
+        <Text style={styles.subtitle}>Calm • Focus • Relax</Text>
+      </View>
 
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>
-        Calm • Focus • Relax
+      {/* Prompt */}
+      <Text style={styles.prompt}>
+        What do you need right now?
       </Text>
 
-      {/* Welcome message */}
-      <Text style={styles.welcome}>
-        Choose a sound frequency and take a moment for yourself.
-      </Text>
+      {/* Quick Action Cards */}
+      <View style={styles.cardContainer}>
 
-      {/* Primary navigation */}
+        <Link
+          href={{
+            pathname: '/test',
+            params: {
+              title: 'Sleep',
+              description: 'Slow frequencies for deep rest',
+              sound: 'sleep',
+            },
+          }}
+          asChild
+        >
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Sleep</Text>
+            <Text style={styles.cardText}>Wind down & rest</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <Link
+          href={{
+            pathname: '/test',
+            params: {
+              title: 'Focus',
+              description: 'Frequencies for concentration',
+              sound: 'focus',
+            },
+          }}
+          asChild
+        >
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Focus</Text>
+            <Text style={styles.cardText}>Stay present</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <Link
+          href={{
+            pathname: '/test',
+            params: {
+              title: 'Calm',
+              description: 'Relaxing sounds for peace',
+              sound: 'calm',
+            },
+          }}
+          asChild
+        >
+          <TouchableOpacity style={styles.card}>
+            <Text style={styles.cardTitle}>Calm</Text>
+            <Text style={styles.cardText}>Ease your mind</Text>
+          </TouchableOpacity>
+        </Link>
+
+      </View>
+
+      {/* Secondary Navigation */}
       <Link href="/categories" asChild>
-        <Text style={styles.primaryAction}>
-          Explore Categories →
+        <Text style={styles.secondaryAction}>
+          Browse all categories →
         </Text>
       </Link>
 
@@ -45,38 +95,66 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 90,
+    paddingHorizontal: 24,
     backgroundColor: '#F8F6FF',
-    padding: 20,
   },
+
+  header: {
+    alignItems: 'center',
+    marginBottom: 36,
+  },
+
   title: {
     fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 6,
     color: '#3A0CA3',
+    marginBottom: 4,
   },
+
   subtitle: {
-    fontSize: 16,
-    color: '#5A189A',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  welcome: {
     fontSize: 15,
-    color: '#555',
-    textAlign: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 10,
+    color: '#5A189A',
   },
-  primaryAction: {
-    backgroundColor: '#5A189A',
-    color: '#FFF',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    fontSize: 16,
+
+  prompt: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#3A0CA3',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+
+  cardContainer: {
+    gap: 16,
+    marginBottom: 32,
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#E6DCF7',
+  },
+
+  cardTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    overflow: 'hidden',
+    color: '#5A189A',
+    marginBottom: 4,
+  },
+
+  cardText: {
+    fontSize: 14,
+    color: '#555',
+  },
+
+  secondaryAction: {
+    textAlign: 'center',
+    color: '#5A189A',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
