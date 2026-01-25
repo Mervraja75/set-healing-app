@@ -1,6 +1,7 @@
 // -------------------------------
 // Imports
 // -------------------------------
+import { useAuth } from '@/context/AuthContext';
 import { Link } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -8,6 +9,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // Profile Screen Component
 // -------------------------------
 export default function ProfileScreen() {
+  const { isGuest, continueAsGuest } = useAuth();
+
   return (
     <View style={styles.container}>
 
@@ -15,7 +18,9 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Your Profile</Text>
         <Text style={styles.subtitle}>
-          Sign in to personalize your healing experience
+          {isGuest
+            ? 'Explore the app as a guest, or sign in to personalize your experience.'
+            : 'You’re signed in — enjoy your personalized healing experience.'}
         </Text>
       </View>
 
@@ -31,23 +36,50 @@ export default function ProfileScreen() {
       {/* Actions */}
       <View style={styles.actions}>
 
+        {/* Continue as Guest */}
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Continue as guest"
+          style={styles.guestButton}
+          onPress={continueAsGuest}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.guestButtonText}>
+            Continue as Guest
+          </Text>
+        </TouchableOpacity>
+
+        {/* Log in */}
         <Link href="/login" asChild>
-          <TouchableOpacity style={styles.primaryButton}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Log in to your account"
+            style={styles.primaryButton}
+            activeOpacity={0.85}
+          >
             <Text style={styles.primaryText}>Log In</Text>
           </TouchableOpacity>
         </Link>
 
+        {/* Create account */}
         <Link href="/register" asChild>
-          <TouchableOpacity style={styles.secondaryButton}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Create a new account"
+            style={styles.secondaryButton}
+            activeOpacity={0.85}
+          >
             <Text style={styles.secondaryText}>Create Account</Text>
           </TouchableOpacity>
         </Link>
 
       </View>
 
-      {/* Footer */}
+      {/* Footer / status text */}
       <Text style={styles.footerText}>
-        You can explore sounds without an account.
+        {isGuest
+          ? 'You are in guest mode — you can log in anytime to save progress.'
+          : 'You are signed in.'}
       </Text>
 
     </View>
@@ -110,10 +142,27 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
+  guestButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#5A189A',
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginBottom: 8,
+  },
+
+  guestButtonText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#5A189A',
+  },
+
   primaryButton: {
     backgroundColor: '#5A189A',
     paddingVertical: 14,
     borderRadius: 14,
+    marginBottom: 8,
   },
 
   primaryText: {
@@ -142,5 +191,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     color: '#777',
+    marginTop: 18,
   },
 });
