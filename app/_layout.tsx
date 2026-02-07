@@ -26,6 +26,10 @@ export default function RootLayout() {
             {/* Other screens that can be opened from Home/Healing */}
             <Stack.Screen name="categories" options={{ title: 'Categories' }} />
             <Stack.Screen name="test" options={{ title: 'Player' }} />
+
+            {/* Paywall screen */}
+            <Stack.Screen name="paywall" options={{ title: 'Upgrade to Pro' }} />
+
           </Stack>
         </PlayerProvider>
       </AuthProvider>
