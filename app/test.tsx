@@ -5,17 +5,22 @@
 // Includes audio teardown + guards
 // =======================================
 
+/* ---------------------------------------
+   SECTION 1 — Imports
+---------------------------------------- */
 import { Audio } from 'expo-av';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import BackButton from '@/components/BackButton';
 import CustomSlider from '@/components/CustomSlider';
 import { usePlayer } from '@/context/PlayerContext';
 
-// -------------------------------
-// Sound Map
-// -------------------------------
+/* ---------------------------------------
+   SECTION 2 — Static data (Sound Map)
+   ✅ Add more categories/sounds here later
+---------------------------------------- */
 const SOUND_MAP: Record<string, any> = {
   sleep: require('../assets/sounds/sleep.mp3'),
   calm: require('../assets/sounds/calm.mp3'),
@@ -23,9 +28,10 @@ const SOUND_MAP: Record<string, any> = {
   energy: require('../assets/sounds/energy.mp3'),
 };
 
-// -------------------------------
-// Helpers
-// -------------------------------
+/* ---------------------------------------
+   SECTION 3 — Helpers / Utils
+   ✅ Add formatting helpers here
+---------------------------------------- */
 const formatTime = (millis: number) => {
   const totalSeconds = Math.floor(millis / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -33,33 +39,51 @@ const formatTime = (millis: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-// -------------------------------
-// Player Screen Component
-// -------------------------------
+/* ---------------------------------------
+   SECTION 4 — Component
+---------------------------------------- */
 export default function TestScreen() {
+  /* -------------------------------------
+     SECTION 4A — Route params
+     ✅ Anything passed from Home/Healing -> Player
+  -------------------------------------- */
   const { title, description, sound } = useLocalSearchParams<{
     title?: string;
     description?: string;
     sound?: string;
   }>();
 
+  /* -------------------------------------
+     SECTION 4B — Global context
+     ✅ Shared app-level playback flags
+  -------------------------------------- */
   const { isPlaying, setIsPlaying } = usePlayer();
 
+  /* -------------------------------------
+     SECTION 4C — Local state
+     ✅ Player state for THIS screen only
+  -------------------------------------- */
   const [audio, setAudio] = useState<Audio.Sound | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [volume, setVolume] = useState(1);
   const [isLooping, setIsLooping] = useState(true);
 
-  // ✅ Progress state
+  // Progress state
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(1);
 
+  /* -------------------------------------
+     SECTION 4D — Derived values
+     ✅ Display-only computed values
+  -------------------------------------- */
   const trackLabel = (sound ?? 'sleep').toString().toUpperCase();
+  const progressPercent = Math.min(position / duration, 1);
 
-  // -------------------------------
-  // Enable audio in silent mode (iOS)
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 5 — Audio mode setup
+     ✅ iOS silent mode support
+  -------------------------------------- */
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -70,19 +94,20 @@ export default function TestScreen() {
     }).catch(() => {});
   }, []);
 
-  // -------------------------------
-  // Teardown helper (safe)
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 6 — Audio lifecycle helpers
+     ✅ Teardown / cleanup logic
+  -------------------------------------- */
   const teardownAudio = async () => {
     if (!audio) return;
 
     try {
-      // Remove status update callback first
+      // Remove callback first
       try {
         audio.setOnPlaybackStatusUpdate(null);
       } catch {}
 
-      // stop and unload
+      // Stop and unload safely
       try {
         await audio.stopAsync();
       } catch {}
@@ -90,9 +115,9 @@ export default function TestScreen() {
         await audio.unloadAsync();
       } catch {}
     } catch {
-      // swallow any errors — teardown must be best-effort
+      // best-effort
     } finally {
-      // reset local state
+      // Reset state
       setAudio(null);
       setIsPlaying(false);
       setPosition(0);
@@ -101,25 +126,24 @@ export default function TestScreen() {
     }
   };
 
-  // -------------------------------
-  // Play / Stop Handler (stabilized)
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 7 — Main Play/Stop handler
+     ✅ Core button logic
+  -------------------------------------- */
   const handleToggleSound = async () => {
-    // Prevent re-entry
     if (isLoading) return;
 
     setIsLoading(true);
 
-    // If already playing, teardown and return
+    // STOP
     if (audio) {
       await teardownAudio();
       return;
     }
 
-    // Start playback (ensure previous audio cleaned up)
+    // PLAY
     try {
-      // Extra safety: ensure any previous instance removed
-      await teardownAudio();
+      await teardownAudio(); // safety
 
       const source = SOUND_MAP[sound ?? 'sleep'];
 
@@ -129,14 +153,13 @@ export default function TestScreen() {
         volume,
       });
 
-      // Attach progress listener
+      // ✅ Playback progress listener (moves progress bar)
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) return;
 
         setPosition(status.positionMillis ?? 0);
         setDuration(status.durationMillis ?? 1);
 
-        // keep global playing state in sync
         if (status.didJustFinish && !status.isLooping) {
           setIsPlaying(false);
         }
@@ -144,8 +167,7 @@ export default function TestScreen() {
 
       setAudio(newSound);
       setIsPlaying(true);
-    } catch (err) {
-      // if anything failed, ensure we are cleaned up
+    } catch {
       try {
         await teardownAudio();
       } catch {}
@@ -154,9 +176,13 @@ export default function TestScreen() {
     }
   };
 
-  // -------------------------------
-  // Volume
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 8 — Controls (Volume + Loop)
+     ✅ Add more controls here later:
+     - seek()
+     - skip()
+     - speed()
+  -------------------------------------- */
   const handleVolumeChange = async (v: number) => {
     setVolume(v);
     if (!audio) return;
@@ -167,9 +193,6 @@ export default function TestScreen() {
     } catch {}
   };
 
-  // -------------------------------
-  // Loop toggle
-  // -------------------------------
   const handleLoopToggle = async () => {
     const next = !isLooping;
     setIsLooping(next);
@@ -182,31 +205,42 @@ export default function TestScreen() {
     } catch {}
   };
 
-  // -------------------------------
-  // Cleanup on unmount — single point
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 9 — Cleanup on unmount
+     ✅ Ensures no memory leaks
+  -------------------------------------- */
   useEffect(() => {
     return () => {
-      // best-effort teardown
       teardownAudio().catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const progressPercent = Math.min(position / duration, 1);
-
-  // -------------------------------
-  // UI
-  // -------------------------------
+  /* -------------------------------------
+     SECTION 10 — UI Layout
+     ✅ Add UI blocks here:
+     - headers
+     - buttons
+     - sliders
+     - cards
+  -------------------------------------- */
   return (
     <View style={styles.container}>
+      {/* Top-left back */}
+      <View style={styles.topBar}>
+        <BackButton />
+      </View>
+
+      {/* Title + metadata */}
       <Text style={styles.title}>{title ?? 'Category'}</Text>
       <Text style={styles.meta}>{trackLabel}</Text>
 
+      {/* Description */}
       <Text style={styles.description}>
         {description ?? 'Listen and relax.'}
       </Text>
 
+      {/* Play/Stop */}
       <TouchableOpacity
         style={[styles.button, isLoading && styles.buttonDisabled]}
         onPress={handleToggleSound}
@@ -218,7 +252,7 @@ export default function TestScreen() {
         </Text>
       </TouchableOpacity>
 
-      {/* ✅ Progress Bar */}
+      {/* Progress Bar */}
       <View style={styles.progressBox}>
         <View style={styles.progressBar}>
           <View style={[styles.progressFill, { width: `${progressPercent * 100}%` }]} />
@@ -251,17 +285,14 @@ export default function TestScreen() {
           unit="%"
         />
       </View>
-
-      <Link href="/categories" asChild>
-        <Text style={styles.back}>← Back to Categories</Text>
-      </Link>
     </View>
   );
 }
 
-// -------------------------------
-// Styles
-// -------------------------------
+/* ---------------------------------------
+   SECTION 11 — Styles
+   ✅ Add new styles here as UI grows
+---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -269,7 +300,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F8F6FF',
     paddingHorizontal: 28,
+    paddingTop: 24,
   },
+
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+  },
+
   title: {
     fontSize: 28,
     fontWeight: '600',
@@ -277,6 +316,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     textAlign: 'center',
   },
+
   meta: {
     fontSize: 12,
     color: '#5A189A',
@@ -284,6 +324,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 8,
   },
+
   description: {
     fontSize: 16,
     color: '#6D5BD0',
@@ -291,6 +332,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     lineHeight: 22,
   },
+
   button: {
     backgroundColor: '#5A189A',
     paddingVertical: 18,
@@ -298,7 +340,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginBottom: 16,
   },
+
   buttonDisabled: { opacity: 0.6 },
+
   buttonText: { color: '#FFF', fontSize: 18, fontWeight: '600' },
 
   progressBox: {
@@ -306,21 +350,25 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     marginBottom: 18,
   },
+
   progressBar: {
     height: 6,
     backgroundColor: '#E6DCF7',
     borderRadius: 999,
     overflow: 'hidden',
   },
+
   progressFill: {
     height: '100%',
     backgroundColor: '#5A189A',
   },
+
   timeRow: {
     marginTop: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+
   timeText: { fontSize: 12, color: '#777' },
 
   loopButton: {
@@ -332,8 +380,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginBottom: 14,
   },
-  loopButtonOff: { backgroundColor: '#FFF' },
-  loopText: { color: '#5A189A', fontWeight: '700', fontSize: 13 },
 
-  back: { marginTop: 14, fontSize: 15, color: '#5A189A', opacity: 0.8 },
+  loopButtonOff: { backgroundColor: '#FFF' },
+
+  loopText: { color: '#5A189A', fontWeight: '700', fontSize: 13 },
 });

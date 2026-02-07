@@ -1,8 +1,11 @@
+// app/(tabs)/profile.tsx
+
 // -------------------------------
 // Imports
 // -------------------------------
 import { useAuth } from '@/context/AuthContext';
 import { Link } from 'expo-router';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // -------------------------------
@@ -13,21 +16,29 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Your Profile</Text>
         <Text style={styles.subtitle}>
           {isGuest
-            ? 'Explore the app as a guest, or sign in to personalize your experience.'
+            ? 'Explore as a guest, or sign in to personalize your experience.'
             : 'You’re signed in — enjoy your personalized healing experience.'}
         </Text>
       </View>
 
+      {/* ✅ Upgrade Card (UI only) */}
+      <Link href="/paywall" asChild>
+        <TouchableOpacity style={styles.upgradeCard} activeOpacity={0.9}>
+          <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
+          <Text style={styles.upgradeText}>
+            Unlock premium collections, favorites, and more.
+          </Text>
+        </TouchableOpacity>
+      </Link>
+
       {/* Info Card */}
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Why create an account?</Text>
-
         <Text style={styles.infoText}>• Save your favorite sounds</Text>
         <Text style={styles.infoText}>• Resume your last session</Text>
         <Text style={styles.infoText}>• Track your healing habits</Text>
@@ -35,19 +46,18 @@ export default function ProfileScreen() {
 
       {/* Actions */}
       <View style={styles.actions}>
-
-        {/* Continue as Guest */}
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Continue as guest"
-          style={styles.guestButton}
-          onPress={continueAsGuest}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.guestButtonText}>
-            Continue as Guest
-          </Text>
-        </TouchableOpacity>
+        {/* Continue as Guest (show only if currently guest) */}
+        {isGuest && (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Continue as guest"
+            style={styles.guestButton}
+            onPress={continueAsGuest}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.guestButtonText}>Continue as Guest</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Log in */}
         <Link href="/login" asChild>
@@ -72,16 +82,12 @@ export default function ProfileScreen() {
             <Text style={styles.secondaryText}>Create Account</Text>
           </TouchableOpacity>
         </Link>
-
       </View>
 
       {/* Footer / status text */}
       <Text style={styles.footerText}>
-        {isGuest
-          ? 'You are in guest mode — you can log in anytime to save progress.'
-          : 'You are signed in.'}
+        {isGuest ? 'Guest mode is on — you can sign in anytime.' : 'Signed in.'}
       </Text>
-
     </View>
   );
 }
@@ -99,7 +105,7 @@ const styles = StyleSheet.create({
 
   header: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 16,
   },
 
   title: {
@@ -115,13 +121,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // ✅ Upgrade Card
+  upgradeCard: {
+    backgroundColor: '#5A189A',
+    borderRadius: 18,
+    padding: 18,
+    marginTop: 10,
+    marginBottom: 18,
+  },
+  upgradeTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  upgradeText: {
+    color: '#E6D9FF',
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 18,
+  },
+
   infoCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 20,
     borderWidth: 1,
     borderColor: '#E6DCF7',
-    marginBottom: 30,
+    marginBottom: 22,
   },
 
   infoTitle: {
@@ -139,7 +166,7 @@ const styles = StyleSheet.create({
 
   actions: {
     gap: 14,
-    marginBottom: 24,
+    marginBottom: 18,
   },
 
   guestButton: {
@@ -148,7 +175,6 @@ const styles = StyleSheet.create({
     borderColor: '#5A189A',
     paddingVertical: 14,
     borderRadius: 14,
-    marginBottom: 8,
   },
 
   guestButtonText: {
@@ -162,7 +188,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#5A189A',
     paddingVertical: 14,
     borderRadius: 14,
-    marginBottom: 8,
   },
 
   primaryText: {
@@ -191,6 +216,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     color: '#777',
-    marginTop: 18,
+    marginTop: 8,
   },
 });

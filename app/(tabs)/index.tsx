@@ -1,12 +1,19 @@
-// -------------------------------
-// Imports
-// -------------------------------
+// =======================================
+// SCREEN: Home (Tabs -> index.tsx)
+// Purpose: Main landing screen with quick actions + popular/new sessions
+// =======================================
+
+/* ---------------------------------------
+   SECTION A — Imports
+---------------------------------------- */
 import { Link } from 'expo-router';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// -------------------------------
-// Mock data (Popular / Newest)
-// -------------------------------
+/* ---------------------------------------
+   SECTION B — Types
+   (Edit here if session fields change)
+---------------------------------------- */
 type Session = {
   id: string;
   title: string;
@@ -15,49 +22,88 @@ type Session = {
   badge?: string;
 };
 
+/* ---------------------------------------
+   SECTION C — Static Data
+   ✅ Edit POPULAR / NEWEST cards here
+---------------------------------------- */
 const POPULAR: Session[] = [
-  { id: 'p1', title: 'Deep Sleep', description: 'Slow frequencies for deep rest', sound: 'sleep', badge: 'Popular' },
-  { id: 'p2', title: 'Focus Booster', description: 'Stay present and productive', sound: 'focus', badge: 'Top' },
+  {
+    id: 'p1',
+    title: 'Deep Sleep',
+    description: 'Slow frequencies for deep rest',
+    sound: 'sleep',
+    badge: 'Popular',
+  },
+  {
+    id: 'p2',
+    title: 'Focus Booster',
+    description: 'Stay present and productive',
+    sound: 'focus',
+    badge: 'Top',
+  },
 ];
 
 const NEWEST: Session[] = [
-  { id: 'n1', title: 'Evening Calm', description: 'Wind down after a busy day', sound: 'calm', badge: 'New' },
-  { id: 'n2', title: 'Morning Clarity', description: 'Gentle tones to start your day', sound: 'focus', badge: 'New' },
+  {
+    id: 'n1',
+    title: 'Evening Calm',
+    description: 'Wind down after a busy day',
+    sound: 'calm',
+    badge: 'New',
+  },
+  {
+    id: 'n2',
+    title: 'Morning Clarity',
+    description: 'Gentle tones to start your day',
+    sound: 'focus',
+    badge: 'New',
+  },
 ];
 
-// -------------------------------
-// Small Section Header (inline)
-// -------------------------------
+/* ---------------------------------------
+   SECTION D — Small Components
+   (Reusable UI helpers)
+---------------------------------------- */
 function SectionHeader({ title }: { title: string }) {
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      {/* future: See all link */}
+      {/* future: "See all" button can go here */}
     </View>
   );
 }
 
-// -------------------------------
-// Home Screen Component
-// -------------------------------
+/* ---------------------------------------
+   SECTION E — Main Screen Component
+---------------------------------------- */
 export default function HomeScreen() {
+
+  /* -------------------------------------
+     SECTION E1 — UI Layout
+     ---------------------------------- */
   return (
     <ScrollView contentContainerStyle={styles.container}>
 
-      {/* Header */}
+      {/* ---------------------------------
+         SECTION F — Header
+         --------------------------------- */}
       <View style={styles.header}>
         <Text style={styles.title}>Healing Frequency</Text>
         <Text style={styles.subtitle}>Calm • Focus • Relax</Text>
       </View>
 
-      {/* Prompt */}
-      <Text style={styles.prompt}>
-        What do you need right now?
-      </Text>
+      {/* ---------------------------------
+         SECTION G — Prompt
+         --------------------------------- */}
+      <Text style={styles.prompt}>What do you need right now?</Text>
 
-      {/* Quick Action Cards */}
+      {/* ---------------------------------
+         SECTION H — Quick Actions
+         ✅ Edit these 3 cards to change top actions
+         --------------------------------- */}
       <View style={styles.cardContainer}>
 
+        {/* Quick Action: Sleep */}
         <Link
           href={{
             pathname: '/test',
@@ -79,6 +125,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </Link>
 
+        {/* Quick Action: Focus */}
         <Link
           href={{
             pathname: '/test',
@@ -100,6 +147,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </Link>
 
+        {/* Quick Action: Calm */}
         <Link
           href={{
             pathname: '/test',
@@ -123,7 +171,10 @@ export default function HomeScreen() {
 
       </View>
 
-      {/* Popular Section */}
+      {/* ---------------------------------
+         SECTION I — Popular Section
+         ✅ Edit list in SECTION C (POPULAR)
+         --------------------------------- */}
       <SectionHeader title="Popular" />
       <View style={styles.sectionList}>
         {POPULAR.map((s) => (
@@ -150,7 +201,10 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Newest Section */}
+      {/* ---------------------------------
+         SECTION J — Newest Section
+         ✅ Edit list in SECTION C (NEWEST)
+         --------------------------------- */}
       <SectionHeader title="Newest" />
       <View style={styles.sectionList}>
         {NEWEST.map((s) => (
@@ -177,23 +231,23 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Secondary Navigation */}
+      {/* ---------------------------------
+         SECTION K — Secondary Navigation
+         --------------------------------- */}
       <Link href="/categories" asChild>
-        <Text style={styles.secondaryAction}>
-          Browse all categories →
-        </Text>
+        <Text style={styles.secondaryAction}>Browse all categories →</Text>
       </Link>
 
-      {/* bottom padding so last content isn't blocked by tab bar */}
+      {/* Bottom padding so last content isn't blocked by tab bar */}
       <View style={{ height: 36 }} />
 
     </ScrollView>
   );
 }
 
-// -------------------------------
-// Styles
-// -------------------------------
+/* ---------------------------------------
+   SECTION L — Styles
+---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     paddingTop: 90,
