@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "healing-frequency-app",
-    "slug": "healing-frequency-app",
+    "name": "SET Healing App",
+    "slug": "set-healing-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

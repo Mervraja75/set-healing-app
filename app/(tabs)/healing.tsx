@@ -1,17 +1,21 @@
 // =======================================
 // SCREEN: Healing
 // Purpose: Show healing collections and premium content
+// Notes: Currently uses static data.
+//        Later we can swap SECTION C with Firestore (backend).
 // =======================================
 
 /* ---------------------------------------
    SECTION A — Imports
+   - Add/remove libraries here
 ---------------------------------------- */
 import { Link } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 /* ---------------------------------------
-   SECTION B — Types
+   SECTION B — Types / Models
+   - Define UI data structures here
 ---------------------------------------- */
 type Collection = {
   id: string;
@@ -22,9 +26,12 @@ type Collection = {
 };
 
 /* ---------------------------------------
-   SECTION C — Static Data
-   ✅ Edit collections here
+   SECTION C — Data Source
+   - STATIC DATA for now
+   - Later: replace with Firestore (backend)
 ---------------------------------------- */
+
+/* SECTION C1 — Featured collection */
 const FEATURED: Collection = {
   id: 'deep-sleep',
   title: 'Deep Sleep',
@@ -33,6 +40,7 @@ const FEATURED: Collection = {
   locked: false,
 };
 
+/* SECTION C2 — Collections list (edit/add cards here) */
 const COLLECTIONS: Collection[] = [
   {
     id: 'calm',
@@ -58,21 +66,26 @@ const COLLECTIONS: Collection[] = [
 ];
 
 /* ---------------------------------------
-   SECTION D — Component
+   SECTION D — Screen Component
 ---------------------------------------- */
 export default function HealingScreen() {
+  /* -------------------------------------
+     SECTION D1 — State (none for now)
+     - Later: add loading state + Firestore data here
+  -------------------------------------- */
 
   /* -------------------------------------
-     SECTION D1 — Handlers
-     ---------------------------------- */
-  // (Navigation handled inline via <Link /> for now)
+     SECTION D2 — Handlers / Helpers
+     - Navigation handled inline with <Link />
+     - Later: add "handlePlay", "handleOpenPaywall" here if needed
+  -------------------------------------- */
 
   /* -------------------------------------
-     SECTION E — UI Layout
-     ---------------------------------- */
+     SECTION E — UI Render
+  -------------------------------------- */
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
+      {/* SECTION E1 — Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Healing</Text>
         <Text style={styles.subtitle}>
@@ -80,7 +93,7 @@ export default function HealingScreen() {
         </Text>
       </View>
 
-      {/* Featured Collection (Free) */}
+      {/* SECTION E2 — Featured Collection (Free) */}
       <View style={styles.featuredCard}>
         <Text style={styles.featuredBadge}>Featured</Text>
         <Text style={styles.featuredTitle}>{FEATURED.title}</Text>
@@ -103,11 +116,16 @@ export default function HealingScreen() {
         </Link>
       </View>
 
-      {/* Collections */}
+      {/* SECTION E3 — Collections Title */}
       <Text style={styles.sectionTitle}>Collections</Text>
 
+      {/* SECTION E4 — Collections List
+          - Locked items -> Paywall
+          - Free items -> Player
+      */}
       <View style={styles.collectionList}>
         {COLLECTIONS.map((item) => {
+          // SECTION E4a — Card UI block (reused for locked/free)
           const Card = (
             <View style={styles.collectionCard}>
               <View style={styles.cardRow}>
@@ -118,18 +136,16 @@ export default function HealingScreen() {
             </View>
           );
 
-          // Locked → Paywall
+          // SECTION E4b — Locked -> Paywall route
           if (item.locked) {
             return (
               <Link key={item.id} href="/paywall" asChild>
-                <TouchableOpacity activeOpacity={0.85}>
-                  {Card}
-                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.85}>{Card}</TouchableOpacity>
               </Link>
             );
           }
 
-          // Free → Player
+          // SECTION E4c — Free -> Player route
           return (
             <Link
               key={item.id}
@@ -143,15 +159,13 @@ export default function HealingScreen() {
               }}
               asChild
             >
-              <TouchableOpacity activeOpacity={0.85}>
-                {Card}
-              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.85}>{Card}</TouchableOpacity>
             </Link>
           );
         })}
       </View>
 
-      {/* Spacer for tab bar */}
+      {/* SECTION E5 — Spacer (prevents tab bar overlap) */}
       <View style={{ height: 36 }} />
     </ScrollView>
   );
@@ -159,6 +173,7 @@ export default function HealingScreen() {
 
 /* ---------------------------------------
    SECTION F — Styles
+   - All styling stays here
 ---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
