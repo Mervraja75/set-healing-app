@@ -1,14 +1,33 @@
-// -------------------------------
-// Imports
-// -------------------------------
+// =======================================
+// SCREEN: Categories
+// Purpose: Display all main healing categories
+// Notes:
+// - Currently uses static data (UI-only)
+// - Will later load categories from backend (Firestore)
+// =======================================
+
+/* ---------------------------------------
+   SECTION A — Imports
+---------------------------------------- */
 import { usePlayer } from '@/context/PlayerContext';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-// -------------------------------
-// Static Categories (UI only)
-// -------------------------------
-const CATEGORIES = [
+/* ---------------------------------------
+   SECTION B — Types
+---------------------------------------- */
+type Category = {
+  id: string;
+  title: string;
+  description: string;
+};
+
+/* ---------------------------------------
+   SECTION C — Data Source
+   - STATIC categories for now
+   - Later: replace with Firestore query
+---------------------------------------- */
+const CATEGORIES: Category[] = [
   {
     id: 'sleep',
     title: 'Sleep',
@@ -31,19 +50,27 @@ const CATEGORIES = [
   },
 ];
 
-// -------------------------------
-// Categories Screen Component
-// -------------------------------
+/* ---------------------------------------
+   SECTION D — Screen Component
+---------------------------------------- */
 export default function CategoriesScreen() {
-  // ✅ Hook MUST be inside the component
+
+  /* -------------------------------------
+     SECTION D1 — Global State
+     - Used to remember last selected category
+  -------------------------------------- */
   const { setLastCategory } = usePlayer();
 
+  /* -------------------------------------
+     SECTION D2 — UI Layout
+  -------------------------------------- */
   return (
     <View style={styles.container}>
-      {/* Screen Title */}
+
+      {/* SECTION E — Screen Title */}
       <Text style={styles.title}>Select a Category</Text>
 
-      {/* Category Cards */}
+      {/* SECTION F — Category Cards List */}
       {CATEGORIES.map((category) => (
         <Link
           key={category.id}
@@ -60,10 +87,10 @@ export default function CategoriesScreen() {
           <Pressable
             style={styles.categoryBox}
             onPress={() => setLastCategory(category.title)}
+            accessibilityRole="button"
+            accessibilityLabel={`${category.title}. ${category.description}`}
           >
-            <Text style={styles.categoryText}>
-              {category.title}
-            </Text>
+            <Text style={styles.categoryText}>{category.title}</Text>
             <Text style={styles.categoryDescription}>
               {category.description}
             </Text>
@@ -74,9 +101,9 @@ export default function CategoriesScreen() {
   );
 }
 
-// -------------------------------
-// Styles
-// -------------------------------
+/* ---------------------------------------
+   SECTION G — Styles
+---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -84,6 +111,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#F8F6FF',
   },
+
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -91,6 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: 'center',
   },
+
   categoryBox: {
     backgroundColor: '#FFF',
     paddingVertical: 18,
@@ -100,12 +129,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDD',
   },
+
   categoryText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#5A189A',
     marginBottom: 4,
   },
+
   categoryDescription: {
     fontSize: 14,
     color: '#555',

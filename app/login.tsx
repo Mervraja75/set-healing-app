@@ -1,55 +1,68 @@
-// -------------------------------
-// Imports
-// -------------------------------
+// =======================================
+// SCREEN: Login
+// Purpose: UI-only login form
+// Notes:
+// - Currently navigates straight to /(tabs)
+// - Later: Replace handleLogin() with real auth (Firebase, Supabase, etc.)
+// =======================================
+
+/* ---------------------------------------
+   SECTION A — Imports
+   ✅ Add/remove dependencies here
+---------------------------------------- */
 
 // Expo Router navigation
 import { Link, useRouter } from 'expo-router';
 
-// useState: manages form field values inside the component
+// React state
 import { useState } from 'react';
 
 // Core React Native components
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// -------------------------------
-// Login Screen Component
-// -------------------------------
+// Context (for later auth state management)
+import { useAuth } from '@/context/AuthContext';
+
+/* ---------------------------------------
+   SECTION B — Component
+---------------------------------------- */
 export default function LoginScreen() {
-
-  // -------------------------------
-  // Router
-  // -------------------------------
+  /* -------------------------------------
+     SECTION B1 — Navigation
+     ✅ Router navigation actions live here
+  -------------------------------------- */
   const router = useRouter();
+  const auth = useAuth();
 
-  // -------------------------------
-  // State (form fields)
-  // -------------------------------
+  /* -------------------------------------
+     SECTION B2 — Local State (form fields)
+     ✅ Add more form fields here later (remember me, etc.)
+  -------------------------------------- */
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // -------------------------------
-  // Handlers
-  // -------------------------------
+  /* -------------------------------------
+     SECTION B3 — Handlers / Actions
+     ✅ Add validation + auth logic here later
+  -------------------------------------- */
   const handleLogin = () => {
     // Temporary login (no auth yet)
+    // Later: replace with Firebase/Supabase login call
+    auth.login(email.trim());
     router.replace('/(tabs)');
   };
 
-  // -------------------------------
-  // UI Layout
-  // -------------------------------
+  /* -------------------------------------
+     SECTION C — UI Layout
+     ✅ Most UI edits happen here (text, buttons, layout)
+  -------------------------------------- */
   return (
     <View style={styles.container}>
-
-      {/* App Title */}
+      {/* SECTION C1 — Header */}
       <Text style={styles.title}>Healing Frequency</Text>
+      <Text style={styles.subtitle}>Relax • Focus • Breathe</Text>
 
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>
-        Relax • Focus • Breathe
-      </Text>
-
-      {/* Email field */}
+      {/* SECTION C2 — Form Inputs */}
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -59,7 +72,6 @@ export default function LoginScreen() {
         value={email}
       />
 
-      {/* Password field */}
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -69,25 +81,25 @@ export default function LoginScreen() {
         value={password}
       />
 
-      {/* Login button */}
+      {/* SECTION C3 — Primary Action */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      {/* Navigation to Register */}
+      {/* SECTION C4 — Secondary Navigation */}
       <Link href="/register" asChild>
         <Text style={styles.registerLink}>
           Don’t have an account? Create one →
         </Text>
       </Link>
-
     </View>
   );
 }
 
-// -------------------------------
-// Styles
-// -------------------------------
+/* ---------------------------------------
+   SECTION D — Styles
+   ✅ Style tweaks live here
+---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

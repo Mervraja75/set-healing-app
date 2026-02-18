@@ -1,4 +1,14 @@
-// app/paywall.tsx
+// =======================================
+// SCREEN: Paywall
+// Purpose: UI-only "Upgrade to Pro" screen
+// Notes:
+// - No real payments yet (placeholder actions)
+// - Can later connect to RevenueCat / Stripe / IAP
+// =======================================
+
+/* ---------------------------------------
+   SECTION A — Imports
+---------------------------------------- */
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,12 +16,21 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BackButton from '@/components/BackButton';
 import { useAuth } from '@/context/AuthContext';
 
+/* ---------------------------------------
+   SECTION B — Component
+---------------------------------------- */
 export default function PaywallScreen() {
+
+  /* -------------------------------------
+     SECTION B1 — Navigation + Context
+  -------------------------------------- */
   const router = useRouter();
   const auth = useAuth();
 
-  // Helpers that try to use functions from your AuthContext if available.
-  // This is UI-only: no real payment logic.
+  /* -------------------------------------
+     SECTION C — Helpers / Actions (UI-only)
+     ✅ Later: Replace these with real payment logic
+  -------------------------------------- */
   const activatePro = () => {
     // Try to call an explicit upgrade function if your context provides one
     if (typeof (auth as any).upgradeToPro === 'function') {
@@ -43,19 +62,24 @@ export default function PaywallScreen() {
     activatePro();
   };
 
+  /* -------------------------------------
+     SECTION D — UI Layout
+  -------------------------------------- */
   return (
     <View style={styles.container}>
+
+      {/* SECTION D1 — Top Bar */}
       <View style={styles.headerRow}>
         <BackButton to="/(tabs)/profile" label="Back" compact />
       </View>
 
-      {/* Header */}
+      {/* SECTION D2 — Header */}
       <Text style={styles.title}>Go Pro</Text>
       <Text style={styles.subtitle}>
         Unlock full access to healing sessions and premium features.
       </Text>
 
-      {/* Benefits Card */}
+      {/* SECTION D3 — Benefits Card */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>What you get</Text>
         <Text style={styles.bullet}>• Unlimited collections</Text>
@@ -64,7 +88,7 @@ export default function PaywallScreen() {
         <Text style={styles.bullet}>• Offline listening (coming soon)</Text>
       </View>
 
-      {/* Pricing Options (UI only) */}
+      {/* SECTION D4 — Pricing (UI only) */}
       <View style={styles.pricingRow}>
         <View style={[styles.priceBox, styles.priceBoxActive]}>
           <Text style={styles.priceTitle}>Monthly</Text>
@@ -79,7 +103,7 @@ export default function PaywallScreen() {
         </View>
       </View>
 
-      {/* CTA Buttons */}
+      {/* SECTION D5 — CTA Buttons */}
       <TouchableOpacity
         style={styles.primaryButton}
         activeOpacity={0.9}
@@ -100,7 +124,7 @@ export default function PaywallScreen() {
         <Text style={styles.secondaryText}>Restore Purchase</Text>
       </TouchableOpacity>
 
-      {/* Not now */}
+      {/* SECTION D6 — Footer Links / Notes */}
       <Link href="/(tabs)/profile" asChild>
         <Text style={styles.notNow}>Not now</Text>
       </Link>
@@ -112,6 +136,9 @@ export default function PaywallScreen() {
   );
 }
 
+/* ---------------------------------------
+   SECTION E — Styles
+---------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

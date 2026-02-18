@@ -5,6 +5,15 @@
 // Includes audio teardown + guards
 // =======================================
 
+// QUICK INDEX (search these tags)
+// - SECTION 2: Sound map (add new tracks)
+// - SECTION 4C: Local state (new controls state)
+// - SECTION 6: Teardown logic (stop/unload behavior)
+// - SECTION 7: Play/Stop logic (core audio start/stop)
+// - SECTION 8: Controls (volume/loop/seek)
+// - SECTION 10: UI layout (screen UI blocks)
+// - SECTION 11: Styles (visual polish)
+
 /* ---------------------------------------
    SECTION 1 — Imports
 ---------------------------------------- */
