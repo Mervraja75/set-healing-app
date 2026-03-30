@@ -14,13 +14,12 @@ import { getStorage } from 'firebase/storage';
 // Replace these with your Firebase project values
 // ---------------------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyCN5Nw8f7h-rVax9r8VbSrYXASLfMUKWo4",
-  authDomain: "set-healing-app.firebaseapp.com",
-  projectId: "set-healing-app",
-  storageBucket: "set-healing-app.firebasestorage.app",
-  messagingSenderId: "825181514214",
-  appId: "1:825181514214:web:a0737d1cba2296bb344e27",
-  measurementId: "G-7TDSWQLLZD"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // ---------------------------------------
