@@ -1,19 +1,26 @@
-// src/App.tsx
 // =======================================
 // Admin App Root
-// Purpose: Entry point for SET Healing App Admin
+// Handles Login → Dashboard switch (UI-only)
 // =======================================
+
+import { useState } from 'react';
+
+import AdminLogin from './components/AdminLogin';
+import Dashboard from './pages/Dashboard';
 
 import './index.css';
 
-
-// Temporary placeholder until we build out the admin dashboard
-
 export default function App() {
+  // SECTION — Admin auth state (UI-only)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
-    <div style={{ padding: 24 }}>
-      <h1>SET Healing App — Admin</h1>
-      <p>Admin dashboard coming soon.</p>
+    <div className="app-root">
+      {isLoggedIn ? (
+        <Dashboard />
+      ) : (
+        <AdminLogin onLogin={() => setIsLoggedIn(true)} />
+      )}
     </div>
   );
 }
