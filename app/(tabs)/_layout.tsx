@@ -72,6 +72,19 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* ---------------------------------
+         SECTION F — Practitioner Tab
+         --------------------------------- */}
+      <Tabs.Screen
+        name="practitioner"
+        options={{
+          title: 'Pro Mode',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="waveform.path.ecg" size={26} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
