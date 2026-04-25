@@ -1,22 +1,23 @@
-/* =======================================
-   CustomSlider Component
-   Reusable labeled slider card for UI
-   ======================================= */
+// =======================================
+// COMPONENT: CustomSlider
+// Day 59 — UI polish, dark theme applied
+// =======================================
 
-/* ---------------------------------------
-   SECTION 1 — Imports
----------------------------------------- */
 import Slider from '@react-native-community/slider';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-/* ---------------------------------------
-   SECTION 2 — Types / Props
-   ✅ Add new props here later:
-   - disabled?: boolean
-   - color overrides
-   - onSlidingStart / onSlidingComplete
----------------------------------------- */
+const C = {
+  bgCard:      '#250D3D',
+  goldBright:  '#D4A828',
+  textBright:  '#FFFFFF',
+  textMuted:   '#B09ACC',
+  textDim:     '#7A60A0',
+  borderGold:  'rgba(212, 168, 40, 0.18)',
+  trackFill:   '#D4A828',
+  trackEmpty:  'rgba(180, 140, 255, 0.15)',
+};
+
 type CustomSliderProps = {
   label: string;
   value: number;
@@ -25,14 +26,10 @@ type CustomSliderProps = {
   maximumValue?: number;
   step?: number;
   unit?: string;
-
   onSlidingStart?: () => void;
   onSlidingComplete?: (v: number) => void;
 };
 
-/* ---------------------------------------
-   SECTION 3 — Component
----------------------------------------- */
 export default function CustomSlider({
   label,
   value,
@@ -42,36 +39,27 @@ export default function CustomSlider({
   step = 0.01,
   unit = '',
   onSlidingStart,
-  onSlidingComplete
+  onSlidingComplete,
 }: CustomSliderProps) {
-  /* -------------------------------------
-     SECTION 3A — Derived display value
-     ✅ If you want different formats, edit here
-     Example:
-     - show decimals
-     - show "Low/Med/High"
-  -------------------------------------- */
+
+  // Display value — handles % scale and raw values
   const displayValue =
     unit === '%'
       ? `${Math.round(value * 100)}%`
-      : `${value}${unit}`;
+      : unit
+      ? `${value}${unit}`
+      : `${Math.round(value * 100)}`;
 
-  /* -------------------------------------
-     SECTION 3B — UI Layout
-     ✅ Add extra UI elements here later:
-     - icon
-     - helper text
-     - "Reset" button
-  -------------------------------------- */
   return (
     <View style={styles.container}>
-      {/* Header row: label + value */}
-      <View style={styles.header}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{displayValue}</Text>
-      </View>
+      {/* Label + value row — only shown when label is provided */}
+      {label ? (
+        <View style={styles.header}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.value}>{displayValue}</Text>
+        </View>
+      ) : null}
 
-      {/* Slider control */}
       <Slider
         style={styles.slider}
         minimumValue={minimumValue}
@@ -81,58 +69,37 @@ export default function CustomSlider({
         onValueChange={onChange}
         onSlidingStart={onSlidingStart}
         onSlidingComplete={onSlidingComplete}
-        minimumTrackTintColor="#5A189A"
-        maximumTrackTintColor="#E6DCF7"
-        thumbTintColor="#5A189A"
+        minimumTrackTintColor={C.trackFill}
+        maximumTrackTintColor={C.trackEmpty}
+        thumbTintColor={C.goldBright}
       />
     </View>
   );
 }
 
-/* ---------------------------------------
-   SECTION 4 — Styles
-   ✅ Add new styles here when component grows
----------------------------------------- */
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-
-    // Softer card style
-    borderWidth: 1,
-    borderColor: '#E6DCF7',
-
-    // Subtle elevation
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
-
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-
   label: {
-    fontSize: 14,
-    color: '#3A0CA3',
-    fontWeight: '600',
+    fontSize: 10,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    color: C.textMuted,
+    fontWeight: '400',
   },
-
   value: {
-    fontSize: 13,
-    color: '#6D5BD0',
+    fontSize: 12,
+    color: C.goldBright,
     fontWeight: '600',
+    letterSpacing: 1,
   },
-
   slider: {
     width: '100%',
     height: 40,
