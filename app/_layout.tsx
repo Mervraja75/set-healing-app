@@ -1,109 +1,110 @@
 // =======================================
-// ROOT LAYOUT (_layout.tsx)
-// Purpose:
-// - Wraps the entire app
-// - Registers global providers
-// - Defines root stack navigation
+// ROOT LAYOUT (app/_layout.tsx)
+// Day 57 — Performance + dark theme fixes
 // =======================================
 
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { PlayerProvider } from '@/context/PlayerContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 /* ---------------------------------------
-   SECTION B — Root Layout Component
+   SECTION B — Custom dark theme
+   Overrides React Navigation defaults so
+   our deep purple bg is never overwritten
+---------------------------------------- */
+const SET_THEME = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background:   '#120828',   // matches C.bg across all screens
+    card:         '#1A0A2E',   // tab bar + header bg
+    text:         '#FFFFFF',
+    border:       'rgba(212, 168, 40, 0.15)',
+    notification: '#D4A828',
+    primary:      '#D4A828',
+  },
+};
+
+/* ---------------------------------------
+   SECTION C — Root Layout Component
 ---------------------------------------- */
 export default function RootLayout() {
-
-  /* -------------------------------------
-     SECTION B1 — Theme / Color Scheme
-     - Controls light/dark navigation theme
-  -------------------------------------- */
-  const colorScheme = useColorScheme();
-
-  /* -------------------------------------
-     SECTION B2 — App Providers + Stack
-     ---------------------------------- */
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-
-      {/* ---------------------------------
-         SECTION C — Global Providers
-         - AuthProvider: guest / login state
-         - PlayerProvider: playback UI state
-         --------------------------------- */}
+    // Force our custom dark theme — never switches to DefaultTheme
+    <ThemeProvider value={SET_THEME}>
       <AuthProvider>
         <PlayerProvider>
 
-          {/* ---------------------------------
-             SECTION D — Root Stack Navigator
-             --------------------------------- */}
           <Stack
             initialRouteName="(tabs)"
             screenOptions={{
-              headerBackTitle: 'Back', // default back label
+              // ── Day 57 fixes ──
+              headerShown:        false,         // hide all headers globally; screens control their own
+              contentStyle:       { backgroundColor: '#120828' }, // force bg on every screen
+              animation:          'fade',        // smoother than default slide on dark bg
+              animationDuration:  180,           // snappier transitions
             }}
           >
 
-            {/* -------------------------------
-               SECTION D1 — Main App (Tabs)
-               - Bottom tab navigation
-               ------------------------------- */}
+            {/* Main tabs */}
             <Stack.Screen
               name="(tabs)"
               options={{ headerShown: false }}
             />
 
-            {/* -------------------------------
-               SECTION D2 — Auth Screens
-               - Opened from Profile tab
-               ------------------------------- */}
+            {/* Auth screens */}
             <Stack.Screen
               name="login"
-              options={{ title: 'Login' }}
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
             />
             <Stack.Screen
               name="register"
-              options={{ title: 'Register' }}
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
             />
 
-            {/* -------------------------------
-               SECTION D3 — Content Screens
-               - Opened from Home / Healing
-               ------------------------------- */}
-            <Stack.Screen
-              name="categories"
-              options={{ title: 'Categories' }}
-            />
+            {/* Player screen — slides up like a modal */}
             <Stack.Screen
               name="test"
-              options={{ title: 'Player' }}
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
             />
 
-            {/* -------------------------------
-               SECTION D4 — Paywall
-               - UI only (no real payments yet)
-               ------------------------------- */}
+            {/* Categories */}
+            <Stack.Screen
+              name="categories"
+              options={{ headerShown: false }}
+            />
+
+            {/* Paywall */}
             <Stack.Screen
               name="paywall"
-              options={{ title: 'Upgrade to Pro' }}
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
             />
 
           </Stack>
+
         </PlayerProvider>
       </AuthProvider>
 
-      {/* ---------------------------------
-         SECTION E — Status Bar
-         --------------------------------- */}
-      <StatusBar style="auto" />
+      {/* light — white icons on our dark bg */}
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }

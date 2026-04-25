@@ -1,90 +1,111 @@
 // =======================================
-// LAYOUT: Tabs (_layout.tsx)
+// LAYOUT: Tabs (app/(tabs)/_layout.tsx)
 // Purpose: Bottom tab navigation
-// Tabs: Profile | Home | Healing
+// Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+
+/* ---------------------------------------
+   DESIGN TOKENS — match all screens
+---------------------------------------- */
+const C = {
+  bg:          '#120828',
+  tabBar:      '#1A0A2E',
+  tabBorder:   'rgba(212, 168, 40, 0.15)',
+  active:      '#D4A828',   // gold — active tab
+  inactive:    '#4A2A6A',   // dim purple — inactive tab
+};
 
 /* ---------------------------------------
    SECTION B — Tab Layout Component
 ---------------------------------------- */
 export default function TabLayout() {
-
-  /* -------------------------------------
-     SECTION B1 — Hooks
-     ---------------------------------- */
-  const colorScheme = useColorScheme();
-
-  /* -------------------------------------
-     SECTION B2 — Tabs container
-     ---------------------------------- */
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+
+        // ── Tab bar container ──
+        tabBarStyle: {
+          backgroundColor: C.tabBar,
+          borderTopWidth: 1,
+          borderTopColor: C.tabBorder,
+          height: Platform.OS === 'ios' ? 84 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 10,
+          paddingTop: 10,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+
+        // ── Label styling ──
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '500',
+          letterSpacing: 0.5,
+          marginTop: 2,
+        },
+
+        // ── Colors ──
+        tabBarActiveTintColor:   C.active,
+        tabBarInactiveTintColor: C.inactive,
+
+        // ── Active indicator (hide default background pill) ──
+        tabBarActiveBackgroundColor:   'transparent',
+        tabBarInactiveBackgroundColor: 'transparent',
       }}
     >
 
-      {/* ---------------------------------
-         SECTION C — Profile Tab
-         --------------------------------- */}
+      {/* ── Profile ── */}
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="person.fill" size={24} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="person.fill" size={22} color={color} />
           ),
         }}
       />
 
-      {/* ---------------------------------
-         SECTION D — Home Tab
-         --------------------------------- */}
+      {/* ── Home ── */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="house.fill" size={28} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="house.fill" size={24} color={color} />
           ),
         }}
       />
 
-      {/* ---------------------------------
-         SECTION E — Healing Tab
-         --------------------------------- */}
+      {/* ── Healing ── */}
       <Tabs.Screen
         name="healing"
         options={{
           title: 'Healing',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="waveform.path.ecg" size={26} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="waveform.path.ecg" size={24} color={color} />
           ),
         }}
       />
 
-      {/* ---------------------------------
-         SECTION F — Practitioner Tab
-         --------------------------------- */}
+      {/* ── Practitioner / Pro Mode ── */}
       <Tabs.Screen
         name="practitioner"
         options={{
           title: 'Pro Mode',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="waveform.path.ecg" size={26} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="waveform.path.ecg" size={24} color={color} />
           ),
         }}
       />
+
     </Tabs>
   );
 }

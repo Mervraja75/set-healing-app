@@ -1,11 +1,24 @@
 // =======================================
 // COMPONENT: ControlCard
-// Purpose: Reusable slider control
+// Day 59 — UI polish, dark theme applied
 // =======================================
 
 import Slider from '@react-native-community/slider';
 import { StyleSheet, Text, View } from 'react-native';
 
+const C = {
+  bg:          '#120828',
+  bgCardDeep:  '#250D3D',
+  bgHero:      '#2D0F50',
+  goldBright:  '#D4A828',
+  textBright:  '#FFFFFF',
+  textMid:     '#DDD0FF',
+  textMuted:   '#B09ACC',
+  textDim:     '#7A60A0',
+  borderGold:  'rgba(212, 168, 40, 0.18)',
+  trackFill:   '#D4A828',
+  trackEmpty:  'rgba(180, 140, 255, 0.15)',
+};
 
 type Props = {
   label: string;
@@ -26,13 +39,20 @@ export default function ControlCard({
   max = 100,
   description,
 }: Props) {
+
+  const displayValue = unit ? `${Math.round(value)} ${unit}` : `${Math.round(value)}`;
+
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>
-        {value} {unit}
-      </Text>
+      {/* Label + live value */}
+      {label ? (
+        <View style={styles.header}>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.valueDisplay}>{displayValue}</Text>
+        </View>
+      ) : null}
 
+      {/* Slider */}
       <Slider
         style={styles.slider}
         minimumValue={min}
@@ -40,44 +60,51 @@ export default function ControlCard({
         step={1}
         value={value}
         onValueChange={onChange}
-        minimumTrackTintColor="#5A189A"
-        maximumTrackTintColor="#E6DCF7"
-        thumbTintColor="#5A189A"
+        minimumTrackTintColor={C.trackFill}
+        maximumTrackTintColor={C.trackEmpty}
+        thumbTintColor={C.goldBright}
       />
 
-      {description && <Text style={styles.helper}>{description}</Text>}
+      {/* Optional helper text */}
+      {description ? (
+        <Text style={styles.helper}>{description}</Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E6DCF7',
-    marginBottom: 16,
+    width: '100%',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   label: {
-    fontSize: 14,
-    color: '#5A189A',
-    marginBottom: 6,
-    fontWeight: '600',
+    fontSize: 10,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    color: C.textMuted,
+    fontWeight: '400',
   },
-  value: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#3A0CA3',
-    marginBottom: 12,
-  },
-  helper: {
+  valueDisplay: {
     fontSize: 13,
-    color: '#666',
-    marginTop: 6,
+    color: C.goldBright,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
   slider: {
     width: '100%',
     height: 40,
+  },
+  helper: {
+    fontSize: 11,
+    color: C.textDim,
+    fontWeight: '300',
+    lineHeight: 16,
+    marginTop: 4,
   },
 });
