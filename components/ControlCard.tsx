@@ -4,6 +4,7 @@
 // =======================================
 
 import Slider from '@react-native-community/slider';
+import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 const C = {
@@ -30,7 +31,7 @@ type Props = {
   description?: string;
 };
 
-export default function ControlCard({
+export default memo(function ControlCard({
   label,
   value,
   unit = '',
@@ -71,7 +72,7 @@ export default function ControlCard({
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

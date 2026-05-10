@@ -5,7 +5,7 @@
 // Day 55 — Playlist support added
 // =======================================
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 // ---------------------------------------
 // SECTION 1 — Types
@@ -68,16 +68,20 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [playlist,          setPlaylistState]     = useState<PlaylistTrack[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
-  const setPlaylist = (tracks: PlaylistTrack[], startIndex = 0) => {
+  const setPlaylist = useCallback((tracks: PlaylistTrack[], startIndex = 0) => {
     setPlaylistState(tracks);
     setCurrentTrackIndex(startIndex);
-  };
+  }, []);
 
-  const goToNextTrack = () =>
-    setCurrentTrackIndex((i) => Math.min(i + 1, playlist.length - 1));
+  // playlist.length is read from closure, so it must be a dep
+  const goToNextTrack = useCallback(() =>
+    setCurrentTrackIndex((i) => Math.min(i + 1, playlist.length - 1)),
+  [playlist.length]);
 
-  const goToPrevTrack = () =>
-    setCurrentTrackIndex((i) => Math.max(i - 1, 0));
+  // Pure functional updater — no external state captured
+  const goToPrevTrack = useCallback(() =>
+    setCurrentTrackIndex((i) => Math.max(i - 1, 0)),
+  []);
 
   const currentTrack = playlist[currentTrackIndex] ?? null;
   const hasNext      = currentTrackIndex < playlist.length - 1;
@@ -92,9 +96,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     playlist,     currentTrackIndex,
     currentTrack, hasNext,           hasPrev,
     setPlaylist,  goToNextTrack,     goToPrevTrack,
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [isPlaying, lastCategory, bassLevel, volume, frequency,
-       playlist, currentTrackIndex]);
+       playlist, currentTrackIndex, setPlaylist, goToNextTrack, goToPrevTrack]);
 
   return (
     <PlayerContext.Provider value={value}>

@@ -4,7 +4,7 @@
 // =======================================
 
 import Slider from '@react-native-community/slider';
-import React from 'react';
+import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 const C = {
@@ -30,7 +30,7 @@ type CustomSliderProps = {
   onSlidingComplete?: (v: number) => void;
 };
 
-export default function CustomSlider({
+export default memo(function CustomSlider({
   label,
   value,
   onChange,
@@ -75,7 +75,7 @@ export default function CustomSlider({
       />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
