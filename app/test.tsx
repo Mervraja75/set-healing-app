@@ -306,6 +306,7 @@ export default function TestScreen() {
   /* ── Track change ── */
   const prevTrackId = useRef<string | null>(null);
   useEffect(() => {
+    let mounted = true;
     const newId = currentTrack?.id ?? null;
     if (newId && newId !== prevTrackId.current) {
       prevTrackId.current = newId;
@@ -313,13 +314,18 @@ export default function TestScreen() {
         (async () => {
           setIsLoading(true);
           await teardown();
+          // If the component unmounted while teardown was running, the unmount
+          // cleanup already fired and found empty refs. Don't create new audio
+          // that would have no one left to clean it up.
+          if (!mounted) return;
           await startPlayback();
-          setIsLoading(false);
+          if (mounted) setIsLoading(false);
         })();
       } else {
         setPosition(0); setDuration(1);
       }
     }
+    return () => { mounted = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTrack?.id]);
 
