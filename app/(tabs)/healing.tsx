@@ -20,7 +20,8 @@ import { useResponsive } from '@/hooks/useResponsive';
 
 import { usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { SkeletonBox } from '@/components/SkeletonBox';
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -118,7 +119,7 @@ export default function HealingScreen() {
       try {
         setLoading(true);
         setError(null);
-        const snap = await getDocs(query(collection(db, 'tracks')));
+        const snap = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc'), limit(10)));
         const items: Track[] = snap.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<Track, 'id'>),
@@ -181,50 +182,55 @@ export default function HealingScreen() {
         {/* Left column: state + featured card */}
         <View style={isTabletLandscape ? styles.tabletLeft : undefined}>
           {loading ? (
-            <View style={styles.stateBox}>
-              <Text style={styles.stateText}>Attuning frequencies…</Text>
+            <View style={[styles.featuredCard, { gap: 12 }]}>
+              <View style={styles.featuredCardGlow} />
+              <SkeletonBox width={80} height={10} />
+              <SkeletonBox width="80%" height={28} />
+              <SkeletonBox width="100%" height={14} />
+              <SkeletonBox width="90%" height={14} />
+              <SkeletonBox width={140} height={44} borderRadius={99} />
             </View>
           ) : error ? (
             <View style={styles.stateBox}>
               <Text style={styles.stateText}>{error}</Text>
             </View>
-          ) : null}
-
-          <View style={styles.featuredCard}>
-            <View style={styles.featuredCardGlow} />
-            <View style={styles.featuredBadgeRow}>
-              <View style={styles.featuredBadgeDot} />
-              <Text style={styles.featuredBadgeText}>Featured Session</Text>
-            </View>
-            <Text style={[styles.featuredTitle, isTabletPortrait && styles.featuredTitleTabletP]}>
-              {featuredTrack?.title ?? FEATURED_FALLBACK.title}
-            </Text>
-            <Text style={styles.featuredBody}>
-              {featuredTrack?.description ?? FEATURED_FALLBACK.description}
-            </Text>
-            {featuredTrack ? (
-              featuredTrack.isPremium ? (
-                <Link href="/paywall" asChild>
-                  <TouchableOpacity style={styles.unlockBtn} activeOpacity={0.85}>
-                    <Text style={styles.unlockBtnText}>🔒  Unlock Premium</Text>
-                  </TouchableOpacity>
-                </Link>
+          ) : (
+            <View style={styles.featuredCard}>
+              <View style={styles.featuredCardGlow} />
+              <View style={styles.featuredBadgeRow}>
+                <View style={styles.featuredBadgeDot} />
+                <Text style={styles.featuredBadgeText}>Featured Session</Text>
+              </View>
+              <Text style={[styles.featuredTitle, isTabletPortrait && styles.featuredTitleTabletP]}>
+                {featuredTrack?.title ?? FEATURED_FALLBACK.title}
+              </Text>
+              <Text style={styles.featuredBody}>
+                {featuredTrack?.description ?? FEATURED_FALLBACK.description}
+              </Text>
+              {featuredTrack ? (
+                featuredTrack.isPremium ? (
+                  <Link href="/paywall" asChild>
+                    <TouchableOpacity style={styles.unlockBtn} activeOpacity={0.85}>
+                      <Text style={styles.unlockBtnText}>🔒  Unlock Premium</Text>
+                    </TouchableOpacity>
+                  </Link>
+                ) : (
+                  renderPlayerLink(
+                    featuredTrack.title,
+                    featuredTrack.description ?? FEATURED_FALLBACK.description,
+                    featuredTrack.category,
+                    featuredTrack.url
+                  )
+                )
               ) : (
                 renderPlayerLink(
-                  featuredTrack.title,
-                  featuredTrack.description ?? FEATURED_FALLBACK.description,
-                  featuredTrack.category,
-                  featuredTrack.url
+                  FEATURED_FALLBACK.title,
+                  FEATURED_FALLBACK.description,
+                  FEATURED_FALLBACK.sound
                 )
-              )
-            ) : (
-              renderPlayerLink(
-                FEATURED_FALLBACK.title,
-                FEATURED_FALLBACK.description,
-                FEATURED_FALLBACK.sound
-              )
-            )}
-          </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Right column: collections */}

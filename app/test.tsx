@@ -9,7 +9,7 @@
 // =======================================
 
 import { Audio } from 'expo-av';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import BackButton from '@/components/BackButton';
@@ -186,11 +186,13 @@ export default function TestScreen() {
   // Day 63 — slider position (0–100) drives Hz via log scale
   const [sliderPos, setSliderPos] = useState(() => hzToSlider(frequency));
 
-  const hasNextRef   = useRef(hasNext);
-  const goToNextRef  = useRef(goToNextTrack);
-  const isLoopingRef = useRef(isLooping);
-  // Always points to the latest teardown — used by the unmount effect to avoid a stale closure
-  const teardownRef  = useRef<() => Promise<void>>(async () => {});
+  const hasNextRef    = useRef(hasNext);
+  const goToNextRef   = useRef(goToNextTrack);
+  const isLoopingRef  = useRef(isLooping);
+  // Stable refs to the live Audio.Sound objects — teardown reads these directly
+  // so it's never a stale closure regardless of when it was captured.
+  const audioRef      = useRef<Audio.Sound | null>(null);
+  const bassAudioRef  = useRef<Audio.Sound | null>(null);
   useEffect(() => { hasNextRef.current   = hasNext; },       [hasNext]);
   useEffect(() => { goToNextRef.current  = goToNextTrack; }, [goToNextTrack]);
   useEffect(() => { isLoopingRef.current = isLooping; },     [isLooping]);
@@ -213,18 +215,27 @@ export default function TestScreen() {
     }).catch(() => {});
   }, []);
 
-  /* ── Teardown ── */
-  const teardown = async () => {
-    if (audio) {
-      try { audio.setOnPlaybackStatusUpdate(null); } catch {}
-      try { await audio.stopAsync(); }   catch {}
-      try { await audio.unloadAsync(); } catch {}
+  /* ── Teardown ──
+     Reads audio objects from refs, not from the render closure, so it is safe
+     to call from any context — unmount, track change, user action — without
+     ever capturing a stale sound object. Nulling the refs first prevents a
+     concurrent call from double-unloading the same objects.
+  */
+  const teardown = useCallback(async () => {
+    const a = audioRef.current;
+    const b = bassAudioRef.current;
+    audioRef.current    = null;
+    bassAudioRef.current = null;
+    if (a) {
+      try { a.setOnPlaybackStatusUpdate(null); } catch {}
+      try { await a.stopAsync(); }   catch {}
+      try { await a.unloadAsync(); } catch {}
     }
-    if (bassAudio) {
-      try { await bassAudio.stopAsync(); }   catch {}
-      try { await bassAudio.unloadAsync(); } catch {}
+    if (b) {
+      try { await b.stopAsync(); }   catch {}
+      try { await b.unloadAsync(); } catch {}
     }
-    // Always stop the frequency engine — it must not outlive its audio layer
+    // Always stop the frequency engine together with the audio layers
     await frequencyEngine.stop().catch(() => {});
     setAudio(null);
     setBassAudio(null);
@@ -232,18 +243,21 @@ export default function TestScreen() {
     setPosition(0);
     setDuration(1);
     setIsLoading(false);
-  };
-  // Keep the ref in sync so the unmount effect always calls the latest closure
-  teardownRef.current = teardown;
+  }, []); // audioRef, bassAudioRef are stable refs; all setters are stable
 
   /* ── Start playback ── */
   const startPlayback = async () => {
+    // Track locally so we can clean up if an error occurs before state is set.
+    // teardown() reads from refs/state, so any object not yet committed would
+    // be missed — the local variables below cover that gap.
+    let main: Audio.Sound | null = null;
+    let bass: Audio.Sound | null = null;
     try {
       const source = getSource(sound, audioUrl);
 
-      const { sound: main } = await Audio.Sound.createAsync(source, {
+      ({ sound: main } = await Audio.Sound.createAsync(source, {
         shouldPlay: true, isLooping, volume,
-      });
+      }));
       main.setOnPlaybackStatusUpdate((status) => {
         if (!status.isLoaded) return;
         setPosition(status.positionMillis ?? 0);
@@ -255,21 +269,37 @@ export default function TestScreen() {
       });
 
       if (bassLevel > 0) {
-        const { sound: bass } = await Audio.Sound.createAsync(source, {
+        ({ sound: bass } = await Audio.Sound.createAsync(source, {
           shouldPlay: true, isLooping,
           volume: bassLevelToVolume(bassLevel),
           rate: bassRate, shouldCorrectPitch: false,
-        });
-        setBassAudio(bass);
+        }));
       }
 
       if (freqEnabled) await frequencyEngine.start(frequency, freqIntensity, bassLevel > 0);
 
+      // All layers ready — commit to refs and state atomically
+      audioRef.current    = main;
+      bassAudioRef.current = bass;
       setAudio(main);
+      setBassAudio(bass);
       setIsPlaying(true);
     } catch (err) {
       console.error('Playback error:', err);
-      await teardown();
+      // Clean up any objects created before the error — they are not in refs/state
+      // yet so teardown() would not reach them
+      if (main) {
+        try { main.setOnPlaybackStatusUpdate(null); } catch {}
+        try { await main.stopAsync(); } catch {}
+        try { await main.unloadAsync(); } catch {}
+      }
+      if (bass) {
+        try { await bass.stopAsync(); } catch {}
+        try { await bass.unloadAsync(); } catch {}
+      }
+      await frequencyEngine.stop().catch(() => {});
+      setIsPlaying(false);
+      setIsLoading(false);
     }
   };
 
@@ -325,12 +355,14 @@ export default function TestScreen() {
     if (preset.id === 'off') {
       if (bassAudio) {
         try { await bassAudio.stopAsync(); await bassAudio.unloadAsync(); } catch {}
+        bassAudioRef.current = null;
         setBassAudio(null);
       }
       return;
     }
     if (bassAudio) {
       try { await bassAudio.stopAsync(); await bassAudio.unloadAsync(); } catch {}
+      bassAudioRef.current = null;
       setBassAudio(null);
     }
     if (audio && preset.level > 0) {
@@ -341,6 +373,7 @@ export default function TestScreen() {
           volume: bassLevelToVolume(preset.level),
           rate: preset.rate, shouldCorrectPitch: false,
         });
+        bassAudioRef.current = bass;
         setBassAudio(bass);
       } catch {}
     }
@@ -417,8 +450,8 @@ export default function TestScreen() {
 
   /* ── Cleanup ── */
   useEffect(() => {
-    return () => { teardownRef.current().catch(() => {}); };
-  }, []);
+    return () => { teardown().catch(() => {}); };
+  }, [teardown]); // teardown is stable (useCallback []) — equivalent to []
 
   /* ── UI ── */
   return (

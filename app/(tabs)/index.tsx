@@ -14,7 +14,8 @@ import { useResponsive } from '@/hooks/useResponsive';
 
 import { PlaylistTrack, usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { SkeletonBox } from '@/components/SkeletonBox';
 
 const C = {
   bg: '#120828', bgCard: '#1E0A30', bgCardDeep: '#250D3D', bgHero: '#2D0F50',
@@ -67,7 +68,7 @@ export default function HomeScreen() {
     (async () => {
       try {
         setLoading(true);
-        const snap  = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc')));
+        const snap  = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc'), limit(10)));
         const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Track, 'id'>) }));
         if (mounted) setTracks(items);
       } catch { if (mounted) setError('Could not load tracks.'); }
@@ -175,7 +176,17 @@ export default function HomeScreen() {
         <View style={isTabletLandscape ? styles.tabletRight : undefined}>
           <SectionLabel title="Popular" />
           {loading ? (
-            <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
+            <View style={styles.trackList}>
+              {[0, 1, 2].map((i) => (
+                <View key={i} style={styles.trackCard}>
+                  <SkeletonBox width={40} height={40} borderRadius={999} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <SkeletonBox width="70%" height={14} />
+                    <SkeletonBox width="40%" height={10} />
+                  </View>
+                </View>
+              ))}
+            </View>
           ) : error ? (
             <View style={styles.empty}><Text style={styles.emptyText}>{error}</Text></View>
           ) : popularTracks.length === 0 ? (
@@ -189,7 +200,17 @@ export default function HomeScreen() {
 
           <SectionLabel title="Newest" />
           {loading ? (
-            <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
+            <View style={styles.trackList}>
+              {[0, 1, 2].map((i) => (
+                <View key={i} style={styles.trackCard}>
+                  <SkeletonBox width={40} height={40} borderRadius={999} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <SkeletonBox width="70%" height={14} />
+                    <SkeletonBox width="40%" height={10} />
+                  </View>
+                </View>
+              ))}
+            </View>
           ) : newestTracks.length === 0 ? (
             <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
           ) : (
