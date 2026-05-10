@@ -14,6 +14,8 @@ import {
   View,
 } from 'react-native';
 
+import { useResponsive } from '@/hooks/useResponsive';
+
 /* ---------------------------------------
    DESIGN TOKENS
 ---------------------------------------- */
@@ -45,11 +47,12 @@ const C = {
 ---------------------------------------- */
 export default function ProfileScreen() {
   const { isGuest, continueAsGuest } = useAuth();
+  const { isTablet, isTabletPortrait, spacing } = useResponsive();
 
   return (
     <ScrollView
       style={{ backgroundColor: C.bg }}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { paddingHorizontal: spacing.horizontal }, isTablet && styles.containerTablet]}
       showsVerticalScrollIndicator={false}
     >
       {/* Ambient glows */}
@@ -67,8 +70,8 @@ export default function ProfileScreen() {
           <View style={styles.avatarRing2} />
         </View>
 
-        <Text style={styles.title}>Your Profile</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, isTabletPortrait && styles.titleTabletP]}>Your Profile</Text>
+        <Text style={[styles.subtitle, isTabletPortrait && styles.subtitleTabletP]}>
           {isGuest
             ? 'Exploring as a guest — sign in to personalize your journey.'
             : 'You are signed in. Enjoy your healing experience.'}
@@ -180,6 +183,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     backgroundColor: C.bg,
   },
+  containerTablet: { maxWidth: 800, alignSelf: 'center', width: '100%' },
+  titleTabletP:    { fontSize: 36 },
+  subtitleTabletP: { fontSize: 15 },
 
   glowTop: {
     position: 'absolute',

@@ -10,11 +10,12 @@
 
 import { Audio } from 'expo-av';
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import BackButton from '@/components/BackButton';
 import CustomSlider from '@/components/CustomSlider';
 import { usePlayer } from '@/context/PlayerContext';
+import { useResponsive } from '@/hooks/useResponsive';
 import {
   bassLevelToVolume,
   FREQUENCY_PRESETS,
@@ -158,10 +159,7 @@ const bandStyles = StyleSheet.create({
    MAIN COMPONENT
 ---------------------------------------- */
 export default function TestScreen() {
-  const { width, height } = useWindowDimensions();
-  const isTablet          = width >= 768;
-  const isTabletLandscape = isTablet && width >= height;
-  const isTabletPortrait  = isTablet && height > width;
+  const { isTablet, isTabletLandscape, isTabletPortrait } = useResponsive();
 
   const {
     isPlaying,    setIsPlaying,
