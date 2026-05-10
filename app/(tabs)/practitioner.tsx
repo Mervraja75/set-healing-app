@@ -99,7 +99,12 @@ export default function PractitionerScreen() {
   const [freqEnabled,   setFreqEnabled]   = useState(false);
   const [freqIntensity, setFreqIntensity] = useState(30);
 
-  const { isTablet } = useResponsive();
+  const { isTablet, isTabletLandscape, isTabletPortrait, spacing } = useResponsive();
+
+  // Grid column widths derived from responsive state
+  const itemWrap = isTabletLandscape ? styles.col3 : isTabletPortrait ? styles.col2 : styles.col1;
+  const bassWrap = isTabletLandscape ? styles.col3 : styles.col1;
+
   const volumePct  = Math.round(volume * 100);
   const currentPreset = getClosestPreset(frequency);
 
@@ -133,7 +138,7 @@ export default function PractitionerScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: C.bg }}
-      contentContainerStyle={[styles.container, isTablet && styles.containerTablet]}
+      contentContainerStyle={[styles.container, { paddingHorizontal: spacing.horizontal }, isTablet && styles.containerTablet]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.glowTop} />
@@ -183,11 +188,12 @@ export default function PractitionerScreen() {
         </Text>
       </View>
 
-      {/* ── Vibration + Volume controls ── */}
+      {/* ── Controls grid: Vibration, Volume, Bass ── */}
       <SectionLabel title="Output Controls" />
-      <View style={[styles.grid, isTablet && styles.gridTablet]}>
+      <View style={[styles.grid, isTablet && styles.gridRow]}>
 
-        <View style={[styles.controlWrap, isTablet && styles.controlWrapTablet]}>
+        {/* Vibration Intensity */}
+        <View style={itemWrap}>
           <View style={styles.controlCard}>
             <View style={styles.controlCardBar} />
             <View style={styles.controlCardInner}>
@@ -204,7 +210,8 @@ export default function PractitionerScreen() {
           </View>
         </View>
 
-        <View style={[styles.controlWrap, isTablet && styles.controlWrapTablet]}>
+        {/* Volume */}
+        <View style={itemWrap}>
           <View style={styles.controlCard}>
             <View style={styles.controlCardBar} />
             <View style={styles.controlCardInner}>
@@ -224,76 +231,69 @@ export default function PractitionerScreen() {
           </View>
         </View>
 
-      </View>
-
-      {/* ── Day 62 — Bass section ── */}
-      <SectionLabel title="Bass Controls" />
-
-      <View style={styles.bassCard}>
-        <View style={styles.bassCardBar} />
-        <View style={styles.bassCardHeader}>
-          <View style={styles.controlHeaderRow}>
-            <View style={styles.controlIconWrap}><Text style={styles.controlIcon}>◐</Text></View>
-            <View style={styles.controlHeaderText}>
-              <View style={styles.controlLabelRow}>
-                <Text style={styles.controlLabel}>Bass Level</Text>
-                <View style={styles.syncBadge}><Text style={styles.syncBadgeText}>Synced</Text></View>
+        {/* Bass — full row on phone/portrait, 3rd column on landscape */}
+        <View style={bassWrap}>
+          <View style={styles.bassCard}>
+            <View style={styles.bassCardBar} />
+            <View style={styles.bassCardHeader}>
+              <View style={styles.controlHeaderRow}>
+                <View style={styles.controlIconWrap}><Text style={styles.controlIcon}>◐</Text></View>
+                <View style={styles.controlHeaderText}>
+                  <View style={styles.controlLabelRow}>
+                    <Text style={styles.controlLabel}>Bass Level</Text>
+                    <View style={styles.syncBadge}><Text style={styles.syncBadgeText}>Synced</Text></View>
+                  </View>
+                  <Text style={styles.controlValueDisplay}>{Math.round(bassLevel)}%</Text>
+                </View>
               </View>
-              <Text style={styles.controlValueDisplay}>{Math.round(bassLevel)}%</Text>
+            </View>
+            <View style={styles.presetRow}>
+              {BASS_PRESETS.map((preset) => {
+                const active = bassPresetId === preset.id;
+                return (
+                  <TouchableOpacity
+                    key={preset.id}
+                    style={[styles.presetChip, active && styles.presetChipActive]}
+                    onPress={() => handleBassPreset(preset)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[styles.presetChipText, active && styles.presetChipTextActive]}>
+                      {preset.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={styles.bassHint}>
+              {BASS_PRESETS.find((p) => p.id === bassPresetId)?.hint ?? 'Fine-tuned'}
+            </Text>
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Fine tune</Text>
+                <Text style={styles.sliderValue}>{Math.round(bassLevel)}%</Text>
+              </View>
+              <ControlCard label="" value={Math.round(bassLevel)} unit="%" min={0} max={100} onChange={(v) => { setBassLevel(v); setBassPresetId('custom'); }} description="" />
+            </View>
+            <View style={styles.sliderDivider} />
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Subharmonic rate</Text>
+                <Text style={styles.sliderValue}>{bassRate.toFixed(2)}×</Text>
+              </View>
+              <ControlCard
+                label=""
+                value={Math.round(bassRate * 100)}
+                unit=""
+                min={70}
+                max={100}
+                onChange={(v) => setBassRate(parseFloat((v / 100).toFixed(2)))}
+                description=""
+              />
+              <Text style={styles.bassRateHint}>Lower = deeper pitch · Higher = subtle warmth</Text>
             </View>
           </View>
         </View>
 
-        {/* Bass preset chips */}
-        <View style={styles.presetRow}>
-          {BASS_PRESETS.map((preset) => {
-            const active = bassPresetId === preset.id;
-            return (
-              <TouchableOpacity
-                key={preset.id}
-                style={[styles.presetChip, active && styles.presetChipActive]}
-                onPress={() => handleBassPreset(preset)}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.presetChipText, active && styles.presetChipTextActive]}>
-                  {preset.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        <Text style={styles.bassHint}>
-          {BASS_PRESETS.find((p) => p.id === bassPresetId)?.hint ?? 'Fine-tuned'}
-        </Text>
-
-        {/* Fine-tune slider */}
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Fine tune</Text>
-            <Text style={styles.sliderValue}>{Math.round(bassLevel)}%</Text>
-          </View>
-          <ControlCard label="" value={Math.round(bassLevel)} unit="%" min={0} max={100} onChange={(v) => { setBassLevel(v); setBassPresetId('custom'); }} description="" />
-        </View>
-
-        <View style={styles.sliderDivider} />
-
-        {/* Subharmonic rate */}
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Subharmonic rate</Text>
-            <Text style={styles.sliderValue}>{bassRate.toFixed(2)}×</Text>
-          </View>
-          <ControlCard
-            label=""
-            value={Math.round(bassRate * 100)}
-            unit=""
-            min={70}
-            max={100}
-            onChange={(v) => setBassRate(parseFloat((v / 100).toFixed(2)))}
-            description=""
-          />
-          <Text style={styles.bassRateHint}>Lower = deeper pitch · Higher = subtle warmth</Text>
-        </View>
       </View>
 
       {/* ── Day 62 — Frequency Engine in Practitioner ── */}
@@ -374,7 +374,7 @@ export default function PractitionerScreen() {
 /* ── STYLES ── */
 const styles = StyleSheet.create({
   container: { paddingTop: 68, paddingHorizontal: 22, backgroundColor: C.bg },
-  containerTablet: { maxWidth: 960, alignSelf: 'center', width: '100%', paddingHorizontal: 32 },
+  containerTablet: { maxWidth: 960, alignSelf: 'center', width: '100%' },
 
   glowTop:    { position: 'absolute', top: -60, right: -80, width: 260, height: 260, borderRadius: 999, backgroundColor: C.glowGold },
   glowBottom: { position: 'absolute', top: 500, left: -80, width: 200, height: 200, borderRadius: 999, backgroundColor: C.glowPurple },
@@ -405,10 +405,11 @@ const styles = StyleSheet.create({
   sectionLabelLine: { flex: 1, height: 1, backgroundColor: C.borderPurple },
   sectionLabelText: { fontSize: 9, letterSpacing: 5, textTransform: 'uppercase', color: C.textMuted, fontWeight: '400' },
 
-  grid:             { flexDirection: 'column', gap: 14, marginBottom: 28 },
-  gridTablet:       { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  controlWrap:      { width: '100%' },
-  controlWrapTablet:{ width: '48%', marginBottom: 16 },
+  grid:    { flexDirection: 'column', gap: 14, marginBottom: 28 },
+  gridRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  col1:    { width: '100%' },
+  col2:    { width: '48%' },
+  col3:    { width: '32%' },
 
   controlCard:       { backgroundColor: C.bgCardDeep, borderRadius: 20, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
   controlCardBar:    { height: 2, backgroundColor: C.goldBright, opacity: 0.5 },
@@ -425,7 +426,7 @@ const styles = StyleSheet.create({
   syncBadgeText:     { fontSize: 8, color: C.aurora, letterSpacing: 1, fontWeight: '600' },
 
   // Bass card
-  bassCard:       { backgroundColor: C.bgCardDeep, borderRadius: 20, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden', marginBottom: 28 },
+  bassCard:       { backgroundColor: C.bgCardDeep, borderRadius: 20, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
   bassCardBar:    { height: 2, backgroundColor: C.goldBright, opacity: 0.5 },
   bassCardHeader: { padding: 20, paddingBottom: 8 },
   bassHint:       { fontSize: 11, color: C.textDim, fontWeight: '300', paddingHorizontal: 20, marginBottom: 4, lineHeight: 16 },
