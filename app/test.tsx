@@ -9,7 +9,7 @@
 // =======================================
 
 import { Audio } from 'expo-av';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import BackButton from '@/components/BackButton';
@@ -93,7 +93,7 @@ const bassToIndicator = (level: number) => Math.max(0.05, level / 100);
    Shows all brainwave bands as a horizontal
    bar with the active range highlighted
 ---------------------------------------- */
-function FrequencyBandDisplay({ hz }: { hz: number }) {
+const FrequencyBandDisplay = memo(function FrequencyBandDisplay({ hz }: { hz: number }) {
   const activeRange = getRangeForHz(hz);
 
   return (
@@ -142,7 +142,7 @@ function FrequencyBandDisplay({ hz }: { hz: number }) {
       </View>
     </View>
   );
-}
+});
 
 const bandStyles = StyleSheet.create({
   wrap:        { width: '100%', paddingHorizontal: 18, paddingBottom: 4 },

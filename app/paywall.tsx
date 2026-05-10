@@ -10,7 +10,6 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { Link, useRouter } from 'expo-router';
-import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import BackButton from '@/components/BackButton';
@@ -29,36 +28,13 @@ export default function PaywallScreen() {
 
   /* -------------------------------------
      SECTION C — Helpers / Actions (UI-only)
-     ✅ Later: Replace these with real payment logic
   -------------------------------------- */
   const activatePro = () => {
-    // Try to call an explicit upgrade function if your context provides one
-    if (typeof (auth as any).upgradeToPro === 'function') {
-      try {
-        (auth as any).upgradeToPro();
-        console.log('upgradeToPro called (UI-only)');
-      } catch (e) {
-        console.log('upgradeToPro failed', e);
-      }
-    } else if (typeof (auth as any).setIsPro === 'function') {
-      try {
-        (auth as any).setIsPro(true);
-        console.log('setIsPro(true) called (UI-only)');
-      } catch (e) {
-        console.log('setIsPro failed', e);
-      }
-    } else {
-      // fallback: if no setter is available, just log and navigate
-      console.log('No upgrade function on AuthContext - UI-only');
-    }
-
-    // Navigate to profile (where pro status can be shown)
+    auth.upgradeToPro();
     router.replace('/(tabs)/profile');
   };
 
   const restorePurchase = () => {
-    // Placeholder: same behaviour for now
-    console.log('restorePurchase (UI-only)');
     activatePro();
   };
 

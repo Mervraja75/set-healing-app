@@ -4,7 +4,7 @@
 // =======================================
 
 import { Link, LinkProps, useRouter } from 'expo-router';
-import React from 'react';
+import { memo } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 const C = {
@@ -20,7 +20,7 @@ type Props = {
   compact?: boolean;
 };
 
-export default function BackButton({ to, label = 'Back', compact = false }: Props) {
+export default memo(function BackButton({ to, label = 'Back', compact = false }: Props) {
   const router = useRouter();
 
   const buttonStyle = [styles.button, compact && styles.compact];
@@ -48,7 +48,7 @@ export default function BackButton({ to, label = 'Back', compact = false }: Prop
       {content}
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   button: {

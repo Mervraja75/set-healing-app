@@ -64,10 +64,6 @@ export default function RegisterScreen() {
 
   const handleRegister = () => {
     if (!canRegister) return;
-    console.log('Name:', name);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // Later: call signup(), set auth state, router.replace('/(tabs)')
   };
 
   return (
