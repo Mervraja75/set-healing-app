@@ -10,7 +10,7 @@
 
 import { Audio } from 'expo-av';
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import BackButton from '@/components/BackButton';
 import CustomSlider from '@/components/CustomSlider';
@@ -158,6 +158,10 @@ const bandStyles = StyleSheet.create({
    MAIN COMPONENT
 ---------------------------------------- */
 export default function TestScreen() {
+  const { width, height } = useWindowDimensions();
+  const isTablet          = width >= 768;
+  const isTabletLandscape = isTablet && width >= height;
+  const isTabletPortrait  = isTablet && height > width;
 
   const {
     isPlaying,    setIsPlaying,
@@ -417,219 +421,245 @@ export default function TestScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: C.bg }}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        isTabletLandscape && styles.containerTabletL,
+        isTabletPortrait  && styles.containerTabletP,
+      ]}
       showsVerticalScrollIndicator={false}
     >
+      {/* Decorative — always absolute, float behind all content */}
       <View style={styles.glowTop} />
       <View style={styles.glowBottom} />
       <View style={styles.ringOuter} />
       <View style={styles.ringMid} />
       <View style={styles.ringInner} />
-
       <View style={styles.topBar}><BackButton /></View>
 
-      {/* Playlist indicator */}
-      {playlist.length > 1 && (
-        <View style={styles.playlistIndicator}>
-          <Text style={styles.playlistText}>{currentTrackIndex + 1} of {playlist.length}</Text>
-          <View style={styles.playlistDots}>
-            {playlist.map((_, i) => (
-              <View key={i} style={[styles.playlistDot, i === currentTrackIndex && styles.playlistDotActive]} />
-            ))}
+      {/* ── Landscape: two columns | Phone/portrait: single centered column ── */}
+      <View style={isTabletLandscape ? styles.tabletRow : styles.phoneCol}>
+
+        {/* Left column — artwork + transport */}
+        <View style={isTabletLandscape ? styles.tabletLeft : styles.fullWidth}>
+
+          {/* Playlist indicator */}
+          {playlist.length > 1 && (
+            <View style={styles.playlistIndicator}>
+              <Text style={styles.playlistText}>{currentTrackIndex + 1} of {playlist.length}</Text>
+              <View style={styles.playlistDots}>
+                {playlist.map((_, i) => (
+                  <View key={i} style={[styles.playlistDot, i === currentTrackIndex && styles.playlistDotActive]} />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Artwork */}
+          <View style={[
+            styles.artworkWrap,
+            isTablet && styles.artworkWrapTablet,
+          ]}>
+            <View style={[
+              styles.artwork,
+              isPlaying && styles.artworkPlaying,
+              isTablet && styles.artworkTablet,
+            ]}>
+              <View style={styles.artworkGlow} />
+              <Text style={[styles.artworkSymbol, isTablet && styles.artworkSymbolTablet]}>
+                {isLoading ? '◌' : isPlaying ? '◉' : '○'}
+              </Text>
+            </View>
+            {freqEnabled && isPlaying && (
+              <View style={[styles.freqRing, { borderColor: activeRange.color }, isTablet && styles.freqRingTablet]} />
+            )}
+            {isPlaying && bassLevel > 0 && (
+              <>
+                <View style={[styles.bassBar, styles.bassBarL, { height: 20 + bassToIndicator(bassLevel) * 40 }]} />
+                <View style={[styles.bassBar, styles.bassBarR, { height: 20 + bassToIndicator(bassLevel) * 40 }]} />
+                <View style={[styles.bassBar, styles.bassBarLi, { height: 12 + bassToIndicator(bassLevel) * 24 }]} />
+                <View style={[styles.bassBar, styles.bassBarRi, { height: 12 + bassToIndicator(bassLevel) * 24 }]} />
+              </>
+            )}
           </View>
-        </View>
-      )}
 
-      {/* Artwork */}
-      <View style={styles.artworkWrap}>
-        <View style={[styles.artwork, isPlaying && styles.artworkPlaying]}>
-          <View style={styles.artworkGlow} />
-          <Text style={styles.artworkSymbol}>
-            {isLoading ? '◌' : isPlaying ? '◉' : '○'}
-          </Text>
-        </View>
-        {freqEnabled && isPlaying && (
-          <View style={[styles.freqRing, { borderColor: activeRange.color }]} />
-        )}
-        {isPlaying && bassLevel > 0 && (
-          <>
-            <View style={[styles.bassBar, styles.bassBarL, { height: 20 + bassToIndicator(bassLevel) * 40 }]} />
-            <View style={[styles.bassBar, styles.bassBarR, { height: 20 + bassToIndicator(bassLevel) * 40 }]} />
-            <View style={[styles.bassBar, styles.bassBarLi, { height: 12 + bassToIndicator(bassLevel) * 24 }]} />
-            <View style={[styles.bassBar, styles.bassBarRi, { height: 12 + bassToIndicator(bassLevel) * 24 }]} />
-          </>
-        )}
-      </View>
-
-      {/* Track info */}
-      <View style={styles.trackInfo}>
-        <Text style={styles.trackLabel}>{trackLabel}</Text>
-        <Text style={styles.trackTitle}>{title}</Text>
-        <Text style={styles.trackDesc}>{description}</Text>
-        {freqEnabled && (
-          <View style={styles.freqActiveBadge}>
-            <View style={[styles.freqActiveDot, { backgroundColor: activeRange.color }]} />
-            <Text style={[styles.freqActiveText, { color: activeRange.color }]}>
-              {currentPreset.label}
-            </Text>
+          {/* Track info */}
+          <View style={styles.trackInfo}>
+            <Text style={styles.trackLabel}>{trackLabel}</Text>
+            <Text style={[styles.trackTitle, isTabletPortrait && styles.trackTitleTabletP]}>{title}</Text>
+            <Text style={styles.trackDesc}>{description}</Text>
+            {freqEnabled && (
+              <View style={styles.freqActiveBadge}>
+                <View style={[styles.freqActiveDot, { backgroundColor: activeRange.color }]} />
+                <Text style={[styles.freqActiveText, { color: activeRange.color }]}>
+                  {currentPreset.label}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-      </View>
 
-      {/* Progress */}
-      <View style={styles.progressWrap}>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progressPct * 100}%` as any }]} />
-          <View style={[styles.progressHead, { left: `${progressPct * 100}%` as any }]} />
-        </View>
-        <View style={styles.timeRow}>
-          <Text style={styles.timeText}>{formatTime(position)}</Text>
-          <Text style={styles.timeText}>{formatTime(duration)}</Text>
-        </View>
-      </View>
-
-      {/* Transport */}
-      <View style={styles.transport}>
-        <TouchableOpacity style={[styles.skipBtn, !hasPrev && styles.skipBtnDisabled]} onPress={handlePrev} disabled={!hasPrev || isLoading} activeOpacity={0.75}>
-          <Text style={[styles.skipIcon, !hasPrev && styles.skipIconDisabled]}>⏮</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.playBtn, isLoading && styles.playBtnDisabled]} onPress={handleToggle} disabled={isLoading} activeOpacity={0.82}>
-          <Text style={styles.playBtnIcon}>{isLoading ? '◌' : isPlaying ? '■' : '▶'}</Text>
-          <Text style={styles.playBtnText}>{isLoading ? 'Loading…' : isPlaying ? 'Stop' : 'Play'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.skipBtn, !hasNext && styles.skipBtnDisabled]} onPress={handleNext} disabled={!hasNext || isLoading} activeOpacity={0.75}>
-          <Text style={[styles.skipIcon, !hasNext && styles.skipIconDisabled]}>⏭</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Loop toggle */}
-      <View style={styles.controlsRow}>
-        <TouchableOpacity style={[styles.ctrlPill, isLooping && styles.ctrlPillActive]} onPress={handleLoopToggle} activeOpacity={0.8}>
-          <Text style={[styles.ctrlPillText, isLooping && styles.ctrlPillTextActive]}>↺  {isLooping ? 'Loop on' : 'Loop off'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Volume card */}
-      <View style={styles.controlsCard}>
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Volume</Text>
-            <Text style={styles.sliderValue}>{Math.round(volume * 100)}%</Text>
+          {/* Progress */}
+          <View style={[
+            styles.progressWrap,
+            isTabletPortrait  && styles.progressWrapTabletP,
+            isTabletLandscape && styles.progressWrapTabletL,
+          ]}>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progressPct * 100}%` as any }]} />
+              <View style={[styles.progressHead, { left: `${progressPct * 100}%` as any }]} />
+            </View>
+            <View style={styles.timeRow}>
+              <Text style={styles.timeText}>{formatTime(position)}</Text>
+              <Text style={styles.timeText}>{formatTime(duration)}</Text>
+            </View>
           </View>
-          <CustomSlider label="" value={volume} onChange={handleVolumeChange} minimumValue={0} maximumValue={1} step={0.01} unit="%" />
-        </View>
-      </View>
 
-      {/* Bass card */}
-      <View style={styles.bassCard}>
-        <View style={styles.bassCardBar} />
-        <View style={styles.bassCardHeader}>
-          <Text style={styles.bassCardTitle}>Bass</Text>
-          <Text style={styles.bassCardValue}>{Math.round(bassLevel)}%</Text>
-        </View>
-        <View style={styles.presetRow}>
-          {BASS_PRESETS.map((preset) => {
-            const active = bassPresetId === preset.id;
-            return (
-              <TouchableOpacity key={preset.id} style={[styles.presetChip, active && styles.presetChipActive]} onPress={() => handleBassPreset(preset)} activeOpacity={0.75}>
-                <Text style={[styles.presetChipText, active && styles.presetChipTextActive]}>{preset.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        {bassPresetId !== 'custom' && (
-          <Text style={styles.bassHint}>{BASS_PRESETS.find((p) => p.id === bassPresetId)?.hint ?? ''}</Text>
-        )}
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Fine tune</Text>
-            <Text style={styles.sliderValue}>{Math.round(bassLevel)}%</Text>
+          {/* Transport */}
+          <View style={styles.transport}>
+            <TouchableOpacity style={[styles.skipBtn, !hasPrev && styles.skipBtnDisabled]} onPress={handlePrev} disabled={!hasPrev || isLoading} activeOpacity={0.75}>
+              <Text style={[styles.skipIcon, !hasPrev && styles.skipIconDisabled]}>⏮</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.playBtn, isLoading && styles.playBtnDisabled]} onPress={handleToggle} disabled={isLoading} activeOpacity={0.82}>
+              <Text style={styles.playBtnIcon}>{isLoading ? '◌' : isPlaying ? '■' : '▶'}</Text>
+              <Text style={styles.playBtnText}>{isLoading ? 'Loading…' : isPlaying ? 'Stop' : 'Play'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.skipBtn, !hasNext && styles.skipBtnDisabled]} onPress={handleNext} disabled={!hasNext || isLoading} activeOpacity={0.75}>
+              <Text style={[styles.skipIcon, !hasNext && styles.skipIconDisabled]}>⏭</Text>
+            </TouchableOpacity>
           </View>
-          <CustomSlider label="" value={bassLevel} onChange={handleBassChange} minimumValue={0} maximumValue={100} step={1} unit="%" />
-        </View>
-        <View style={styles.sliderDivider} />
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Subharmonic rate</Text>
-            <Text style={styles.sliderValue}>{bassRate.toFixed(2)}×</Text>
+
+          {/* Loop toggle */}
+          <View style={styles.controlsRow}>
+            <TouchableOpacity style={[styles.ctrlPill, isLooping && styles.ctrlPillActive]} onPress={handleLoopToggle} activeOpacity={0.8}>
+              <Text style={[styles.ctrlPillText, isLooping && styles.ctrlPillTextActive]}>↺  {isLooping ? 'Loop on' : 'Loop off'}</Text>
+            </TouchableOpacity>
           </View>
-          <CustomSlider label="" value={bassRate} onChange={(v) => setBassRate(parseFloat(v.toFixed(2)))} minimumValue={0.7} maximumValue={1.0} step={0.01} unit="×" />
-          <Text style={styles.bassRateHint}>Lower = deeper pitch shift · Higher = subtle warmth</Text>
-        </View>
-      </View>
 
-      {/* ── Day 63 — Frequency Engine card ── */}
-      <View style={styles.freqCard}>
-        <View style={[styles.freqCardBar, { backgroundColor: activeRange.color }]} />
+        </View>{/* end left column */}
 
-        <View style={styles.freqCardHeader}>
-          <Text style={styles.freqCardTitle}>Frequency Engine</Text>
-          <TouchableOpacity
-            style={[styles.freqToggle, freqEnabled && styles.freqToggleActive]}
-            onPress={handleFreqToggle}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.freqToggleText, freqEnabled && { color: activeRange.color }]}>
-              {freqEnabled ? 'On' : 'Off'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Right column — engine cards */}
+        <View style={isTabletLandscape ? styles.tabletRight : styles.fullWidth}>
 
-        {/* Day 63 — Band display */}
-        <FrequencyBandDisplay hz={frequency} />
-
-        {/* Day 63 — Logarithmic slider */}
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Frequency</Text>
-            <Text style={[styles.sliderValue, { color: activeRange.color }]}>{frequency} Hz</Text>
+          {/* Volume card */}
+          <View style={[styles.controlsCard, isTabletLandscape && styles.cardTabletL, isTabletPortrait && styles.cardTabletP]}>
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Volume</Text>
+                <Text style={styles.sliderValue}>{Math.round(volume * 100)}%</Text>
+              </View>
+              <CustomSlider label="" value={volume} onChange={handleVolumeChange} minimumValue={0} maximumValue={1} step={0.01} unit="%" />
+            </View>
           </View>
-          <CustomSlider
-            label=""
-            value={sliderPos}
-            onChange={handleSliderChange}
-            onSlidingComplete={handleSliderComplete}
-            minimumValue={0}
-            maximumValue={100}
-            step={1}
-            unit=""
-          />
-          <Text style={styles.sliderHint}>
-            Drag to explore · Snaps to nearest healing frequency
-          </Text>
-        </View>
 
-        <View style={styles.sliderDivider} />
-
-        {/* Intensity */}
-        <View style={styles.sliderBlock}>
-          <View style={styles.sliderHeader}>
-            <Text style={styles.sliderLabel}>Intensity</Text>
-            <Text style={styles.sliderValue}>{freqIntensity}%</Text>
+          {/* Bass card */}
+          <View style={[styles.bassCard, isTabletLandscape && styles.cardTabletL, isTabletPortrait && styles.cardTabletP]}>
+            <View style={styles.bassCardBar} />
+            <View style={styles.bassCardHeader}>
+              <Text style={styles.bassCardTitle}>Bass</Text>
+              <Text style={styles.bassCardValue}>{Math.round(bassLevel)}%</Text>
+            </View>
+            <View style={styles.presetRow}>
+              {BASS_PRESETS.map((preset) => {
+                const active = bassPresetId === preset.id;
+                return (
+                  <TouchableOpacity key={preset.id} style={[styles.presetChip, active && styles.presetChipActive]} onPress={() => handleBassPreset(preset)} activeOpacity={0.75}>
+                    <Text style={[styles.presetChipText, active && styles.presetChipTextActive]}>{preset.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {bassPresetId !== 'custom' && (
+              <Text style={styles.bassHint}>{BASS_PRESETS.find((p) => p.id === bassPresetId)?.hint ?? ''}</Text>
+            )}
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Fine tune</Text>
+                <Text style={styles.sliderValue}>{Math.round(bassLevel)}%</Text>
+              </View>
+              <CustomSlider label="" value={bassLevel} onChange={handleBassChange} minimumValue={0} maximumValue={100} step={1} unit="%" />
+            </View>
+            <View style={styles.sliderDivider} />
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Subharmonic rate</Text>
+                <Text style={styles.sliderValue}>{bassRate.toFixed(2)}×</Text>
+              </View>
+              <CustomSlider label="" value={bassRate} onChange={(v) => setBassRate(parseFloat(v.toFixed(2)))} minimumValue={0.7} maximumValue={1.0} step={0.01} unit="×" />
+              <Text style={styles.bassRateHint}>Lower = deeper pitch shift · Higher = subtle warmth</Text>
+            </View>
           </View>
-          <CustomSlider label="" value={freqIntensity} onChange={handleFreqIntensityChange} minimumValue={0} maximumValue={100} step={1} unit="%" />
-          <Text style={styles.sliderHint}>Blends the healing tone with the audio session</Text>
-        </View>
 
-        {/* Range chips */}
-        <View style={styles.presetRow}>
-          {FREQUENCY_RANGES.map((range) => {
-            const active = activeRange.id === range.id;
-            return (
+          {/* Frequency Engine card */}
+          <View style={[styles.freqCard, isTabletLandscape && styles.cardTabletL, isTabletPortrait && styles.cardTabletP]}>
+            <View style={[styles.freqCardBar, { backgroundColor: activeRange.color }]} />
+
+            <View style={styles.freqCardHeader}>
+              <Text style={styles.freqCardTitle}>Frequency Engine</Text>
               <TouchableOpacity
-                key={range.id}
-                style={[styles.freqChip, active && { backgroundColor: `${range.color}18`, borderColor: `${range.color}50` }]}
-                onPress={() => handleRangeChip(range.id)}
-                activeOpacity={0.75}
+                style={[styles.freqToggle, freqEnabled && styles.freqToggleActive]}
+                onPress={handleFreqToggle}
+                activeOpacity={0.8}
               >
-                <Text style={[styles.freqChipText, active && { color: range.color }]}>
-                  {range.label}
+                <Text style={[styles.freqToggleText, freqEnabled && { color: activeRange.color }]}>
+                  {freqEnabled ? 'On' : 'Off'}
                 </Text>
               </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+            </View>
+
+            <FrequencyBandDisplay hz={frequency} />
+
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Frequency</Text>
+                <Text style={[styles.sliderValue, { color: activeRange.color }]}>{frequency} Hz</Text>
+              </View>
+              <CustomSlider
+                label=""
+                value={sliderPos}
+                onChange={handleSliderChange}
+                onSlidingComplete={handleSliderComplete}
+                minimumValue={0}
+                maximumValue={100}
+                step={1}
+                unit=""
+              />
+              <Text style={styles.sliderHint}>
+                Drag to explore · Snaps to nearest healing frequency
+              </Text>
+            </View>
+
+            <View style={styles.sliderDivider} />
+
+            <View style={styles.sliderBlock}>
+              <View style={styles.sliderHeader}>
+                <Text style={styles.sliderLabel}>Intensity</Text>
+                <Text style={styles.sliderValue}>{freqIntensity}%</Text>
+              </View>
+              <CustomSlider label="" value={freqIntensity} onChange={handleFreqIntensityChange} minimumValue={0} maximumValue={100} step={1} unit="%" />
+              <Text style={styles.sliderHint}>Blends the healing tone with the audio session</Text>
+            </View>
+
+            <View style={styles.presetRow}>
+              {FREQUENCY_RANGES.map((range) => {
+                const active = activeRange.id === range.id;
+                return (
+                  <TouchableOpacity
+                    key={range.id}
+                    style={[styles.freqChip, active && { backgroundColor: `${range.color}18`, borderColor: `${range.color}50` }]}
+                    onPress={() => handleRangeChip(range.id)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[styles.freqChipText, active && { color: range.color }]}>
+                      {range.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+        </View>{/* end right column */}
+
+      </View>{/* end tabletRow / phoneCol */}
 
       <Text style={styles.footer}>Sound Energy Therapy</Text>
       <View style={{ height: 48 }} />
@@ -731,4 +761,25 @@ const styles = StyleSheet.create({
   freqChipText:         { fontSize: 10, color: C.textDim, fontWeight: '500', letterSpacing: 1 },
 
   footer: { fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: C.textMuted, fontWeight: '300' },
+
+  // ── Tablet layout ──
+  containerTabletL:    { paddingHorizontal: 40 },
+  containerTabletP:    { paddingHorizontal: 60 },
+  phoneCol:            { width: '100%', alignItems: 'center' },
+  fullWidth:           { width: '100%' },
+  tabletRow:           { flexDirection: 'row', gap: 24, width: '100%' },
+  tabletLeft:          { flex: 1, alignItems: 'center' },
+  tabletRight:         { flex: 1, paddingTop: 8 },
+  // Cards: remove maxWidth cap in landscape, widen in portrait
+  cardTabletL:         { maxWidth: 2000, width: '100%' },
+  cardTabletP:         { maxWidth: 520 },
+  progressWrapTabletL: { maxWidth: 2000, width: '100%' },
+  progressWrapTabletP: { maxWidth: 480 },
+  // Artwork: slightly larger on any tablet
+  artworkWrapTablet:   { width: 200, height: 200 },
+  artworkTablet:       { width: 160, height: 160 },
+  artworkSymbolTablet: { fontSize: 56 },
+  freqRingTablet:      { width: 180, height: 180 },
+  // Portrait font bump
+  trackTitleTabletP:   { fontSize: 34 },
 });
