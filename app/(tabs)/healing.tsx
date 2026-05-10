@@ -105,8 +105,10 @@ const groupTracksByCategory = (tracks: Track[]) => {
 ---------------------------------------- */
 export default function HealingScreen() {
   const { setLastCategory } = usePlayer();
-  const { width }           = useWindowDimensions();
-  const isTablet            = width >= 768;
+  const { width, height } = useWindowDimensions();
+  const isTablet          = width >= 768;
+  const isTabletLandscape = isTablet && width >= height;
+  const isTabletPortrait  = isTablet && height > width;
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,7 +159,7 @@ export default function HealingScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.container, isTablet && styles.containerTablet]}
+      contentContainerStyle={[styles.container, isTabletLandscape && styles.containerTablet, isTabletPortrait && styles.containerTabletPortrait]}
       showsVerticalScrollIndicator={false}
     >
       {/* Ambient glows */}
@@ -167,8 +169,8 @@ export default function HealingScreen() {
       {/* ── Header — always full width ── */}
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Sound Energy Therapy</Text>
-        <Text style={styles.title}>Healing</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, isTabletPortrait && styles.titleTabletP]}>Healing</Text>
+        <Text style={[styles.subtitle, isTabletPortrait && styles.subtitleTabletP]}>
           Curated collections to restore your mind and body
         </Text>
       </View>
@@ -176,10 +178,10 @@ export default function HealingScreen() {
       <View style={styles.goldRule} />
 
       {/* Two-column on tablet, single column on phone */}
-      <View style={isTablet ? styles.tabletRow : undefined}>
+      <View style={isTabletLandscape ? styles.tabletRow : undefined}>
 
         {/* Left column: state + featured card */}
-        <View style={isTablet ? styles.tabletLeft : undefined}>
+        <View style={isTabletLandscape ? styles.tabletLeft : undefined}>
           {loading ? (
             <View style={styles.stateBox}>
               <Text style={styles.stateText}>Attuning frequencies…</Text>
@@ -196,7 +198,7 @@ export default function HealingScreen() {
               <View style={styles.featuredBadgeDot} />
               <Text style={styles.featuredBadgeText}>Featured Session</Text>
             </View>
-            <Text style={styles.featuredTitle}>
+            <Text style={[styles.featuredTitle, isTabletPortrait && styles.featuredTitleTabletP]}>
               {featuredTrack?.title ?? FEATURED_FALLBACK.title}
             </Text>
             <Text style={styles.featuredBody}>
@@ -228,14 +230,14 @@ export default function HealingScreen() {
         </View>
 
         {/* Right column: collections */}
-        <View style={isTablet ? styles.tabletRight : undefined}>
+        <View style={isTabletLandscape ? styles.tabletRight : undefined}>
           <View style={styles.sectionLabelRow}>
             <View style={styles.sectionLabelLine} />
             <Text style={styles.sectionLabelText}>Collections</Text>
             <View style={styles.sectionLabelLine} />
           </View>
 
-          <View style={[styles.collectionList, isTablet && styles.tabletCollectionGrid]}>
+          <View style={[styles.collectionList, isTabletLandscape && styles.tabletCollectionGrid]}>
             {COLLECTIONS.map((item) => {
               const latestTrack  = groupedTracks[item.id]?.[0];
               const displayTitle = latestTrack?.title ?? item.title;
@@ -294,7 +296,7 @@ export default function HealingScreen() {
               );
 
               return (
-                <View key={item.id} style={isTablet ? styles.tabletCollectionItem : undefined}>
+                <View key={item.id} style={isTabletLandscape ? styles.tabletCollectionItem : undefined}>
                   {linkEl}
                 </View>
               );
@@ -586,10 +588,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  containerTablet:      { paddingHorizontal: 40 },
-  tabletRow:            { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
-  tabletLeft:           { flex: 1 },
-  tabletRight:          { flex: 1 },
-  tabletCollectionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  tabletCollectionItem: { width: '48%' },
+  containerTablet:         { paddingHorizontal: 40 },
+  containerTabletPortrait: { paddingHorizontal: 60 },
+  tabletRow:               { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
+  tabletLeft:              { flex: 1 },
+  tabletRight:             { flex: 1 },
+  tabletCollectionGrid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  tabletCollectionItem:    { width: '48%' },
+  titleTabletP:            { fontSize: 44 },
+  subtitleTabletP:         { fontSize: 15 },
+  featuredTitleTabletP:    { fontSize: 30 },
 });

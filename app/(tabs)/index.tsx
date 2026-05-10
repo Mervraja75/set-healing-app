@@ -54,8 +54,10 @@ function SectionLabel({ title }: { title: string }) {
 export default function HomeScreen() {
   const router            = useRouter();
   const { setPlaylist }   = usePlayer();
-  const { width }         = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isTablet          = width >= 768;
+  const isTabletLandscape = isTablet && width >= height;
+  const isTabletPortrait  = isTablet && height > width;
 
   const [tracks,  setTracks]  = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,31 +127,31 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView contentContainerStyle={[styles.container, isTablet && styles.containerTablet]} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={[styles.container, isTabletLandscape && styles.containerTablet, isTabletPortrait && styles.containerTabletPortrait]} showsVerticalScrollIndicator={false}>
       <View style={styles.glowTR} /><View style={styles.glowML} />
 
       {/* Hero — always full width */}
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>Sound · Energy · Therapy</Text>
-        <Text style={styles.logoMark}>SET</Text>
+        <Text style={[styles.logoMark, isTabletPortrait && styles.logoMarkTabletP]}>SET</Text>
         <Text style={styles.logoSub}>Healing</Text>
         <Text style={styles.logoFull}>Sound Energy Therapy</Text>
-        <Text style={styles.tagline}>Restore harmony through sacred frequency</Text>
+        <Text style={[styles.tagline, isTabletPortrait && styles.taglineTabletP]}>Restore harmony through sacred frequency</Text>
       </View>
       <View style={styles.rule} />
 
       {/* Two-column on tablet, single column on phone */}
-      <View style={isTablet ? styles.tabletRow : undefined}>
+      <View style={isTabletLandscape ? styles.tabletRow : undefined}>
 
         {/* Left column: hero card + quick actions */}
-        <View style={isTablet ? styles.tabletLeft : undefined}>
+        <View style={isTabletLandscape ? styles.tabletLeft : undefined}>
           <View style={styles.heroCard}>
             <View style={styles.heroGlow} />
             <View style={styles.heroBadgeRow}>
               <View style={styles.heroDot} />
               <Text style={styles.heroBadgeText}>Begin today</Text>
             </View>
-            <Text style={styles.heroTitle}>What does your{'\n'}body need?</Text>
+            <Text style={[styles.heroTitle, isTabletPortrait && styles.heroTitleTabletP]}>What does your{'\n'}body need?</Text>
             <Text style={styles.heroBody}>Guided sessions for rest, focus, and deep cellular healing.</Text>
             <TouchableOpacity style={styles.heroBtn} onPress={handleHeroPress} activeOpacity={0.82}>
               <Text style={styles.heroBtnText}>Start Session</Text>
@@ -167,11 +169,11 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          {!isTablet && <View style={styles.rule} />}
+          {!isTabletLandscape && <View style={styles.rule} />}
         </View>
 
         {/* Right column: popular + newest + browse */}
-        <View style={isTablet ? styles.tabletRight : undefined}>
+        <View style={isTabletLandscape ? styles.tabletRight : undefined}>
           <SectionLabel title="Popular" />
           {loading ? (
             <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
@@ -259,8 +261,12 @@ const styles = StyleSheet.create({
   browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: 'rgba(212,168,40,0.04)' },
   browseBtnText: { fontSize: 11, color: C.goldBright, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '500' },
 
-  containerTablet: { paddingHorizontal: 40 },
-  tabletRow:       { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
-  tabletLeft:      { flex: 1 },
-  tabletRight:     { flex: 1 },
+  containerTablet:        { paddingHorizontal: 40 },
+  containerTabletPortrait: { paddingHorizontal: 60 },
+  tabletRow:              { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
+  tabletLeft:             { flex: 1 },
+  tabletRight:            { flex: 1 },
+  logoMarkTabletP:        { fontSize: 74, lineHeight: 80 },
+  taglineTabletP:         { fontSize: 15 },
+  heroTitleTabletP:       { fontSize: 30 },
 });

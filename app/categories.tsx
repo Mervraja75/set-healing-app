@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { usePlayer } from '@/context/PlayerContext';
@@ -84,6 +85,8 @@ const getTrackSortValue = (track: Track) => track.createdAt?.seconds ?? 0;
 ---------------------------------------- */
 export default function CategoriesScreen() {
   const { setLastCategory } = usePlayer();
+  const { width, height }   = useWindowDimensions();
+  const isTabletPortrait    = width >= 768 && height > width;
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +129,7 @@ export default function CategoriesScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, isTabletPortrait && styles.containerTabletPortrait]}
       showsVerticalScrollIndicator={false}
     >
       {/* Ambient glows */}
@@ -136,8 +139,8 @@ export default function CategoriesScreen() {
       {/* ── Header ── */}
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Sound Energy Therapy</Text>
-        <Text style={styles.title}>Categories</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, isTabletPortrait && styles.titleTabletP]}>Categories</Text>
+        <Text style={[styles.subtitle, isTabletPortrait && styles.subtitleTabletP]}>
           Browse healing tracks by frequency type
         </Text>
       </View>
@@ -192,7 +195,7 @@ export default function CategoriesScreen() {
                 {/* Gold top bar */}
                 <View style={styles.categoryCardBar} />
 
-                <View style={styles.categoryCardInner}>
+                <View style={[styles.categoryCardInner, isTabletPortrait && styles.categoryCardInnerTabletP]}>
                   {/* Left: icon + track count */}
                   <View style={styles.categoryLeft}>
                     <View style={styles.categoryIconWrap}>
@@ -209,7 +212,7 @@ export default function CategoriesScreen() {
 
                   {/* Middle: text */}
                   <View style={styles.categoryTextBlock}>
-                    <Text style={styles.categoryTitle}>{category.title}</Text>
+                    <Text style={[styles.categoryTitle, isTabletPortrait && styles.categoryTitleTabletP]}>{category.title}</Text>
                     <Text style={styles.categoryDesc}>{targetDesc}</Text>
                     {latestTrack ? (
                       <Text style={styles.categoryLatest}>
@@ -443,4 +446,10 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     fontWeight: '300',
   },
+
+  containerTabletPortrait:    { paddingHorizontal: 60 },
+  titleTabletP:               { fontSize: 44 },
+  subtitleTabletP:            { fontSize: 15 },
+  categoryCardInnerTabletP:   { padding: 28, gap: 20 },
+  categoryTitleTabletP:       { fontSize: 24 },
 });
