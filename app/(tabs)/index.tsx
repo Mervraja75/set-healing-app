@@ -7,8 +7,10 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions,
+  ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
+
+import { useResponsive } from '@/hooks/useResponsive';
 
 import { PlaylistTrack, usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
@@ -54,10 +56,7 @@ function SectionLabel({ title }: { title: string }) {
 export default function HomeScreen() {
   const router            = useRouter();
   const { setPlaylist }   = usePlayer();
-  const { width, height } = useWindowDimensions();
-  const isTablet          = width >= 768;
-  const isTabletLandscape = isTablet && width >= height;
-  const isTabletPortrait  = isTablet && height > width;
+  const { isTabletLandscape, isTabletPortrait } = useResponsive();
 
   const [tracks,  setTracks]  = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);

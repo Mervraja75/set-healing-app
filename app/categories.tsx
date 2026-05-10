@@ -14,8 +14,9 @@ import {
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from 'react-native';
+
+import { useResponsive } from '@/hooks/useResponsive';
 
 import { usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
@@ -85,8 +86,7 @@ const getTrackSortValue = (track: Track) => track.createdAt?.seconds ?? 0;
 ---------------------------------------- */
 export default function CategoriesScreen() {
   const { setLastCategory } = usePlayer();
-  const { width, height }   = useWindowDimensions();
-  const isTabletPortrait    = width >= 768 && height > width;
+  const { isTabletPortrait } = useResponsive();
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);

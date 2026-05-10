@@ -14,8 +14,9 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
 } from 'react-native';
+
+import { useResponsive } from '@/hooks/useResponsive';
 
 import { usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
@@ -105,10 +106,7 @@ const groupTracksByCategory = (tracks: Track[]) => {
 ---------------------------------------- */
 export default function HealingScreen() {
   const { setLastCategory } = usePlayer();
-  const { width, height } = useWindowDimensions();
-  const isTablet          = width >= 768;
-  const isTabletLandscape = isTablet && width >= height;
-  const isTabletPortrait  = isTablet && height > width;
+  const { isTablet, isTabletLandscape, isTabletPortrait } = useResponsive();
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);

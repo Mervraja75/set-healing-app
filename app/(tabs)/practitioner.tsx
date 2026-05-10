@@ -8,8 +8,10 @@
 import { useState } from 'react';
 import {
   ScrollView, StyleSheet, Text,
-  TouchableOpacity, View, useWindowDimensions,
+  TouchableOpacity, View,
 } from 'react-native';
+
+import { useResponsive } from '@/hooks/useResponsive';
 
 import { usePlayer } from '@/context/PlayerContext';
 import {
@@ -97,8 +99,7 @@ export default function PractitionerScreen() {
   const [freqEnabled,   setFreqEnabled]   = useState(false);
   const [freqIntensity, setFreqIntensity] = useState(30);
 
-  const { width }  = useWindowDimensions();
-  const isTablet   = width >= 768;
+  const { isTablet } = useResponsive();
   const volumePct  = Math.round(volume * 100);
   const currentPreset = getClosestPreset(frequency);
 
