@@ -189,6 +189,8 @@ export default function TestScreen() {
   const hasNextRef   = useRef(hasNext);
   const goToNextRef  = useRef(goToNextTrack);
   const isLoopingRef = useRef(isLooping);
+  // Always points to the latest teardown — used by the unmount effect to avoid a stale closure
+  const teardownRef  = useRef<() => Promise<void>>(async () => {});
   useEffect(() => { hasNextRef.current   = hasNext; },       [hasNext]);
   useEffect(() => { goToNextRef.current  = goToNextTrack; }, [goToNextTrack]);
   useEffect(() => { isLoopingRef.current = isLooping; },     [isLooping]);
@@ -222,6 +224,8 @@ export default function TestScreen() {
       try { await bassAudio.stopAsync(); }   catch {}
       try { await bassAudio.unloadAsync(); } catch {}
     }
+    // Always stop the frequency engine — it must not outlive its audio layer
+    await frequencyEngine.stop().catch(() => {});
     setAudio(null);
     setBassAudio(null);
     setIsPlaying(false);
@@ -229,6 +233,8 @@ export default function TestScreen() {
     setDuration(1);
     setIsLoading(false);
   };
+  // Keep the ref in sync so the unmount effect always calls the latest closure
+  teardownRef.current = teardown;
 
   /* ── Start playback ── */
   const startPlayback = async () => {
@@ -291,7 +297,7 @@ export default function TestScreen() {
   const handleToggle = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    if (audio) { await teardown(); await frequencyEngine.stop(); }
+    if (audio) await teardown();
     else await startPlayback();
     setIsLoading(false);
   };
@@ -411,8 +417,7 @@ export default function TestScreen() {
 
   /* ── Cleanup ── */
   useEffect(() => {
-    return () => { teardown().catch(() => {}); frequencyEngine.stop().catch(() => {}); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { teardownRef.current().catch(() => {}); };
   }, []);
 
   /* ── UI ── */
