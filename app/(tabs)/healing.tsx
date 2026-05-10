@@ -14,6 +14,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { usePlayer } from '@/context/PlayerContext';
@@ -104,6 +105,8 @@ const groupTracksByCategory = (tracks: Track[]) => {
 ---------------------------------------- */
 export default function HealingScreen() {
   const { setLastCategory } = usePlayer();
+  const { width }           = useWindowDimensions();
+  const isTablet            = width >= 768;
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,14 +157,14 @@ export default function HealingScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, isTablet && styles.containerTablet]}
       showsVerticalScrollIndicator={false}
     >
       {/* Ambient glows */}
       <View style={styles.glowTopRight} />
       <View style={styles.glowMidLeft} />
 
-      {/* ── Header ── */}
+      {/* ── Header — always full width ── */}
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Sound Energy Therapy</Text>
         <Text style={styles.title}>Healing</Text>
@@ -172,125 +175,132 @@ export default function HealingScreen() {
 
       <View style={styles.goldRule} />
 
-      {/* ── State boxes ── */}
-      {loading ? (
-        <View style={styles.stateBox}>
-          <Text style={styles.stateText}>Attuning frequencies…</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.stateBox}>
-          <Text style={styles.stateText}>{error}</Text>
-        </View>
-      ) : null}
+      {/* Two-column on tablet, single column on phone */}
+      <View style={isTablet ? styles.tabletRow : undefined}>
 
-      {/* ── Featured Card ── */}
-      <View style={styles.featuredCard}>
-        <View style={styles.featuredCardGlow} />
-        <View style={styles.featuredBadgeRow}>
-          <View style={styles.featuredBadgeDot} />
-          <Text style={styles.featuredBadgeText}>Featured Session</Text>
-        </View>
-        <Text style={styles.featuredTitle}>
-          {featuredTrack?.title ?? FEATURED_FALLBACK.title}
-        </Text>
-        <Text style={styles.featuredBody}>
-          {featuredTrack?.description ?? FEATURED_FALLBACK.description}
-        </Text>
-        {featuredTrack ? (
-          featuredTrack.isPremium ? (
-            <Link href="/paywall" asChild>
-              <TouchableOpacity style={styles.unlockBtn} activeOpacity={0.85}>
-                <Text style={styles.unlockBtnText}>🔒  Unlock Premium</Text>
-              </TouchableOpacity>
-            </Link>
-          ) : (
-            renderPlayerLink(
-              featuredTrack.title,
-              featuredTrack.description ?? FEATURED_FALLBACK.description,
-              featuredTrack.category,
-              featuredTrack.url
-            )
-          )
-        ) : (
-          renderPlayerLink(
-            FEATURED_FALLBACK.title,
-            FEATURED_FALLBACK.description,
-            FEATURED_FALLBACK.sound
-          )
-        )}
-      </View>
-
-      {/* ── Collections label ── */}
-      <View style={styles.sectionLabelRow}>
-        <View style={styles.sectionLabelLine} />
-        <Text style={styles.sectionLabelText}>Collections</Text>
-        <View style={styles.sectionLabelLine} />
-      </View>
-
-      {/* ── Collection cards ── */}
-      <View style={styles.collectionList}>
-        {COLLECTIONS.map((item) => {
-          const latestTrack  = groupedTracks[item.id]?.[0];
-          const displayTitle = latestTrack?.title ?? item.title;
-          const displayDesc  = latestTrack?.description ?? item.description;
-          const soundKey     = latestTrack?.category ?? item.sound;
-
-          const Card = (
-            <View style={styles.collectionCard}>
-              <View style={styles.collectionCardBar} />
-              <View style={styles.collectionCardInner}>
-                <View style={styles.collectionIconWrap}>
-                  <Text style={styles.collectionIcon}>{item.icon}</Text>
-                </View>
-                <View style={styles.collectionTextBlock}>
-                  <View style={styles.collectionTitleRow}>
-                    <Text style={styles.collectionTitle}>{item.title}</Text>
-                    {latestTrack?.isPremium ? (
-                      <Text style={styles.lockIcon}>🔒</Text>
-                    ) : latestTrack ? (
-                      <View style={styles.newBadge}>
-                        <Text style={styles.newBadgeText}>New</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  <Text style={styles.collectionDesc}>{displayDesc}</Text>
-                  <Text style={styles.collectionLatest}>
-                    {latestTrack
-                      ? `Latest: ${latestTrack.title}`
-                      : 'No uploaded tracks yet'}
-                  </Text>
-                </View>
-                <Text style={styles.collectionArrow}>›</Text>
-              </View>
+        {/* Left column: state + featured card */}
+        <View style={isTablet ? styles.tabletLeft : undefined}>
+          {loading ? (
+            <View style={styles.stateBox}>
+              <Text style={styles.stateText}>Attuning frequencies…</Text>
             </View>
-          );
+          ) : error ? (
+            <View style={styles.stateBox}>
+              <Text style={styles.stateText}>{error}</Text>
+            </View>
+          ) : null}
 
-          if (latestTrack?.isPremium) {
-            return (
-              <Link key={item.id} href="/paywall" asChild>
-                <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
-              </Link>
-            );
-          }
+          <View style={styles.featuredCard}>
+            <View style={styles.featuredCardGlow} />
+            <View style={styles.featuredBadgeRow}>
+              <View style={styles.featuredBadgeDot} />
+              <Text style={styles.featuredBadgeText}>Featured Session</Text>
+            </View>
+            <Text style={styles.featuredTitle}>
+              {featuredTrack?.title ?? FEATURED_FALLBACK.title}
+            </Text>
+            <Text style={styles.featuredBody}>
+              {featuredTrack?.description ?? FEATURED_FALLBACK.description}
+            </Text>
+            {featuredTrack ? (
+              featuredTrack.isPremium ? (
+                <Link href="/paywall" asChild>
+                  <TouchableOpacity style={styles.unlockBtn} activeOpacity={0.85}>
+                    <Text style={styles.unlockBtnText}>🔒  Unlock Premium</Text>
+                  </TouchableOpacity>
+                </Link>
+              ) : (
+                renderPlayerLink(
+                  featuredTrack.title,
+                  featuredTrack.description ?? FEATURED_FALLBACK.description,
+                  featuredTrack.category,
+                  featuredTrack.url
+                )
+              )
+            ) : (
+              renderPlayerLink(
+                FEATURED_FALLBACK.title,
+                FEATURED_FALLBACK.description,
+                FEATURED_FALLBACK.sound
+              )
+            )}
+          </View>
+        </View>
 
-          return (
-            <Link
-              key={item.id}
-              href={{
-                pathname: '/test',
-                params: {
-                  title: displayTitle,
-                  description: displayDesc,
-                  sound: soundKey,
-                  audioUrl: latestTrack?.url,
-                },
-              }}
-              asChild
-            >
-              <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
-            </Link>
-          );
-        })}
+        {/* Right column: collections */}
+        <View style={isTablet ? styles.tabletRight : undefined}>
+          <View style={styles.sectionLabelRow}>
+            <View style={styles.sectionLabelLine} />
+            <Text style={styles.sectionLabelText}>Collections</Text>
+            <View style={styles.sectionLabelLine} />
+          </View>
+
+          <View style={[styles.collectionList, isTablet && styles.tabletCollectionGrid]}>
+            {COLLECTIONS.map((item) => {
+              const latestTrack  = groupedTracks[item.id]?.[0];
+              const displayTitle = latestTrack?.title ?? item.title;
+              const displayDesc  = latestTrack?.description ?? item.description;
+              const soundKey     = latestTrack?.category ?? item.sound;
+
+              const Card = (
+                <View style={styles.collectionCard}>
+                  <View style={styles.collectionCardBar} />
+                  <View style={styles.collectionCardInner}>
+                    <View style={styles.collectionIconWrap}>
+                      <Text style={styles.collectionIcon}>{item.icon}</Text>
+                    </View>
+                    <View style={styles.collectionTextBlock}>
+                      <View style={styles.collectionTitleRow}>
+                        <Text style={styles.collectionTitle}>{item.title}</Text>
+                        {latestTrack?.isPremium ? (
+                          <Text style={styles.lockIcon}>🔒</Text>
+                        ) : latestTrack ? (
+                          <View style={styles.newBadge}>
+                            <Text style={styles.newBadgeText}>New</Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text style={styles.collectionDesc}>{displayDesc}</Text>
+                      <Text style={styles.collectionLatest}>
+                        {latestTrack
+                          ? `Latest: ${latestTrack.title}`
+                          : 'No uploaded tracks yet'}
+                      </Text>
+                    </View>
+                    <Text style={styles.collectionArrow}>›</Text>
+                  </View>
+                </View>
+              );
+
+              const linkEl = latestTrack?.isPremium ? (
+                <Link href="/paywall" asChild>
+                  <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
+                </Link>
+              ) : (
+                <Link
+                  href={{
+                    pathname: '/test',
+                    params: {
+                      title: displayTitle,
+                      description: displayDesc,
+                      sound: soundKey,
+                      audioUrl: latestTrack?.url,
+                    },
+                  }}
+                  asChild
+                >
+                  <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
+                </Link>
+              );
+
+              return (
+                <View key={item.id} style={isTablet ? styles.tabletCollectionItem : undefined}>
+                  {linkEl}
+                </View>
+              );
+            })}
+          </View>
+        </View>
       </View>
 
       <View style={{ height: 48 }} />
@@ -575,4 +585,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     fontWeight: '600',
   },
+
+  containerTablet:      { paddingHorizontal: 40 },
+  tabletRow:            { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
+  tabletLeft:           { flex: 1 },
+  tabletRight:          { flex: 1 },
+  tabletCollectionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  tabletCollectionItem: { width: '48%' },
 });

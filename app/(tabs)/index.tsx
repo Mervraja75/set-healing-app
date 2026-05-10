@@ -1,13 +1,13 @@
 // =======================================
 // SCREEN: Home (app/(tabs)/index.tsx)
-// Day 55 — Tapping a track loads full playlist into context
+// Day 68 — Tablet landscape layout (two-column at width >= 768)
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions,
 } from 'react-native';
 
 import { PlaylistTrack, usePlayer } from '@/context/PlayerContext';
@@ -54,6 +54,8 @@ function SectionLabel({ title }: { title: string }) {
 export default function HomeScreen() {
   const router            = useRouter();
   const { setPlaylist }   = usePlayer();
+  const { width }         = useWindowDimensions();
+  const isTablet          = width >= 768;
 
   const [tracks,  setTracks]  = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,10 +125,10 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={[styles.container, isTablet && styles.containerTablet]} showsVerticalScrollIndicator={false}>
       <View style={styles.glowTR} /><View style={styles.glowML} />
 
-      {/* Hero */}
+      {/* Hero — always full width */}
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>Sound · Energy · Therapy</Text>
         <Text style={styles.logoMark}>SET</Text>
@@ -136,64 +138,71 @@ export default function HomeScreen() {
       </View>
       <View style={styles.rule} />
 
-      {/* Hero card */}
-      <View style={styles.heroCard}>
-        <View style={styles.heroGlow} />
-        <View style={styles.heroBadgeRow}>
-          <View style={styles.heroDot} />
-          <Text style={styles.heroBadgeText}>Begin today</Text>
-        </View>
-        <Text style={styles.heroTitle}>What does your{'\n'}body need?</Text>
-        <Text style={styles.heroBody}>Guided sessions for rest, focus, and deep cellular healing.</Text>
-        <TouchableOpacity style={styles.heroBtn} onPress={handleHeroPress} activeOpacity={0.82}>
-          <Text style={styles.heroBtnText}>Start Session</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Two-column on tablet, single column on phone */}
+      <View style={isTablet ? styles.tabletRow : undefined}>
 
-      {/* Quick actions */}
-      <SectionLabel title="Choose your frequency" />
-      <View style={styles.quickGrid}>
-        {QUICK_ACTIONS.map((a) => (
-          <TouchableOpacity key={a.id} style={styles.quickCard} activeOpacity={0.78} onPress={() => handleQuickAction(a)}>
-            <View style={styles.quickBar} />
-            <Text style={styles.quickIcon}>{a.icon}</Text>
-            <Text style={styles.quickName}>{a.title}</Text>
-            <Text style={styles.quickDesc}>{a.description}</Text>
+        {/* Left column: hero card + quick actions */}
+        <View style={isTablet ? styles.tabletLeft : undefined}>
+          <View style={styles.heroCard}>
+            <View style={styles.heroGlow} />
+            <View style={styles.heroBadgeRow}>
+              <View style={styles.heroDot} />
+              <Text style={styles.heroBadgeText}>Begin today</Text>
+            </View>
+            <Text style={styles.heroTitle}>What does your{'\n'}body need?</Text>
+            <Text style={styles.heroBody}>Guided sessions for rest, focus, and deep cellular healing.</Text>
+            <TouchableOpacity style={styles.heroBtn} onPress={handleHeroPress} activeOpacity={0.82}>
+              <Text style={styles.heroBtnText}>Start Session</Text>
+            </TouchableOpacity>
+          </View>
+
+          <SectionLabel title="Choose your frequency" />
+          <View style={styles.quickGrid}>
+            {QUICK_ACTIONS.map((a) => (
+              <TouchableOpacity key={a.id} style={styles.quickCard} activeOpacity={0.78} onPress={() => handleQuickAction(a)}>
+                <View style={styles.quickBar} />
+                <Text style={styles.quickIcon}>{a.icon}</Text>
+                <Text style={styles.quickName}>{a.title}</Text>
+                <Text style={styles.quickDesc}>{a.description}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {!isTablet && <View style={styles.rule} />}
+        </View>
+
+        {/* Right column: popular + newest + browse */}
+        <View style={isTablet ? styles.tabletRight : undefined}>
+          <SectionLabel title="Popular" />
+          {loading ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
+          ) : error ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>{error}</Text></View>
+          ) : popularTracks.length === 0 ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
+          ) : (
+            <View style={styles.trackList}>
+              {popularTracks.map((t, i) => renderTrack(t, popularTracks, i === 0 ? 'Top' : undefined))}
+            </View>
+          )}
+          <View style={styles.rule} />
+
+          <SectionLabel title="Newest" />
+          {loading ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
+          ) : newestTracks.length === 0 ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
+          ) : (
+            <View style={styles.trackList}>
+              {newestTracks.map((t) => renderTrack(t, newestTracks, 'New'))}
+            </View>
+          )}
+
+          <TouchableOpacity style={styles.browseBtn} onPress={() => router.push('/categories')} activeOpacity={0.75}>
+            <Text style={styles.browseBtnText}>Browse all categories  →</Text>
           </TouchableOpacity>
-        ))}
+        </View>
       </View>
-      <View style={styles.rule} />
 
-      {/* Popular */}
-      <SectionLabel title="Popular" />
-      {loading ? (
-        <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
-      ) : error ? (
-        <View style={styles.empty}><Text style={styles.emptyText}>{error}</Text></View>
-      ) : popularTracks.length === 0 ? (
-        <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
-      ) : (
-        <View style={styles.trackList}>
-          {popularTracks.map((t, i) => renderTrack(t, popularTracks, i === 0 ? 'Top' : undefined))}
-        </View>
-      )}
-      <View style={styles.rule} />
-
-      {/* Newest */}
-      <SectionLabel title="Newest" />
-      {loading ? (
-        <View style={styles.empty}><Text style={styles.emptyText}>Attuning frequencies…</Text></View>
-      ) : newestTracks.length === 0 ? (
-        <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
-      ) : (
-        <View style={styles.trackList}>
-          {newestTracks.map((t) => renderTrack(t, newestTracks, 'New'))}
-        </View>
-      )}
-
-      <TouchableOpacity style={styles.browseBtn} onPress={() => router.push('/categories')} activeOpacity={0.75}>
-        <Text style={styles.browseBtnText}>Browse all categories  →</Text>
-      </TouchableOpacity>
       <View style={{ height: 48 }} />
     </ScrollView>
   );
@@ -249,4 +258,9 @@ const styles = StyleSheet.create({
 
   browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: 'rgba(212,168,40,0.04)' },
   browseBtnText: { fontSize: 11, color: C.goldBright, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '500' },
+
+  containerTablet: { paddingHorizontal: 40 },
+  tabletRow:       { flexDirection: 'row', gap: 24, alignItems: 'flex-start' },
+  tabletLeft:      { flex: 1 },
+  tabletRight:     { flex: 1 },
 });
