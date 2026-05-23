@@ -95,15 +95,10 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── Practitioner / Pro Mode ── */}
+      {/* ── Practitioner / Pro Mode — hidden from tab bar ── */}
       <Tabs.Screen
         name="practitioner"
-        options={{
-          title: 'Pro Mode',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="waveform.path.ecg" size={24} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
 
     </Tabs>
