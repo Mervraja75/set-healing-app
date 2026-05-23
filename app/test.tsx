@@ -558,14 +558,14 @@ export default function TestScreen() {
           {/* Transport */}
           <View style={styles.transport}>
             <TouchableOpacity style={[styles.skipBtn, !hasPrev && styles.skipBtnDisabled]} onPress={handlePrev} disabled={!hasPrev || isLoading} activeOpacity={0.75}>
-              <Text style={[styles.skipIcon, !hasPrev && styles.skipIconDisabled]}>⏮</Text>
+              <Text style={[styles.skipIcon, !hasPrev && styles.skipIconDisabled]}>‹‹</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.playBtn, isLoading && styles.playBtnDisabled]} onPress={handleToggle} disabled={isLoading} activeOpacity={0.82}>
               <Text style={styles.playBtnIcon}>{isLoading ? '◌' : isPlaying ? '■' : '▶'}</Text>
               <Text style={styles.playBtnText}>{isLoading ? 'Loading…' : isPlaying ? 'Stop' : 'Play'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.skipBtn, !hasNext && styles.skipBtnDisabled]} onPress={handleNext} disabled={!hasNext || isLoading} activeOpacity={0.75}>
-              <Text style={[styles.skipIcon, !hasNext && styles.skipIconDisabled]}>⏭</Text>
+              <Text style={[styles.skipIcon, !hasNext && styles.skipIconDisabled]}>››</Text>
             </TouchableOpacity>
           </View>
 
@@ -757,9 +757,9 @@ const styles = StyleSheet.create({
   transport:        { flexDirection: 'row', alignItems: 'center', gap: 20, marginBottom: 20 },
   skipBtn:          { width: 48, height: 48, borderRadius: 999, backgroundColor: C.bgCardDeep, borderWidth: 1, borderColor: C.borderGold, alignItems: 'center', justifyContent: 'center' },
   skipBtnDisabled:  { opacity: 0.3 },
-  skipIcon:         { fontSize: 18, color: C.goldBright },
+  skipIcon:         { fontSize: 20, color: C.goldBright, fontWeight: '600' },
   skipIconDisabled: { color: C.textDim },
-  playBtn:          { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.goldBright, paddingVertical: 16, paddingHorizontal: 36, borderRadius: 999, shadowColor: C.goldBright, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 6 },
+  playBtn:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, width: 200, backgroundColor: C.goldBright, paddingVertical: 16, borderRadius: 999, shadowColor: C.goldBright, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 6 },
   playBtnDisabled:  { opacity: 0.5 },
   playBtnIcon:      { fontSize: 15, color: C.bg, fontWeight: '800' },
   playBtnText:      { fontSize: 13, fontWeight: '700', color: C.bg, letterSpacing: 3, textTransform: 'uppercase' },
