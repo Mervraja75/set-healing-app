@@ -21,6 +21,8 @@ const MAPPING = {
   'sparkles': 'auto-awesome',
   'wind': 'air',
   'circle.hexagongrid.fill': 'hub',
+  'quote.bubble.fill': 'format-quote',
+  'square.grid.2x2.fill': 'grid-view',
 } as IconMapping;
 
 /**

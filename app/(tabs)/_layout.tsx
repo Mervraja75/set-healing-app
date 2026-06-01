@@ -1,6 +1,6 @@
 // =======================================
 // LAYOUT: Tabs (app/(tabs)/_layout.tsx)
-// Purpose: Bottom tab navigation
+// Purpose: Bottom tab navigation — 4 visible tabs
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
@@ -16,11 +16,11 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
    DESIGN TOKENS — match all screens
 ---------------------------------------- */
 const C = {
-  bg:          '#120828',
-  tabBar:      '#1A0A2E',
-  tabBorder:   'rgba(212, 168, 40, 0.15)',
-  active:      '#D4A828',   // gold — active tab
-  inactive:    '#4A2A6A',   // dim purple — inactive tab
+  bg:        '#120828',
+  tabBar:    '#1A0A2E',
+  tabBorder: 'rgba(212, 168, 40, 0.15)',
+  active:    '#D4A828',   // gold — active tab
+  inactive:  '#4A2A6A',   // dim purple — inactive tab
 };
 
 /* ---------------------------------------
@@ -62,23 +62,12 @@ export default function TabLayout() {
       }}
     >
 
-      {/* ── Profile ── */}
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="person.fill" size={22} color={color} />
-          ),
-        }}
-      />
-
       {/* ── Home ── */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <IconSymbol name="house.fill" size={24} color={color} />
           ),
         }}
@@ -89,50 +78,40 @@ export default function TabLayout() {
         name="healing"
         options={{
           title: 'Healing',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <IconSymbol name="waveform.path.ecg" size={24} color={color} />
           ),
         }}
       />
 
-      {/* ── Chakras ── */}
+      {/* ── Explore ── */}
       <Tabs.Screen
-        name="chakras"
+        name="explore"
         options={{
-          title: 'Chakras',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="circle.hexagongrid.fill" size={22} color={color} />
+          title: 'Explore',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="square.grid.2x2.fill" size={22} color={color} />
           ),
         }}
       />
 
-      {/* ── Breathwork ── */}
+      {/* ── Profile ── */}
       <Tabs.Screen
-        name="breathwork"
+        name="profile"
         options={{
-          title: 'Breathwork',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="wind" size={22} color={color} />
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="person.fill" size={22} color={color} />
           ),
         }}
       />
 
-      {/* ── Meditations ── */}
-      <Tabs.Screen
-        name="meditations"
-        options={{
-          title: 'Meditate',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="sparkles" size={22} color={color} />
-          ),
-        }}
-      />
-
-      {/* ── Practitioner / Pro Mode — hidden from tab bar ── */}
-      <Tabs.Screen
-        name="practitioner"
-        options={{ href: null }}
-      />
+      {/* ── Hidden screens — navigable but not in tab bar ── */}
+      <Tabs.Screen name="meditations"  options={{ href: null }} />
+      <Tabs.Screen name="breathwork"   options={{ href: null }} />
+      <Tabs.Screen name="chakras"      options={{ href: null }} />
+      <Tabs.Screen name="affirmations" options={{ href: null }} />
+      <Tabs.Screen name="practitioner" options={{ href: null }} />
 
     </Tabs>
   );
