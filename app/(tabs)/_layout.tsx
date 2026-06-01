@@ -95,6 +95,17 @@ export default function TabLayout() {
         }}
       />
 
+      {/* ── Meditations ── */}
+      <Tabs.Screen
+        name="meditations"
+        options={{
+          title: 'Meditate',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="sparkles" size={22} color={color} />
+          ),
+        }}
+      />
+
       {/* ── Practitioner / Pro Mode — hidden from tab bar ── */}
       <Tabs.Screen
         name="practitioner"
