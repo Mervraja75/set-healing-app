@@ -20,6 +20,7 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'sparkles': 'auto-awesome',
   'wind': 'air',
+  'circle.hexagongrid.fill': 'hub',
 } as IconMapping;
 
 /**

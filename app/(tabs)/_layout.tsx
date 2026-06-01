@@ -95,6 +95,17 @@ export default function TabLayout() {
         }}
       />
 
+      {/* ── Chakras ── */}
+      <Tabs.Screen
+        name="chakras"
+        options={{
+          title: 'Chakras',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="circle.hexagongrid.fill" size={22} color={color} />
+          ),
+        }}
+      />
+
       {/* ── Breathwork ── */}
       <Tabs.Screen
         name="breathwork"
