@@ -1,17 +1,28 @@
 // =======================================
 // ROOT LAYOUT (app/_layout.tsx)
 // Day 57 — Performance + dark theme fixes
+// Day 97 — Splash screen held until fonts/resources ready
 // =======================================
 
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { PlayerProvider } from '@/context/PlayerContext';
+
+/* ---------------------------------------
+   Keep the splash screen visible until
+   fonts and resources are fully loaded.
+   Must be called before any component renders.
+---------------------------------------- */
+SplashScreen.preventAutoHideAsync();
 
 /* ---------------------------------------
    SECTION B — Custom dark theme
@@ -35,6 +46,26 @@ const SET_THEME = {
    SECTION C — Root Layout Component
 ---------------------------------------- */
 export default function RootLayout() {
+  // useFonts returns true immediately when the map is empty,
+  // and will block here when custom fonts are added in future.
+  const [fontsLoaded] = useFonts({
+    // Custom fonts go here, e.g.:
+    // 'Cormorant-Light': require('../assets/fonts/Cormorant-Light.ttf'),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      // Hide the splash screen only after fonts (and any other
+      // async resources) are confirmed ready.
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  // Hold — splash screen is still covering the screen at this point.
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     // Force our custom dark theme — never switches to DefaultTheme
     <ThemeProvider value={SET_THEME}>
@@ -44,11 +75,10 @@ export default function RootLayout() {
           <Stack
             initialRouteName="(tabs)"
             screenOptions={{
-              // ── Day 57 fixes ──
-              headerShown:        false,         // hide all headers globally; screens control their own
-              contentStyle:       { backgroundColor: '#0A0616' }, // force bg on every screen
-              animation:          'fade',        // smoother than default slide on dark bg
-              animationDuration:  180,           // snappier transitions
+              headerShown:        false,         // screens control their own headers
+              contentStyle:       { backgroundColor: '#0A0616' },
+              animation:          'fade',
+              animationDuration:  180,
             }}
           >
 
@@ -119,8 +149,8 @@ export default function RootLayout() {
         </PlayerProvider>
       </AuthProvider>
 
-      {/* light — white icons on our dark bg */}
-      <StatusBar style="light" />
+      {/* Light icons on dark bg. backgroundColor targets Android status bar. */}
+      <StatusBar style="light" backgroundColor="#0A0616" />
     </ThemeProvider>
   );
 }
