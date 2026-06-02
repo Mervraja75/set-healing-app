@@ -1,6 +1,6 @@
 // =======================================
 // SCREEN: Explore (app/(tabs)/explore.tsx)
-// Day 91 — Grid hub for all content areas
+// Day 95 — Fixed 2-column square-card grid
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -57,7 +58,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'meditations',
     title: 'Meditations',
-    description: 'Guided journeys for deep healing and expanded awareness',
+    description: 'Guided journeys for deep healing',
     icon: '◈',
     color: '#7B3FA0',
     route: '/(tabs)/meditations',
@@ -65,7 +66,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'breathwork',
     title: 'Breathwork',
-    description: 'Conscious breathing techniques to regulate and restore',
+    description: 'Conscious breathing to regulate and restore',
     icon: '◎',
     color: '#3498DB',
     route: '/(tabs)/breathwork',
@@ -73,7 +74,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'chakras',
     title: 'Chakras',
-    description: 'Seven sacred energy centers with frequency sessions',
+    description: 'Seven energy centers with frequency sessions',
     icon: '◉',
     color: '#9B59B6',
     route: '/(tabs)/chakras',
@@ -81,7 +82,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'affirmations',
     title: 'Affirmations',
-    description: 'Sacred words that rewire the mind and open the heart',
+    description: 'Sacred words that rewire mind and heart',
     icon: '❝',
     color: '#C9A84C',
     route: '/(tabs)/affirmations',
@@ -89,7 +90,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'frequencies',
     title: 'Frequencies',
-    description: 'Binaural and vibroacoustic healing sound sessions',
+    description: 'Binaural and vibroacoustic sound sessions',
     icon: '◐',
     color: '#C9A84C',
     route: '/(tabs)/healing',
@@ -97,7 +98,7 @@ const ITEMS: ExploreItem[] = [
   {
     id: 'categories',
     title: 'Categories',
-    description: 'Browse all healing collections by sound and intention',
+    description: 'Browse all collections by intention',
     icon: '◫',
     color: '#27AE60',
     route: '/categories',
@@ -106,33 +107,40 @@ const ITEMS: ExploreItem[] = [
 
 /* ---------------------------------------
    SECTION C — Grid Card
+   size: exact pixel dimension (width = height)
 ---------------------------------------- */
-function ExploreCard({ item }: { item: ExploreItem }) {
+function ExploreCard({ item, size }: { item: ExploreItem; size: number }) {
   const router = useRouter();
 
   return (
     <TouchableOpacity
       activeOpacity={0.78}
       onPress={() => router.push(item.route as any)}
-      style={styles.card}
+      style={[styles.card, { width: size, height: size }]}
     >
-      {/* Top accent strip */}
+      {/* Colored top accent strip */}
       <View style={[styles.cardStrip, { backgroundColor: item.color }]} />
 
+      {/* Card body — icon top, text/arrow bottom */}
       <View style={styles.cardContent}>
+
         {/* Icon */}
-        <View style={[styles.iconWrap, { backgroundColor: item.color + '18', borderColor: item.color + '44' }]}>
+        <View style={[
+          styles.iconWrap,
+          { backgroundColor: item.color + '18', borderColor: item.color + '44' },
+        ]}>
           <Text style={[styles.iconText, { color: item.color }]}>{item.icon}</Text>
         </View>
 
-        {/* Text */}
-        <Text style={styles.cardTitle}>{item.title}</Text>
-        <Text style={styles.cardDesc}>{item.description}</Text>
-
-        {/* Arrow */}
-        <View style={styles.cardFooter}>
-          <Text style={[styles.cardArrow, { color: item.color }]}>→</Text>
+        {/* Bottom group */}
+        <View>
+          <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
+          <View style={styles.cardFooter}>
+            <Text style={[styles.cardArrow, { color: item.color }]}>→</Text>
+          </View>
         </View>
+
       </View>
     </TouchableOpacity>
   );
@@ -143,8 +151,16 @@ function ExploreCard({ item }: { item: ExploreItem }) {
 ---------------------------------------- */
 export default function ExploreScreen() {
   const { isTabletLandscape, isTabletPortrait } = useResponsive();
+  const { width: screenWidth } = useWindowDimensions();
 
-  const cardWidth = isTabletLandscape ? '31.5%' : '48.5%';
+  // Exact pixel card size: avoids the percentage + gap overflow bug in RN flex-wrap.
+  // Cards are square — same value used for both width and height.
+  const numCols  = isTabletLandscape ? 3 : 2;
+  const hPad     = isTabletLandscape ? 40 : isTabletPortrait ? 60 : 22;
+  const colGap   = 12;
+  const cardSize = Math.floor(
+    (screenWidth - hPad * 2 - colGap * (numCols - 1)) / numCols
+  );
 
   return (
     <ScrollView
@@ -179,12 +195,10 @@ export default function ExploreScreen() {
         <View style={styles.sectionLabelLine} />
       </View>
 
-      {/* Grid */}
+      {/* Grid — pixel-sized cards eliminate the percentage + gap overflow */}
       <View style={styles.grid}>
         {ITEMS.map((item) => (
-          <View key={item.id} style={{ width: cardWidth }}>
-            <ExploreCard item={item} />
-          </View>
+          <ExploreCard key={item.id} item={item} size={cardSize} />
         ))}
       </View>
 
@@ -280,6 +294,8 @@ const styles = StyleSheet.create({
   },
 
   // ── Grid ──
+  // gap: 12 works correctly here because children have explicit pixel widths,
+  // not percentages — so the gap never causes overflow-wrap.
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -287,55 +303,55 @@ const styles = StyleSheet.create({
   },
 
   // ── Card ──
+  // width + height injected as inline style from cardSize calculation
   card: {
     backgroundColor: C.bgCardDeep,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: C.borderGold,
     overflow: 'hidden',
-    minHeight: 180,
   },
   cardStrip: {
     height: 3,
     opacity: 0.85,
   },
+  // space-between pushes icon to top and text group to bottom
   cardContent: {
     flex: 1,
-    padding: 18,
-    gap: 8,
+    padding: 14,
+    justifyContent: 'space-between',
   },
   iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
   },
   iconText: {
-    fontSize: 22,
-    lineHeight: 26,
+    fontSize: 20,
+    lineHeight: 24,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: C.textBright,
     letterSpacing: 0.1,
+    marginBottom: 3,
   },
   cardDesc: {
-    fontSize: 11,
+    fontSize: 10,
     color: C.textMuted,
     fontWeight: '300',
-    lineHeight: 17,
-    flex: 1,
+    lineHeight: 15,
+    marginBottom: 4,
   },
   cardFooter: {
     alignItems: 'flex-end',
-    marginTop: 4,
   },
   cardArrow: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

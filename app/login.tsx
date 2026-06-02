@@ -1,5 +1,6 @@
 // =======================================
 // SCREEN: Login (app/login.tsx)
+// Day 95 — Apple Sign In + Google Sign In
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
@@ -11,14 +12,17 @@ import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { useAuth } from '@/context/AuthContext';
+import { signInWithApple, signInWithGoogle } from '@/services/AuthService';
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -49,17 +53,63 @@ const C = {
    SECTION B — Component
 ---------------------------------------- */
 export default function LoginScreen() {
-  const router = useRouter();
-  const auth   = useAuth();
+  const router  = useRouter();
+  const authCtx = useAuth();
 
+  // Email form state (unchanged)
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [focused,  setFocused]  = useState<'email' | 'password' | null>(null);
 
+  // Social auth state
+  const [loadingApple,  setLoadingApple]  = useState(false);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [error,         setError]         = useState<string | null>(null);
+
+  /* ── Existing email login (unchanged logic) ── */
   const handleLogin = () => {
-    auth.login(email.trim());
+    setError(null);
+    authCtx.login(email.trim());
     router.replace('/(tabs)');
   };
+
+  /* ── Apple Sign In ── */
+  const handleAppleSignIn = async () => {
+    try {
+      setLoadingApple(true);
+      setError(null);
+      const result = await signInWithApple();
+      authCtx.login(result.user.email ?? '');
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      if (e?.code !== 'ERR_REQUEST_CANCELED') {
+        setError('Apple Sign In failed. Please try again.');
+      }
+    } finally {
+      setLoadingApple(false);
+    }
+  };
+
+  /* ── Google Sign In ── */
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoadingGoogle(true);
+      setError(null);
+      const result = await signInWithGoogle();
+      authCtx.login(result.user.email ?? '');
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      const cancelled =
+        e?.code === 'SIGN_IN_CANCELLED' || e?.code === 'ERR_REQUEST_CANCELED';
+      if (!cancelled) {
+        setError('Google Sign In failed. Please try again.');
+      }
+    } finally {
+      setLoadingGoogle(false);
+    }
+  };
+
+  const anyLoading = loadingApple || loadingGoogle;
 
   return (
     <KeyboardAvoidingView
@@ -70,7 +120,11 @@ export default function LoginScreen() {
       <View style={styles.glowTop} />
       <View style={styles.glowBottom} />
 
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
 
         {/* ── Logo / wordmark ── */}
         <View style={styles.logoWrap}>
@@ -81,7 +135,52 @@ export default function LoginScreen() {
 
         <View style={styles.goldRule} />
 
-        {/* ── Form card ── */}
+        {/* ── Social sign-in section ── */}
+
+        {/* Error message */}
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
+        {/* Apple — iOS only */}
+        {Platform.OS === 'ios' && (
+          <View
+            style={[styles.appleBtnWrap, loadingApple && styles.btnDimmed]}
+            pointerEvents={anyLoading ? 'none' : 'auto'}
+          >
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={99}
+              style={styles.appleBtn}
+              onPress={handleAppleSignIn}
+            />
+          </View>
+        )}
+
+        {/* Google */}
+        <TouchableOpacity
+          style={[styles.googleBtn, loadingGoogle && styles.btnDimmed]}
+          onPress={handleGoogleSignIn}
+          disabled={anyLoading}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.googleLogo}>G</Text>
+          <Text style={styles.googleBtnText}>
+            {loadingGoogle ? 'Signing in…' : 'Sign in with Google'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Divider — or continue with email */}
+        <View style={styles.socialDividerRow}>
+          <View style={styles.socialDividerLine} />
+          <Text style={styles.socialDividerText}>or continue with email</Text>
+          <View style={styles.socialDividerLine} />
+        </View>
+
+        {/* ── Form card (unchanged) ── */}
         <View style={styles.formCard}>
           <View style={styles.formCardGlow} />
 
@@ -158,7 +257,8 @@ export default function LoginScreen() {
           Sound Energy Therapy · Healing Through Frequency
         </Text>
 
-      </View>
+        <View style={{ height: 32 }} />
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -172,7 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.bg,
   },
 
-  // Glows
+  // Glows (absolute, behind scroll content)
   glowTop: {
     position: 'absolute',
     top: -80,
@@ -192,16 +292,19 @@ const styles = StyleSheet.create({
     backgroundColor: C.glowPurple,
   },
 
-  container: {
-    flex: 1,
+  // ScrollView content
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 26,
+    paddingTop: 60,
+    paddingBottom: 24,
   },
 
   // Logo
   logoWrap: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   logoMark: {
     fontSize: 56,
@@ -229,11 +332,94 @@ const styles = StyleSheet.create({
   goldRule: {
     height: 1,
     backgroundColor: C.borderGold,
-    marginVertical: 24,
+    marginVertical: 20,
     marginHorizontal: 20,
   },
 
-  // Form card
+  // ── Social sign-in ──────────────────
+
+  // Error
+  errorBox: {
+    backgroundColor: 'rgba(220, 50, 50, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(220, 50, 50, 0.25)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 14,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#FF6B6B',
+    fontWeight: '400',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
+  // Shared dimming for loading state
+  btnDimmed: {
+    opacity: 0.5,
+  },
+
+  // Apple (iOS native button)
+  appleBtnWrap: {
+    marginBottom: 12,
+  },
+  appleBtn: {
+    height: 52,
+    width: '100%',
+  },
+
+  // Google
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 99,
+    paddingVertical: 15,
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  googleLogo: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#4285F4',
+    lineHeight: 22,
+  },
+  googleBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F1F1F',
+    letterSpacing: 0.2,
+  },
+
+  // "or continue with email" divider
+  socialDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
+  socialDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: C.borderPurple,
+  },
+  socialDividerText: {
+    fontSize: 10,
+    color: C.textDim,
+    letterSpacing: 1,
+    fontWeight: '300',
+  },
+
+  // ── Form card (unchanged) ───────────
+
   formCard: {
     backgroundColor: C.bgCardDeep,
     borderRadius: 28,
@@ -317,7 +503,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  // Divider
+  // Divider (inside form card)
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
