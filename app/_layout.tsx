@@ -98,6 +98,22 @@ export default function RootLayout() {
               }}
             />
 
+            {/* Legal screens */}
+            <Stack.Screen
+              name="privacy"
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="terms"
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
+            />
+
           </Stack>
 
         </PlayerProvider>

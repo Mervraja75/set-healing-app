@@ -161,6 +161,30 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      {/* ── Legal ── */}
+      <View style={styles.legalSection}>
+        <View style={styles.legalLabelRow}>
+          <View style={styles.legalLabelLine} />
+          <Text style={styles.legalLabelText}>Legal</Text>
+          <View style={styles.legalLabelLine} />
+        </View>
+        <View style={styles.legalCard}>
+          <Link href="/privacy" asChild>
+            <TouchableOpacity style={styles.legalRow} activeOpacity={0.72}>
+              <Text style={styles.legalRowText}>Privacy Policy</Text>
+              <Text style={styles.legalRowArrow}>›</Text>
+            </TouchableOpacity>
+          </Link>
+          <View style={styles.legalDivider} />
+          <Link href="/terms" asChild>
+            <TouchableOpacity style={styles.legalRow} activeOpacity={0.72}>
+              <Text style={styles.legalRowText}>Terms of Service</Text>
+              <Text style={styles.legalRowArrow}>›</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+      </View>
+
       {/* Footer */}
       <View style={styles.footer}>
         <View style={styles.footerLine} />
@@ -459,6 +483,59 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '400',
     letterSpacing: 1,
+  },
+
+  // Legal section
+  legalSection: {
+    marginBottom: 24,
+  },
+  legalLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  legalLabelLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: C.borderPurple,
+  },
+  legalLabelText: {
+    fontSize: 9,
+    letterSpacing: 5,
+    textTransform: 'uppercase',
+    color: C.textMuted,
+    fontWeight: '400',
+  },
+  legalCard: {
+    backgroundColor: C.bgCardDeep,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: C.borderPurple,
+    overflow: 'hidden',
+  },
+  legalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+  },
+  legalRowText: {
+    fontSize: 14,
+    color: C.textMid,
+    fontWeight: '400',
+    letterSpacing: 0.2,
+  },
+  legalRowArrow: {
+    fontSize: 20,
+    color: C.textDim,
+    fontWeight: '300',
+  },
+  legalDivider: {
+    height: 1,
+    backgroundColor: C.borderPurple,
+    marginHorizontal: 18,
   },
 
   // Footer
