@@ -16,10 +16,10 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
    DESIGN TOKENS — match all screens
 ---------------------------------------- */
 const C = {
-  bg:        '#120828',
+  bg:        '#0A0616',
   tabBar:    '#1A0A2E',
-  tabBorder: 'rgba(212, 168, 40, 0.15)',
-  active:    '#D4A828',   // gold — active tab
+  tabBorder: 'rgba(201, 168, 76, 0.15)',
+  active:    '#C9A84C',   // gold — active tab
   inactive:  '#4A2A6A',   // dim purple — inactive tab
 };
 

@@ -19,12 +19,12 @@ import { useResponsive } from '@/hooks/useResponsive';
    DESIGN TOKENS
 ---------------------------------------- */
 const C = {
-  bg:           '#120828',
-  bgCard:       '#1E0A30',
-  bgCardDeep:   '#250D3D',
-  bgHero:       '#2D0F50',
+  bg:           '#0A0616',
+  bgCard:       '#1A0D2E',
+  bgCardDeep:   '#160A28',
+  bgHero:       '#1E0A3C',
 
-  goldBright:   '#D4A828',
+  goldBright:   '#C9A84C',
   goldMid:      '#C8920A',
 
   textBright:   '#FFFFFF',
@@ -32,10 +32,10 @@ const C = {
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   'rgba(201, 168, 76, 0.15)',
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(212, 168, 40, 0.08)',
+  glowGold:     'rgba(201, 168, 76, 0.08)',
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 
   aurora:       '#7EFFD4',
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(212,168,40,0.2)',
+    borderColor: 'rgba(201,168,76,0.2)',
   },
   avatarRing2: {
     position: 'absolute',
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(212,168,40,0.10)',
+    borderColor: 'rgba(201,168,76,0.10)',
   },
   title: {
     fontSize: 28,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   statusPillGuest: {
-    backgroundColor: 'rgba(212,168,40,0.08)',
+    backgroundColor: 'rgba(201,168,76,0.08)',
     borderColor: C.borderGold,
   },
   statusDot: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 999,
-    backgroundColor: 'rgba(212,168,40,0.08)',
+    backgroundColor: 'rgba(201,168,76,0.08)',
   },
   upgradeBadgeRow: {
     flexDirection: 'row',
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     paddingVertical: 15,
     alignItems: 'center',
-    backgroundColor: 'rgba(212,168,40,0.04)',
+    backgroundColor: 'rgba(201,168,76,0.04)',
   },
   ghostBtnText: {
     color: C.goldBright,

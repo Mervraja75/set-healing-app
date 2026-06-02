@@ -26,12 +26,12 @@ import { collection, getDocs } from 'firebase/firestore';
    DESIGN TOKENS
 ---------------------------------------- */
 const C = {
-  bg:           '#120828',
-  bgCard:       '#1E0A30',
-  bgCardDeep:   '#250D3D',
-  bgHero:       '#2D0F50',
+  bg:           '#0A0616',
+  bgCard:       '#1A0D2E',
+  bgCardDeep:   '#160A28',
+  bgHero:       '#1E0A3C',
 
-  goldBright:   '#D4A828',
+  goldBright:   '#C9A84C',
   goldMid:      '#C8920A',
 
   textBright:   '#FFFFFF',
@@ -39,10 +39,10 @@ const C = {
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   'rgba(201, 168, 76, 0.15)',
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(212, 168, 40, 0.08)',
+  glowGold:     'rgba(201, 168, 76, 0.08)',
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 };
 
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     color: C.goldBright,
   },
   trackCountBadge: {
-    backgroundColor: 'rgba(212,168,40,0.10)',
+    backgroundColor: 'rgba(201,168,76,0.10)',
     borderWidth: 1,
     borderColor: C.borderGold,
     borderRadius: 99,

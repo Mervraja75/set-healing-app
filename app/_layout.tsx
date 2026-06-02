@@ -22,12 +22,12 @@ const SET_THEME = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background:   '#120828',   // matches C.bg across all screens
+    background:   '#0A0616',   // matches C.bg across all screens
     card:         '#1A0A2E',   // tab bar + header bg
     text:         '#FFFFFF',
-    border:       'rgba(212, 168, 40, 0.15)',
-    notification: '#D4A828',
-    primary:      '#D4A828',
+    border:       'rgba(201, 168, 76, 0.15)',
+    notification: '#C9A84C',
+    primary:      '#C9A84C',
   },
 };
 
@@ -46,7 +46,7 @@ export default function RootLayout() {
             screenOptions={{
               // ── Day 57 fixes ──
               headerShown:        false,         // hide all headers globally; screens control their own
-              contentStyle:       { backgroundColor: '#120828' }, // force bg on every screen
+              contentStyle:       { backgroundColor: '#0A0616' }, // force bg on every screen
               animation:          'fade',        // smoother than default slide on dark bg
               animationDuration:  180,           // snappier transitions
             }}

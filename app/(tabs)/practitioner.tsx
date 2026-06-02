@@ -25,19 +25,19 @@ import ControlCard from '../../components/ControlCard';
    DESIGN TOKENS
 ---------------------------------------- */
 const C = {
-  bg:           '#120828',
-  bgCard:       '#1E0A30',
-  bgCardDeep:   '#250D3D',
-  bgHero:       '#2D0F50',
-  goldBright:   '#D4A828',
+  bg:           '#0A0616',
+  bgCard:       '#1A0D2E',
+  bgCardDeep:   '#160A28',
+  bgHero:       '#1E0A3C',
+  goldBright:   '#C9A84C',
   goldMid:      '#C8920A',
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   'rgba(201, 168, 76, 0.15)',
   borderPurple: 'rgba(180, 140, 255, 0.10)',
-  glowGold:     'rgba(212, 168, 40, 0.08)',
+  glowGold:     'rgba(201, 168, 76, 0.08)',
   glowPurple:   'rgba(100, 50, 180, 0.15)',
   aurora:       '#7EFFD4',
 };
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   glowBottom: { position: 'absolute', top: 500, left: -80, width: 200, height: 200, borderRadius: 999, backgroundColor: C.glowPurple },
 
   header: { alignItems: 'center', marginBottom: 20 },
-  proBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 14, backgroundColor: 'rgba(212,168,40,0.08)', borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 6, paddingHorizontal: 16 },
+  proBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 14, backgroundColor: 'rgba(201,168,76,0.08)', borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 6, paddingHorizontal: 16 },
   proBadgeDot: { width: 5, height: 5, borderRadius: 999, backgroundColor: C.goldBright },
   proBadgeText: { fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', color: C.goldBright, fontWeight: '600' },
   title:       { fontSize: 40, fontWeight: '800', color: C.textBright, letterSpacing: -1, lineHeight: 42 },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   goldRule: { height: 1, backgroundColor: C.borderGold, marginVertical: 20, marginHorizontal: 20 },
 
   statusCard:     { backgroundColor: C.bgHero, borderRadius: 24, padding: 24, marginBottom: 28, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
-  statusCardGlow: { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: 'rgba(212,168,40,0.07)' },
+  statusCardGlow: { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: 'rgba(201,168,76,0.07)' },
   statusTopRow:   { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 18 },
   statusActiveDot:{ width: 7, height: 7, borderRadius: 999, backgroundColor: C.aurora },
   statusActiveText:{ fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', color: C.aurora, fontWeight: '500' },
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
 
   presetRow:            { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 20, paddingBottom: 8 },
   presetChip:           { backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderPurple, borderRadius: 99, paddingVertical: 7, paddingHorizontal: 14 },
-  presetChipActive:     { backgroundColor: 'rgba(212,168,40,0.10)', borderColor: C.borderGold },
+  presetChipActive:     { backgroundColor: 'rgba(201,168,76,0.10)', borderColor: C.borderGold },
   presetChipText:       { fontSize: 11, color: C.textDim, fontWeight: '500', letterSpacing: 0.5 },
   presetChipTextActive: { color: C.goldBright },
 
