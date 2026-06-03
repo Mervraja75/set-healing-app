@@ -267,11 +267,11 @@ export default function HealingScreen() {
                         ) : null}
                       </View>
                       <Text style={styles.collectionDesc}>{displayDesc}</Text>
-                      <Text style={styles.collectionLatest}>
-                        {latestTrack
-                          ? `Latest: ${latestTrack.title}`
-                          : 'No uploaded tracks yet'}
-                      </Text>
+                      {latestTrack && (
+                        <Text style={styles.collectionLatest}>
+                          Latest: {latestTrack.title}
+                        </Text>
+                      )}
                     </View>
                     <Text style={styles.collectionArrow}>›</Text>
                   </View>

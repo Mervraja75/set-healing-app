@@ -14,9 +14,11 @@
       "buildNumber": "1",
       "infoPlist": {
         "UIBackgroundModes": [
+          "audio",
           "audio"
         ],
-        "NSMicrophoneUsageDescription": "SET Healing uses audio to deliver healing frequency sessions."
+        "NSMicrophoneUsageDescription": "SET Healing uses audio to deliver healing frequency sessions.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
