@@ -4,8 +4,9 @@
 // =======================================
 
 import { useAuth } from '@/context/AuthContext';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import {
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -45,8 +46,10 @@ const C = {
    COMPONENT
 ---------------------------------------- */
 export default function ProfileScreen() {
-  const { isGuest, continueAsGuest } = useAuth();
+  const { isGuest, continueAsGuest, userRole } = useAuth();
   const { isTablet, isTabletPortrait, spacing } = useResponsive();
+  const router = useRouter();
+  const isAdmin = userRole === 'admin';
 
   return (
     <ScrollView
@@ -83,6 +86,14 @@ export default function ProfileScreen() {
             {isGuest ? 'Guest mode' : 'Signed in'}
           </Text>
         </View>
+
+        {/* Admin gold badge — visible for admin role only */}
+        {isAdmin && (
+          <View style={styles.adminBadge}>
+            <Text style={styles.adminBadgeStar}>★</Text>
+            <Text style={styles.adminBadgeText}>Admin</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.goldRule} />
@@ -160,6 +171,39 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* ── Admin actions — visible for admin role only ── */}
+      {isAdmin && (
+        <View style={styles.adminSection}>
+          <View style={styles.adminSectionLabelRow}>
+            <View style={styles.adminSectionLine} />
+            <Text style={styles.adminSectionLabelText}>Admin</Text>
+            <View style={styles.adminSectionLine} />
+          </View>
+
+          {/* Practitioner Mode */}
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Open Practitioner Mode"
+            style={styles.adminPractitionerBtn}
+            onPress={() => router.push('/(tabs)/practitioner')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.adminPractitionerBtnText}>Practitioner Mode  ›</Text>
+          </TouchableOpacity>
+
+          {/* Admin Dashboard */}
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Open Admin Dashboard"
+            style={styles.adminDashBtn}
+            onPress={() => Linking.openURL('https://set-healing-admin.vercel.app')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.adminDashBtnText}>Admin Dashboard  →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* ── Legal ── */}
       <View style={styles.legalSection}>
@@ -556,5 +600,88 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     textTransform: 'uppercase',
     fontWeight: '300',
+  },
+
+  // Admin badge (in header, next to status pill)
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 10,
+    backgroundColor: 'rgba(201,168,76,0.12)',
+    borderWidth: 1,
+    borderColor: C.goldBright,
+    borderRadius: 99,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+  },
+  adminBadgeStar: {
+    fontSize: 11,
+    color: C.goldBright,
+    lineHeight: 14,
+  },
+  adminBadgeText: {
+    fontSize: 10,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+    color: C.goldBright,
+    fontWeight: '700',
+  },
+
+  // Admin section (above Legal)
+  adminSection: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  adminSectionLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 4,
+  },
+  adminSectionLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: C.borderGold,
+  },
+  adminSectionLabelText: {
+    fontSize: 9,
+    letterSpacing: 5,
+    textTransform: 'uppercase',
+    color: C.goldBright,
+    fontWeight: '500',
+  },
+  adminPractitionerBtn: {
+    backgroundColor: 'rgba(201,168,76,0.10)',
+    borderWidth: 1,
+    borderColor: C.goldBright,
+    borderRadius: 99,
+    paddingVertical: 16,
+    alignItems: 'center',
+    shadowColor: C.goldBright,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  adminPractitionerBtnText: {
+    color: C.goldBright,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 2,
+  },
+  adminDashBtn: {
+    borderWidth: 1,
+    borderColor: C.borderGold,
+    borderRadius: 99,
+    paddingVertical: 15,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  adminDashBtnText: {
+    color: C.textMid,
+    fontSize: 13,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
 });

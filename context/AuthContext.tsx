@@ -1,37 +1,53 @@
 // =======================================
 // AuthContext.tsx
-// Handles guest vs authenticated user state (UI-only for now)
+// Handles guest vs authenticated user state
+// Day 99.1 — Role-based access control
 // =======================================
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { getAuth, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { app } from '@/lib/firebase';
+import { getUserRole } from '@/services/UserService';
+
+const auth = getAuth(app);
 
 /* ---------------------------------------
    SECTION 1 — Types
-   Define what this context exposes
 ---------------------------------------- */
 
-// SECTION 1A — User model (UI-only)
-// ✅ Later: this can mirror your Firebase user/doc shape
+// SECTION 1A — Role type
+export type UserRole = 'guest' | 'customer' | 'admin';
+
+// SECTION 1B — User model
 export type AuthUser = {
   name: string;
   email: string;
 };
 
-// SECTION 1B — Context API (what screens can call)
+// SECTION 1C — Context API
 type AuthContextType = {
-  // SECTION 1B1 — Session flags
+  // SECTION 1C1 — Session flags
   isGuest: boolean;
   user: AuthUser | null;
 
-  // SECTION 1B2 — Guest flow
+  // SECTION 1C2 — Role
+  userRole: UserRole;
+
+  // SECTION 1C3 — Guest flow
   continueAsGuest: () => void;
 
-  // SECTION 1B3 — Auth flows (UI-only now, real backend later)
+  // SECTION 1C4 — Auth flows
   login: (email: string) => void;
   register: (name: string, email: string) => void;
   logout: () => void;
 
-  // SECTION 1B4 — Premium flags (UI-only now)
+  // SECTION 1C5 — Premium flags
   isPro: boolean;
   upgradeToPro: () => void;
 };
@@ -42,74 +58,85 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /* ---------------------------------------
-   SECTION 3 — Provider component
-   Wraps the app and holds auth state
+   SECTION 3 — Provider
 ---------------------------------------- */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+
   /* -------------------------------------
      SECTION 3A — State
-     ✅ This is the “single source of truth”
   -------------------------------------- */
+  const [user,     setUser]     = useState<AuthUser | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>('guest');
+  const [isPro,    setIsPro]    = useState(false);
 
-  // SECTION 3A1 — Who is the user?
-  const [user, setUser] = useState<AuthUser | null>(null);
-
-  // SECTION 3A2 — Guest flag (derived from user)
-  // ✅ Keep explicit flag to make UI logic super obvious
   const isGuest = !user;
 
-  // SECTION 3A3 — Premium flag (UI-only)
-  const [isPro, setIsPro] = useState(false);
+  /* -------------------------------------
+     SECTION 3B — Firebase Auth listener
+     Handles Apple / Google sign-ins and
+     restores persisted sessions on launch.
+     Role is fetched from Firestore after
+     the Firebase user is confirmed.
+  -------------------------------------- */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) return;
+      setUser({
+        name:  firebaseUser.displayName ?? 'Member',
+        email: firebaseUser.email ?? '',
+      });
+      const role = await getUserRole(firebaseUser.uid);
+      setUserRole(role);
+    });
+    return unsubscribe;
+  }, []);
 
   /* -------------------------------------
      SECTION 4 — Actions
-     Functions that modify auth state
   -------------------------------------- */
 
   // SECTION 4A — Guest mode
   const continueAsGuest = () => {
     setUser(null);
-    setIsPro(false); // optional: reset premium when switching to guest
-  };
-
-  // SECTION 4B — Login (UI-only)
-  // ✅ Later: replace internals with Firebase Auth signInWithEmailAndPassword
-  const login = (email: string) => {
-    // UI-only placeholder user
-    setUser({
-      name: 'Member',
-      email,
-    });
-  };
-
-  // SECTION 4C — Register (UI-only)
-  // ✅ Later: replace internals with Firebase Auth createUserWithEmailAndPassword + Firestore user doc
-  const register = (name: string, email: string) => {
-    setUser({
-      name,
-      email,
-    });
-  };
-
-  // SECTION 4D — Logout
-  const logout = () => {
-    setUser(null);
+    setUserRole('guest');
     setIsPro(false);
   };
 
-  // SECTION 4E — Upgrade to Pro (UI-only)
-  const upgradeToPro = () => {
-    setIsPro(true);
+  // SECTION 4B — UI-only email login
+  // Role defaults to 'customer'; Firebase Auth listener may
+  // override with 'admin' if the user also has a live session.
+  const login = (email: string) => {
+    setUser({ name: 'Member', email });
+    setUserRole('customer');
   };
+
+  // SECTION 4C — Register (UI-only)
+  const register = (name: string, email: string) => {
+    setUser({ name, email });
+    setUserRole('customer');
+  };
+
+  // SECTION 4D — Logout
+  // Signs out from Firebase Auth so Apple/Google sessions are
+  // cleared, then resets all local state.
+  const logout = () => {
+    setUser(null);
+    setUserRole('guest');
+    setIsPro(false);
+    firebaseSignOut(auth).catch(() => {});
+  };
+
+  // SECTION 4E — Upgrade to Pro
+  const upgradeToPro = () => setIsPro(true);
 
   /* -------------------------------------
      SECTION 5 — Memoized context value
-     What gets exposed to the app
   -------------------------------------- */
   const value = useMemo(
     () => ({
       isGuest,
       user,
+      userRole,
       continueAsGuest,
       login,
       register,
@@ -117,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isPro,
       upgradeToPro,
     }),
-    [isGuest, user, isPro]
+    [isGuest, user, userRole, isPro]
   );
 
   /* -------------------------------------
@@ -128,7 +155,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 /* ---------------------------------------
    SECTION 7 — Hook
-   Used by screens/components
 ---------------------------------------- */
 export function useAuth() {
   const ctx = useContext(AuthContext);
