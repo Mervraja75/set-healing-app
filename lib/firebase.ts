@@ -4,6 +4,7 @@
 // =======================================
 
 import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,
@@ -11,6 +12,7 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 /* ---------------------------------------
    SECTION A — Config
@@ -34,7 +36,17 @@ export const app = getApps().length
   : initializeApp(firebaseConfig);
 
 /* ---------------------------------------
-   SECTION C — Firestore with local cache
+   SECTION C — Auth with AsyncStorage persistence
+   Avoids the "no persistence" warning on React Native
+---------------------------------------- */
+export const auth = getApps().length > 1
+  ? getAuth(app)
+  : initializeAuth(app, {
+      persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+    });
+
+/* ---------------------------------------
+   SECTION D — Firestore with local cache
    Day 57: persistentLocalCache means tracks
    load instantly on repeat visits even
    without a network connection.
@@ -56,12 +68,12 @@ try {
 export const db = _db;
 
 /* ---------------------------------------
-   SECTION D — Storage
+   SECTION E — Storage
 ---------------------------------------- */
 export const storage = getStorage(app);
 
 /* ---------------------------------------
-   SECTION E — Dev guard
+   SECTION F — Dev guard
    Warns if env vars are missing so you
    catch config errors early
 ---------------------------------------- */
