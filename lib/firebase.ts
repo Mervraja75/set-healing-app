@@ -4,7 +4,7 @@
 // =======================================
 
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,
@@ -12,7 +12,6 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 /* ---------------------------------------
    SECTION A — Config
@@ -36,14 +35,9 @@ export const app = getApps().length
   : initializeApp(firebaseConfig);
 
 /* ---------------------------------------
-   SECTION C — Auth with AsyncStorage persistence
-   Avoids the "no persistence" warning on React Native
+   SECTION C — Auth
 ---------------------------------------- */
-export const auth = getApps().length > 1
-  ? getAuth(app)
-  : initializeAuth(app, {
-      persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-    });
+export const auth = getAuth(app);
 
 /* ---------------------------------------
    SECTION D — Firestore with local cache

@@ -9,6 +9,7 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -17,7 +18,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 
 /* ---------------------------------------
@@ -46,24 +49,54 @@ const C = {
 };
 
 /* ---------------------------------------
+   SECTION B1 — Firebase error helper
+---------------------------------------- */
+function firebaseErrorMessage(code: string | undefined): string {
+  switch (code) {
+    case 'auth/email-already-in-use':   return 'That email is already registered. Try signing in instead.';
+    case 'auth/invalid-email':           return 'Please enter a valid email address.';
+    case 'auth/weak-password':           return 'Password must be at least 6 characters.';
+    case 'auth/network-request-failed':  return 'Network error. Check your connection and try again.';
+    default:                             return 'Something went wrong. Please try again.';
+  }
+}
+
+/* ---------------------------------------
    SECTION B — Component
 ---------------------------------------- */
 export default function RegisterScreen() {
-  const router = useRouter();
-  const auth   = useAuth();
+  const router  = useRouter();
+  const authCtx = useAuth();
 
   const [name,     setName]     = useState('');
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [focused,  setFocused]  = useState<'name' | 'email' | 'password' | null>(null);
+  const [loading,  setLoading]  = useState(false);
 
   const canRegister =
     name.trim() !== '' &&
     email.trim() !== '' &&
     password.trim() !== '';
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    console.log('[Register] handleRegister called', { email: email.trim(), hasPassword: !!password });
     if (!canRegister) return;
+
+    setLoading(true);
+    try {
+      console.log('[Register] Calling createUserWithEmailAndPassword...');
+      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      console.log('[Register] Account created successfully — navigating to tabs');
+      authCtx.register(name.trim(), email.trim());
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      console.log('[Register] Error:', e?.code, e?.message);
+      const msg = firebaseErrorMessage(e?.code);
+      Alert.alert('Registration Failed', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -142,12 +175,14 @@ export default function RegisterScreen() {
 
           {/* Register button */}
           <TouchableOpacity
-            style={[styles.registerBtn, !canRegister && styles.registerBtnDisabled]}
+            style={[styles.registerBtn, (!canRegister || loading) && styles.registerBtnDisabled]}
             onPress={handleRegister}
-            disabled={!canRegister}
+            disabled={!canRegister || loading}
             activeOpacity={0.85}
           >
-            <Text style={styles.registerBtnText}>Create Account</Text>
+            <Text style={styles.registerBtnText}>
+              {loading ? 'Creating Account…' : 'Create Account'}
+            </Text>
           </TouchableOpacity>
 
           {/* Divider */}
