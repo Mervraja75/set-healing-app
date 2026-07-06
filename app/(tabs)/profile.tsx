@@ -46,7 +46,7 @@ const C = {
    COMPONENT
 ---------------------------------------- */
 export default function ProfileScreen() {
-  const { isGuest, continueAsGuest, userRole } = useAuth();
+  const { isGuest, continueAsGuest, userRole, user, logout } = useAuth();
   const { isTablet, isTabletPortrait, spacing } = useResponsive();
   const router = useRouter();
   const isAdmin = userRole === 'admin';
@@ -98,79 +98,96 @@ export default function ProfileScreen() {
 
       <View style={styles.goldRule} />
 
-      {/* ── Upgrade card ── */}
-      <Link href="/paywall" asChild>
-        <TouchableOpacity style={styles.upgradeCard} activeOpacity={0.85}>
-          <View style={styles.upgradeCardGlow} />
-          <View style={styles.upgradeBadgeRow}>
-            <View style={styles.upgradeBadgeDot} />
-            <Text style={styles.upgradeBadgeText}>Premium</Text>
-          </View>
-          <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
-          <Text style={styles.upgradeBody}>
-            Unlock premium collections, save favourites, and track your
-            healing progress.
-          </Text>
-          <View style={styles.upgradeBtn}>
-            <Text style={styles.upgradeBtnText}>Unlock Pro  →</Text>
-          </View>
-        </TouchableOpacity>
-      </Link>
-
-      {/* ── Info card ── */}
-      <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>Why create an account?</Text>
-        {[
-          'Save your favourite sounds',
-          'Resume your last session',
-          'Track your healing habits',
-        ].map((item) => (
-          <View key={item} style={styles.infoRow}>
-            <View style={styles.infoRowDot} />
-            <Text style={styles.infoRowText}>{item}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* ── Actions ── */}
-      <View style={styles.actions}>
-        {/* Log In — primary gold */}
-        <Link href="/login" asChild>
+      {isAdmin ? (
+        /* ── Admin: email + sign out ── */
+        <View style={styles.adminInfoCard}>
+          <Text style={styles.adminEmailLabel}>Signed in as</Text>
+          <Text style={styles.adminEmail}>{user?.email}</Text>
           <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Log in to your account"
-            style={styles.primaryBtn}
+            style={styles.signOutBtn}
+            onPress={logout}
             activeOpacity={0.85}
           >
-            <Text style={styles.primaryBtnText}>Log In</Text>
+            <Text style={styles.signOutBtnText}>Sign Out</Text>
           </TouchableOpacity>
-        </Link>
+        </View>
+      ) : (
+        <>
+          {/* ── Upgrade card ── */}
+          <Link href="/paywall" asChild>
+            <TouchableOpacity style={styles.upgradeCard} activeOpacity={0.85}>
+              <View style={styles.upgradeCardGlow} />
+              <View style={styles.upgradeBadgeRow}>
+                <View style={styles.upgradeBadgeDot} />
+                <Text style={styles.upgradeBadgeText}>Premium</Text>
+              </View>
+              <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
+              <Text style={styles.upgradeBody}>
+                Unlock premium collections, save favourites, and track your
+                healing progress.
+              </Text>
+              <View style={styles.upgradeBtn}>
+                <Text style={styles.upgradeBtnText}>Unlock Pro  →</Text>
+              </View>
+            </TouchableOpacity>
+          </Link>
 
-        {/* Create Account — ghost gold */}
-        <Link href="/register" asChild>
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Create a new account"
-            style={styles.ghostBtn}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.ghostBtnText}>Create Account</Text>
-          </TouchableOpacity>
-        </Link>
+          {/* ── Info card ── */}
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Why create an account?</Text>
+            {[
+              'Save your favourite sounds',
+              'Resume your last session',
+              'Track your healing habits',
+            ].map((item) => (
+              <View key={item} style={styles.infoRow}>
+                <View style={styles.infoRowDot} />
+                <Text style={styles.infoRowText}>{item}</Text>
+              </View>
+            ))}
+          </View>
 
-        {/* Continue as Guest — dim, only shown when guest */}
-        {isGuest && (
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Continue as guest"
-            style={styles.guestBtn}
-            onPress={continueAsGuest}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.guestBtnText}>Continue as Guest</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          {/* ── Actions ── */}
+          <View style={styles.actions}>
+            {/* Log In — primary gold */}
+            <Link href="/login" asChild>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Log in to your account"
+                style={styles.primaryBtn}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.primaryBtnText}>Log In</Text>
+              </TouchableOpacity>
+            </Link>
+
+            {/* Create Account — ghost gold */}
+            <Link href="/register" asChild>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Create a new account"
+                style={styles.ghostBtn}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.ghostBtnText}>Create Account</Text>
+              </TouchableOpacity>
+            </Link>
+
+            {/* Continue as Guest — dim, only shown when guest */}
+            {isGuest && (
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Continue as guest"
+                style={styles.guestBtn}
+                onPress={continueAsGuest}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.guestBtnText}>Continue as Guest</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
+      )}
 
       {/* ── Admin actions — visible for admin role only ── */}
       {isAdmin && (
@@ -682,6 +699,45 @@ const styles = StyleSheet.create({
     color: C.textMid,
     fontSize: 13,
     fontWeight: '500',
+    letterSpacing: 1,
+  },
+
+  // Admin info card (email + sign out)
+  adminInfoCard: {
+    backgroundColor: C.bgCardDeep,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: C.borderGold,
+    alignItems: 'center',
+    marginBottom: 24,
+    gap: 6,
+  },
+  adminEmailLabel: {
+    fontSize: 9,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+    color: C.textDim,
+    fontWeight: '400',
+  },
+  adminEmail: {
+    fontSize: 15,
+    color: C.textBright,
+    fontWeight: '400',
+    marginBottom: 16,
+  },
+  signOutBtn: {
+    borderWidth: 1,
+    borderColor: 'rgba(220, 80, 80, 0.4)',
+    borderRadius: 99,
+    paddingVertical: 13,
+    paddingHorizontal: 36,
+    backgroundColor: 'rgba(220, 80, 80, 0.08)',
+  },
+  signOutBtnText: {
+    color: '#FF6B6B',
+    fontSize: 13,
+    fontWeight: '600',
     letterSpacing: 1,
   },
 });
