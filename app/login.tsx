@@ -21,6 +21,8 @@ import {
 } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { signInWithApple, signInWithGoogle } from '@/services/AuthService';
 
@@ -62,15 +64,38 @@ export default function LoginScreen() {
   const [focused,  setFocused]  = useState<'email' | 'password' | null>(null);
 
   // Social auth state
+  const [loadingEmail,  setLoadingEmail]  = useState(false);
   const [loadingApple,  setLoadingApple]  = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error,         setError]         = useState<string | null>(null);
 
-  /* ── Existing email login (unchanged logic) ── */
-  const handleLogin = () => {
-    setError(null);
-    authCtx.login(email.trim());
-    router.replace('/(tabs)');
+  /* ── Email / password sign-in via Firebase Auth ── */
+  const handleLogin = async () => {
+    try {
+      setError(null);
+      setLoadingEmail(true);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      // onAuthStateChanged in AuthContext handles setUser + role fetch
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      switch (e?.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          setError('Invalid email or password.');
+          break;
+        case 'auth/invalid-email':
+          setError('Please enter a valid email address.');
+          break;
+        case 'auth/too-many-requests':
+          setError('Too many attempts. Please try again later.');
+          break;
+        default:
+          setError('Sign in failed. Please try again.');
+      }
+    } finally {
+      setLoadingEmail(false);
+    }
   };
 
   /* ── Apple Sign In ── */
@@ -109,7 +134,7 @@ export default function LoginScreen() {
     }
   };
 
-  const anyLoading = loadingApple || loadingGoogle;
+  const anyLoading = loadingEmail || loadingApple || loadingGoogle;
 
   return (
     <KeyboardAvoidingView
@@ -228,11 +253,14 @@ export default function LoginScreen() {
 
           {/* Login button */}
           <TouchableOpacity
-            style={styles.loginBtn}
+            style={[styles.loginBtn, loadingEmail && styles.btnDimmed]}
             onPress={handleLogin}
+            disabled={anyLoading}
             activeOpacity={0.85}
           >
-            <Text style={styles.loginBtnText}>Sign In</Text>
+            <Text style={styles.loginBtnText}>
+              {loadingEmail ? 'Signing in…' : 'Sign In'}
+            </Text>
           </TouchableOpacity>
 
           {/* Divider */}

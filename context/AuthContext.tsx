@@ -80,12 +80,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   -------------------------------------- */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) return;
+      console.log('[AuthContext] onAuthStateChanged fired — firebaseUser:', firebaseUser ? 'signed in' : 'null');
+
+      if (!firebaseUser) {
+        console.log('[AuthContext] No Firebase user — staying as guest');
+        return;
+      }
+
+      console.log('[AuthContext] Firebase uid:', firebaseUser.uid);
+      console.log('[AuthContext] Firebase email:', firebaseUser.email);
+
       setUser({
         name:  firebaseUser.displayName ?? 'Member',
         email: firebaseUser.email ?? '',
       });
+
       const role = await getUserRole(firebaseUser.uid);
+      console.log('[AuthContext] Role returned from getUserRole:', role);
       setUserRole(role);
     });
     return unsubscribe;

@@ -15,7 +15,11 @@ export type UserRole = 'admin' | 'customer';
    otherwise defaults to 'customer'.
 ────────────────────────────────────────*/
 export async function getUserRole(uid: string): Promise<UserRole> {
+  console.log('[UserService] getUserRole — querying users/' + uid);
   const snap = await getDoc(doc(db, 'users', uid));
+  console.log('[UserService] Document exists:', snap.exists());
+  console.log('[UserService] Document data:', snap.exists() ? snap.data() : 'none');
+  console.log('[UserService] role field:', snap.exists() ? snap.data().role : 'none');
   if (snap.exists() && snap.data().role === 'admin') return 'admin';
   return 'customer';
 }
