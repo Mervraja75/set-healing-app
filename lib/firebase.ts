@@ -3,9 +3,9 @@
 // Day 57 — Performance & reliability fixes
 // =======================================
 
-import { getApp, getApps, initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getReactNativePersistence, initializeAuth } from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,

@@ -7,15 +7,18 @@
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { PlayerProvider } from '@/context/PlayerContext';
+
+const ONBOARDING_KEY = 'onboarding_complete';
 
 /* ---------------------------------------
    Keep the splash screen visible until
@@ -46,6 +49,8 @@ const SET_THEME = {
    SECTION C — Root Layout Component
 ---------------------------------------- */
 export default function RootLayout() {
+  const router = useRouter();
+
   // useFonts returns true immediately when the map is empty,
   // and will block here when custom fonts are added in future.
   const [fontsLoaded] = useFonts({
@@ -53,16 +58,30 @@ export default function RootLayout() {
     // 'Cormorant-Light': require('../assets/fonts/Cormorant-Light.ttf'),
   });
 
+  // Day 100 — first-launch onboarding check
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
   useEffect(() => {
-    if (fontsLoaded) {
-      // Hide the splash screen only after fonts (and any other
-      // async resources) are confirmed ready.
+    AsyncStorage.getItem(ONBOARDING_KEY).then((value) => {
+      setNeedsOnboarding(value !== 'true');
+      setOnboardingChecked(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && onboardingChecked) {
+      // Hide the splash screen only after fonts and the onboarding
+      // check (and any other async resources) are confirmed ready.
       SplashScreen.hideAsync();
+      if (needsOnboarding) {
+        router.replace('/onboarding');
+      }
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, onboardingChecked, needsOnboarding, router]);
 
   // Hold — splash screen is still covering the screen at this point.
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !onboardingChecked) {
     return null;
   }
 
@@ -85,6 +104,12 @@ export default function RootLayout() {
             {/* Main tabs */}
             <Stack.Screen
               name="(tabs)"
+              options={{ headerShown: false }}
+            />
+
+            {/* Onboarding — first launch only */}
+            <Stack.Screen
+              name="onboarding"
               options={{ headerShown: false }}
             />
 
