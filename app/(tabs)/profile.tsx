@@ -3,6 +3,7 @@
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
+import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import { Link, useRouter } from 'expo-router';
@@ -10,12 +11,28 @@ import {
   Linking,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import { cancelAllNotifications, scheduleMeditationReminder } from '@/services/NotificationService';
+
+/* ---------------------------------------
+   NOTIFICATION PRESETS
+---------------------------------------- */
+const NOTIF_ENABLED_KEY = 'notifications_enabled';
+const NOTIF_PRESET_KEY  = 'notifications_preset';
+
+type PresetKey = 'morning' | 'afternoon' | 'evening';
+
+const PRESETS: Record<PresetKey, { label: string; time: string; hour: number; minute: number }> = {
+  morning:   { label: 'Morning',   time: '8:00 AM', hour: 8,  minute: 0 },
+  afternoon: { label: 'Afternoon', time: '2:00 PM', hour: 14, minute: 0 },
+  evening:   { label: 'Evening',   time: '8:00 PM', hour: 20, minute: 0 },
+};
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -56,6 +73,44 @@ export default function ProfileScreen() {
   const handlePreviewOnboarding = async () => {
     await AsyncStorage.removeItem('onboarding_complete');
     router.replace('/onboarding');
+  };
+
+  /* -------------------------------------
+     Day 101 — Notification preferences
+  -------------------------------------- */
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<PresetKey>('morning');
+
+  useEffect(() => {
+    (async () => {
+      const [enabled, preset] = await Promise.all([
+        AsyncStorage.getItem(NOTIF_ENABLED_KEY),
+        AsyncStorage.getItem(NOTIF_PRESET_KEY),
+      ]);
+      setNotificationsEnabled(enabled === 'true');
+      if (preset === 'morning' || preset === 'afternoon' || preset === 'evening') {
+        setSelectedPreset(preset);
+      }
+    })();
+  }, []);
+
+  const handleToggleNotifications = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    await AsyncStorage.setItem(NOTIF_ENABLED_KEY, value ? 'true' : 'false');
+    await cancelAllNotifications();
+    if (value) {
+      const preset = PRESETS[selectedPreset];
+      await scheduleMeditationReminder(preset.hour, preset.minute);
+    }
+  };
+
+  const handleSelectPreset = async (key: PresetKey) => {
+    setSelectedPreset(key);
+    await AsyncStorage.setItem(NOTIF_PRESET_KEY, key);
+    if (notificationsEnabled) {
+      await cancelAllNotifications();
+      await scheduleMeditationReminder(PRESETS[key].hour, PRESETS[key].minute);
+    }
   };
 
   return (
@@ -194,6 +249,60 @@ export default function ProfileScreen() {
             )}
           </View>
         </>
+      )}
+
+      {/* ── Notifications — visible for all logged-in users ── */}
+      {!isGuest && (
+        <View style={styles.notifSection}>
+          <View style={styles.adminSectionLabelRow}>
+            <View style={styles.adminSectionLine} />
+            <Text style={styles.adminSectionLabelText}>Notifications</Text>
+            <View style={styles.adminSectionLine} />
+          </View>
+
+          <View style={styles.notifCard}>
+            <View style={styles.notifToggleRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.notifToggleTitle}>Daily Healing Reminder</Text>
+                <Text style={styles.notifToggleSubtitle}>
+                  Get a gentle nudge to return to your practice.
+                </Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={handleToggleNotifications}
+                trackColor={{ false: C.borderPurple, true: C.goldMid }}
+                thumbColor={notificationsEnabled ? C.goldBright : '#8A7CA8'}
+              />
+            </View>
+
+            {notificationsEnabled && (
+              <View style={styles.presetRow}>
+                {(Object.keys(PRESETS) as PresetKey[]).map((key) => {
+                  const preset = PRESETS[key];
+                  const active = selectedPreset === key;
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${preset.label} reminder at ${preset.time}`}
+                      style={[styles.presetPill, active && styles.presetPillActive]}
+                      onPress={() => handleSelectPreset(key)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.presetPillLabel, active && styles.presetPillLabelActive]}>
+                        {preset.label}
+                      </Text>
+                      <Text style={[styles.presetPillTime, active && styles.presetPillTimeActive]}>
+                        {preset.time}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        </View>
       )}
 
       {/* ── Admin actions — visible for admin role only ── */}
@@ -735,6 +844,71 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     letterSpacing: 1,
+  },
+
+  // Notifications section
+  notifSection: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  notifCard: {
+    backgroundColor: C.bgCardDeep,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: C.borderPurple,
+  },
+  notifToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  notifToggleTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: C.textBright,
+    marginBottom: 4,
+  },
+  notifToggleSubtitle: {
+    fontSize: 12,
+    color: C.textMuted,
+    fontWeight: '300',
+    lineHeight: 17,
+  },
+  presetRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+  },
+  presetPill: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: C.borderPurple,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  presetPillActive: {
+    borderColor: C.goldBright,
+    backgroundColor: 'rgba(201,168,76,0.10)',
+  },
+  presetPillLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: C.textMid,
+    marginBottom: 2,
+  },
+  presetPillLabelActive: {
+    color: C.goldBright,
+  },
+  presetPillTime: {
+    fontSize: 11,
+    fontWeight: '300',
+    color: C.textDim,
+  },
+  presetPillTimeActive: {
+    color: C.goldMid,
   },
 
   // Admin info card (email + sign out)

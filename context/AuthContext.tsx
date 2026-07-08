@@ -14,6 +14,7 @@ import React, {
 import { getAuth, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { getUserRole } from '@/services/UserService';
+import { registerForPushNotifications } from '@/services/NotificationService';
 
 const auth = getAuth(app);
 
@@ -98,6 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const role = await getUserRole(firebaseUser.uid);
       console.log('[AuthContext] Role returned from getUserRole:', role);
       setUserRole(role);
+
+      registerForPushNotifications();
     });
     return unsubscribe;
   }, []);
