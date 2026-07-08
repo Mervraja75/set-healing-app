@@ -177,6 +177,7 @@ export default function TestScreen() {
   const [isLooping,     setIsLooping]    = useState(false);
   const [position,      setPosition]     = useState(0);
   const [duration,      setDuration]     = useState(1);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
 
   const [bassRate,      setBassRate]     = useState(0.88);
   const [bassPresetId,  setBassPresetId] = useState('natural');
@@ -253,6 +254,7 @@ export default function TestScreen() {
     let main: Audio.Sound | null = null;
     let bass: Audio.Sound | null = null;
     try {
+      setPlaybackError(null);
       const source = getSource(sound, audioUrl);
 
       ({ sound: main } = await Audio.Sound.createAsync(source, {
@@ -298,6 +300,7 @@ export default function TestScreen() {
         try { await bass.unloadAsync(); } catch {}
       }
       await frequencyEngine.stop().catch(() => {});
+      setPlaybackError(audioUrl ? 'This session could not be loaded. Check your connection and try again.' : 'No audio available for this session.');
       setIsPlaying(false);
       setIsLoading(false);
     }
@@ -310,6 +313,7 @@ export default function TestScreen() {
     const newId = currentTrack?.id ?? null;
     if (newId && newId !== prevTrackId.current) {
       prevTrackId.current = newId;
+      setPlaybackError(null);
       if (isPlaying) {
         (async () => {
           setIsLoading(true);
@@ -539,6 +543,16 @@ export default function TestScreen() {
             )}
           </View>
 
+          {/* Playback error — friendly message + retry */}
+          {playbackError && (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{playbackError}</Text>
+              <TouchableOpacity style={styles.errorRetryBtn} onPress={startPlayback} activeOpacity={0.8}>
+                <Text style={styles.errorRetryBtnText}>Try Again</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Progress */}
           <View style={[
             styles.progressWrap,
@@ -746,6 +760,11 @@ const styles = StyleSheet.create({
   freqActiveBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   freqActiveDot:   { width: 5, height: 5, borderRadius: 999 },
   freqActiveText:  { fontSize: 10, letterSpacing: 2, fontWeight: '500' },
+
+  errorBox:          { width: '100%', maxWidth: 340, backgroundColor: 'rgba(220, 80, 80, 0.08)', borderWidth: 1, borderColor: 'rgba(220, 80, 80, 0.3)', borderRadius: 16, padding: 16, alignItems: 'center', marginBottom: 20, gap: 10 },
+  errorText:         { fontSize: 12, color: '#FF9B9B', fontWeight: '400', lineHeight: 18, textAlign: 'center' },
+  errorRetryBtn:     { borderWidth: 1, borderColor: 'rgba(220, 80, 80, 0.4)', borderRadius: 99, paddingVertical: 9, paddingHorizontal: 22 },
+  errorRetryBtnText: { fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: '#FF9B9B', fontWeight: '600' },
 
   progressWrap:  { width: '100%', maxWidth: 340, marginBottom: 28 },
   progressTrack: { height: 3, backgroundColor: C.bgCardDeep, borderRadius: 999, overflow: 'visible', position: 'relative' },

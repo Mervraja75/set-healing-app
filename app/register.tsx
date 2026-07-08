@@ -22,6 +22,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import BackButton from '@/components/BackButton';
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -107,6 +108,10 @@ export default function RegisterScreen() {
       {/* Ambient glows */}
       <View style={styles.glowTop} />
       <View style={styles.glowBottom} />
+
+      <View style={styles.topBar}>
+        <BackButton />
+      </View>
 
       <View style={styles.container}>
 
@@ -219,6 +224,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: C.bg,
+  },
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
   },
 
   glowTop: {

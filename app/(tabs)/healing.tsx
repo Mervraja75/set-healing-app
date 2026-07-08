@@ -6,7 +6,7 @@
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ScrollView,
@@ -106,12 +106,16 @@ const groupTracksByCategory = (tracks: Track[]) => {
    SECTION E — Screen Component
 ---------------------------------------- */
 export default function HealingScreen() {
-  const { setLastCategory } = usePlayer();
+  const { setLastCategory, setPlaylist } = usePlayer();
   const { isTablet, isTabletLandscape, isTabletPortrait } = useResponsive();
+  const router = useRouter();
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+
+  const [reloadKey, setReloadKey] = useState(0);
+  const handleRetry = () => setReloadKey((k) => k + 1);
 
   useEffect(() => {
     let mounted = true;
@@ -134,26 +138,31 @@ export default function HealingScreen() {
     };
     loadTracks();
     return () => { mounted = false; };
-  }, []);
+  }, [reloadKey]);
 
   const groupedTracks = useMemo(() => groupTracksByCategory(tracks), [tracks]);
   const featuredTrack = groupedTracks.sleep?.[0] ?? tracks[0] ?? null;
 
+  const playTrack = (id: string, title: string, description: string, sound: string, audioUrl?: string) => {
+    setPlaylist([{ id, title, description, sound, audioUrl }], 0);
+    router.push('/test');
+  };
+
   const renderPlayerLink = (
+    id: string,
     title: string,
     description: string,
     sound: string,
     audioUrl?: string
   ) => (
-    <Link
-      href={{ pathname: '/test', params: { title, description, sound, audioUrl } }}
-      asChild
+    <TouchableOpacity
+      style={styles.featuredBtn}
+      activeOpacity={0.85}
+      onPress={() => playTrack(id, title, description, sound, audioUrl)}
     >
-      <TouchableOpacity style={styles.featuredBtn} activeOpacity={0.85}>
-        <Text style={styles.featuredBtnIcon}>▶</Text>
-        <Text style={styles.featuredBtnText}>Play Session</Text>
-      </TouchableOpacity>
-    </Link>
+      <Text style={styles.featuredBtnIcon}>▶</Text>
+      <Text style={styles.featuredBtnText}>Play Session</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -193,6 +202,9 @@ export default function HealingScreen() {
           ) : error ? (
             <View style={styles.stateBox}>
               <Text style={styles.stateText}>{error}</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={handleRetry} activeOpacity={0.8}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.featuredCard}>
@@ -216,6 +228,7 @@ export default function HealingScreen() {
                   </Link>
                 ) : (
                   renderPlayerLink(
+                    featuredTrack.id,
                     featuredTrack.title,
                     featuredTrack.description ?? FEATURED_FALLBACK.description,
                     featuredTrack.category,
@@ -224,6 +237,7 @@ export default function HealingScreen() {
                 )
               ) : (
                 renderPlayerLink(
+                  FEATURED_FALLBACK.id,
                   FEATURED_FALLBACK.title,
                   FEATURED_FALLBACK.description,
                   FEATURED_FALLBACK.sound
@@ -283,20 +297,15 @@ export default function HealingScreen() {
                   <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
                 </Link>
               ) : (
-                <Link
-                  href={{
-                    pathname: '/test',
-                    params: {
-                      title: displayTitle,
-                      description: displayDesc,
-                      sound: soundKey,
-                      audioUrl: latestTrack?.url,
-                    },
+                <TouchableOpacity
+                  activeOpacity={0.78}
+                  onPress={() => {
+                    setLastCategory(item.title);
+                    playTrack(latestTrack?.id ?? item.id, displayTitle, displayDesc, soundKey, latestTrack?.url);
                   }}
-                  asChild
                 >
-                  <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
-                </Link>
+                  {Card}
+                </TouchableOpacity>
               );
 
               return (
@@ -392,6 +401,22 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     letterSpacing: 2,
     fontWeight: '300',
+  },
+  retryBtn: {
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: C.borderGold,
+    borderRadius: 99,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    backgroundColor: 'rgba(201,168,76,0.06)',
+  },
+  retryBtnText: {
+    fontSize: 11,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: C.goldBright,
+    fontWeight: '600',
   },
 
   featuredCard: {

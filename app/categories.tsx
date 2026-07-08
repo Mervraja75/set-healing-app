@@ -6,7 +6,7 @@
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
@@ -85,12 +85,16 @@ const getTrackSortValue = (track: Track) => track.createdAt?.seconds ?? 0;
    SECTION E — Screen Component
 ---------------------------------------- */
 export default function CategoriesScreen() {
-  const { setLastCategory } = usePlayer();
+  const { setLastCategory, setPlaylist } = usePlayer();
   const { isTabletPortrait } = useResponsive();
+  const router = useRouter();
 
   const [tracks, setTracks]   = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+
+  const [reloadKey, setReloadKey] = useState(0);
+  const handleRetry = () => setReloadKey((k) => k + 1);
 
   useEffect(() => {
     let mounted = true;
@@ -113,7 +117,7 @@ export default function CategoriesScreen() {
     };
     loadTracks();
     return () => { mounted = false; };
-  }, []);
+  }, [reloadKey]);
 
   const tracksByCategory = useMemo(() => {
     const grouped: Record<string, Track[]> = {};
@@ -155,6 +159,9 @@ export default function CategoriesScreen() {
       ) : error ? (
         <View style={styles.stateBox}>
           <Text style={styles.stateText}>{error}</Text>
+          <Pressable style={styles.retryBtn} onPress={handleRetry}>
+            <Text style={styles.retryBtnText}>Try Again</Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -170,66 +177,60 @@ export default function CategoriesScreen() {
           const targetAudio  = latestTrack?.url;
 
           return (
-            <Link
+            <Pressable
               key={category.id}
-              href={{
-                pathname: '/test',
-                params: {
-                  title: targetTitle,
-                  description: targetDesc,
-                  sound: category.id,
-                  audioUrl: targetAudio,
-                },
+              style={({ pressed }) => [
+                styles.categoryCard,
+                pressed && styles.categoryCardPressed,
+              ]}
+              onPress={() => {
+                setLastCategory(category.title);
+                setPlaylist(
+                  [{ id: latestTrack?.id ?? category.id, title: targetTitle, description: targetDesc, sound: category.id, audioUrl: targetAudio }],
+                  0
+                );
+                router.push('/test');
               }}
-              asChild
+              accessibilityRole="button"
+              accessibilityLabel={`${category.title}. ${targetDesc}`}
             >
-              <Pressable
-                style={({ pressed }) => [
-                  styles.categoryCard,
-                  pressed && styles.categoryCardPressed,
-                ]}
-                onPress={() => setLastCategory(category.title)}
-                accessibilityRole="button"
-                accessibilityLabel={`${category.title}. ${targetDesc}`}
-              >
-                {/* Gold top bar */}
-                <View style={styles.categoryCardBar} />
+              {/* Gold top bar */}
+              <View style={styles.categoryCardBar} />
 
-                <View style={[styles.categoryCardInner, isTabletPortrait && styles.categoryCardInnerTabletP]}>
-                  {/* Left: icon + track count */}
-                  <View style={styles.categoryLeft}>
-                    <View style={styles.categoryIconWrap}>
-                      <Text style={styles.categoryIcon}>{category.icon}</Text>
-                    </View>
-                    <View style={styles.trackCountBadge}>
-                      <Text style={styles.trackCountText}>
-                        {trackCount > 0
-                          ? `${trackCount} track${trackCount === 1 ? '' : 's'}`
-                          : 'No tracks'}
-                      </Text>
-                    </View>
+              <View style={[styles.categoryCardInner, isTabletPortrait && styles.categoryCardInnerTabletP]}>
+                {/* Left: icon + track count */}
+                <View style={styles.categoryLeft}>
+                  <View style={styles.categoryIconWrap}>
+                    <Text style={styles.categoryIcon}>{category.icon}</Text>
                   </View>
-
-                  {/* Middle: text */}
-                  <View style={styles.categoryTextBlock}>
-                    <Text style={[styles.categoryTitle, isTabletPortrait && styles.categoryTitleTabletP]}>{category.title}</Text>
-                    <Text style={styles.categoryDesc}>{targetDesc}</Text>
-                    {latestTrack ? (
-                      <Text style={styles.categoryLatest}>
-                        Latest: {latestTrack.title}
-                      </Text>
-                    ) : (
-                      <Text style={styles.categoryLatest}>
-                        No uploaded tracks yet
-                      </Text>
-                    )}
+                  <View style={styles.trackCountBadge}>
+                    <Text style={styles.trackCountText}>
+                      {trackCount > 0
+                        ? `${trackCount} track${trackCount === 1 ? '' : 's'}`
+                        : 'No tracks'}
+                    </Text>
                   </View>
-
-                  {/* Right: arrow */}
-                  <Text style={styles.categoryArrow}>›</Text>
                 </View>
-              </Pressable>
-            </Link>
+
+                {/* Middle: text */}
+                <View style={styles.categoryTextBlock}>
+                  <Text style={[styles.categoryTitle, isTabletPortrait && styles.categoryTitleTabletP]}>{category.title}</Text>
+                  <Text style={styles.categoryDesc}>{targetDesc}</Text>
+                  {latestTrack ? (
+                    <Text style={styles.categoryLatest}>
+                      Latest: {latestTrack.title}
+                    </Text>
+                  ) : (
+                    <Text style={styles.categoryLatest}>
+                      No uploaded tracks yet
+                    </Text>
+                  )}
+                </View>
+
+                {/* Right: arrow */}
+                <Text style={styles.categoryArrow}>›</Text>
+              </View>
+            </Pressable>
           );
         })}
       </View>
@@ -328,6 +329,22 @@ const styles = StyleSheet.create({
     color: C.textMuted,
     letterSpacing: 2,
     fontWeight: '300',
+  },
+  retryBtn: {
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: C.borderGold,
+    borderRadius: 99,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    backgroundColor: 'rgba(201,168,76,0.06)',
+  },
+  retryBtnText: {
+    fontSize: 11,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: C.goldBright,
+    fontWeight: '600',
   },
 
   // Category list

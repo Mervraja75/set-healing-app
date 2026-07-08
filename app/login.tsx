@@ -25,6 +25,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { signInWithApple, signInWithGoogle } from '@/services/AuthService';
+import BackButton from '@/components/BackButton';
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -144,6 +145,10 @@ export default function LoginScreen() {
       {/* Ambient glows */}
       <View style={styles.glowTop} />
       <View style={styles.glowBottom} />
+
+      <View style={styles.topBar}>
+        <BackButton />
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -298,6 +303,12 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: C.bg,
+  },
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
   },
 
   // Glows (absolute, behind scroll content)

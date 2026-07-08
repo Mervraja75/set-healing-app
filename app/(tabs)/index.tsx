@@ -63,11 +63,15 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
 
+  const [reloadKey, setReloadKey] = useState(0);
+  const handleRetry = () => setReloadKey((k) => k + 1);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         setLoading(true);
+        setError(null);
         const snap  = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc'), limit(10)));
         const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Track, 'id'>) }));
         if (mounted) setTracks(items);
@@ -75,7 +79,7 @@ export default function HomeScreen() {
       finally   { if (mounted) setLoading(false); }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [reloadKey]);
 
   const popularTracks = useMemo(() => {
     const pref = tracks.filter((t) => t.category === 'sleep' || t.category === 'focus');
@@ -188,7 +192,12 @@ export default function HomeScreen() {
               ))}
             </View>
           ) : error ? (
-            <View style={styles.empty}><Text style={styles.emptyText}>{error}</Text></View>
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>{error}</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={handleRetry} activeOpacity={0.8}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </TouchableOpacity>
+            </View>
           ) : popularTracks.length === 0 ? (
             <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
           ) : (
@@ -210,6 +219,13 @@ export default function HomeScreen() {
                   </View>
                 </View>
               ))}
+            </View>
+          ) : error ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>{error}</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={handleRetry} activeOpacity={0.8}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </TouchableOpacity>
             </View>
           ) : newestTracks.length === 0 ? (
             <View style={styles.empty}><Text style={styles.emptyText}>No tracks yet.</Text></View>
@@ -277,6 +293,8 @@ const styles = StyleSheet.create({
 
   empty:     { backgroundColor: C.bgCardDeep, borderRadius: 18, padding: 24, borderWidth: 1, borderColor: C.borderPurple, alignItems: 'center', marginBottom: 20 },
   emptyText: { fontSize: 12, color: C.textMuted, letterSpacing: 2, fontWeight: '300' },
+  retryBtn:     { marginTop: 14, borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 10, paddingHorizontal: 22, backgroundColor: 'rgba(201,168,76,0.06)' },
+  retryBtnText: { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: C.goldBright, fontWeight: '600' },
 
   browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: 'rgba(201,168,76,0.04)' },
   browseBtnText: { fontSize: 11, color: C.goldBright, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '500' },
