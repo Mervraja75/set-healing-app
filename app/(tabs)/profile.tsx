@@ -3,6 +3,7 @@
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import { Link, useRouter } from 'expo-router';
 import {
@@ -50,6 +51,12 @@ export default function ProfileScreen() {
   const { isTablet, isTabletPortrait, spacing } = useResponsive();
   const router = useRouter();
   const isAdmin = userRole === 'admin';
+
+  // TEMP — Day 100: lets admins re-trigger the onboarding flow for testing.
+  const handlePreviewOnboarding = async () => {
+    await AsyncStorage.removeItem('onboarding_complete');
+    router.replace('/onboarding');
+  };
 
   return (
     <ScrollView
@@ -218,6 +225,17 @@ export default function ProfileScreen() {
             activeOpacity={0.85}
           >
             <Text style={styles.adminDashBtnText}>Admin Dashboard  →</Text>
+          </TouchableOpacity>
+
+          {/* Preview Onboarding — TEMP dev tool, admin-only */}
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Preview onboarding flow"
+            style={styles.previewOnboardingBtn}
+            onPress={handlePreviewOnboarding}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.previewOnboardingBtnText}>Preview Onboarding</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -698,6 +716,23 @@ const styles = StyleSheet.create({
   adminDashBtnText: {
     color: C.textMid,
     fontSize: 13,
+    fontWeight: '500',
+    letterSpacing: 1,
+  },
+
+  // Preview Onboarding — TEMP dev tool, admin-only
+  previewOnboardingBtn: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: C.textDim,
+    borderRadius: 99,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  previewOnboardingBtnText: {
+    color: C.textDim,
+    fontSize: 12,
     fontWeight: '500',
     letterSpacing: 1,
   },
