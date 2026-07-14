@@ -124,10 +124,11 @@ export default function TabLayout() {
       />
 
       {/* ── Hidden screens — navigable but not in tab bar ── */}
-      <Tabs.Screen name="meditations"  options={{ href: null }} />
-      <Tabs.Screen name="breathwork"   options={{ href: null }} />
-      <Tabs.Screen name="chakras"      options={{ href: null }} />
-      <Tabs.Screen name="affirmations" options={{ href: null }} />
+      <Tabs.Screen name="meditations"   options={{ href: null }} />
+      <Tabs.Screen name="breathwork"    options={{ href: null }} />
+      <Tabs.Screen name="chakras"       options={{ href: null }} />
+      <Tabs.Screen name="affirmations"  options={{ href: null }} />
+      <Tabs.Screen name="healing-music" options={{ href: null }} />
 
     </Tabs>
   );

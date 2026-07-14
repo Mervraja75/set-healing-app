@@ -96,6 +96,14 @@ const ITEMS: ExploreItem[] = [
     route: '/(tabs)/healing',
   },
   {
+    id: 'healing-music',
+    title: 'Healing Music',
+    description: 'Original compositions for restoration',
+    icon: '♪',
+    color: '#E84393',
+    route: '/(tabs)/healing-music',
+  },
+  {
     id: 'categories',
     title: 'Categories',
     description: 'Browse all collections by intention',
