@@ -23,6 +23,9 @@ const MAPPING = {
   'circle.hexagongrid.fill': 'hub',
   'quote.bubble.fill': 'format-quote',
   'square.grid.2x2.fill': 'grid-view',
+  'mountain.2.fill': 'terrain',
+  'drop.fill': 'water-drop',
+  'flame.fill': 'local-fire-department',
 } as IconMapping;
 
 /**

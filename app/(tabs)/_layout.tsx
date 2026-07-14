@@ -129,6 +129,7 @@ export default function TabLayout() {
       <Tabs.Screen name="chakras"       options={{ href: null }} />
       <Tabs.Screen name="affirmations"  options={{ href: null }} />
       <Tabs.Screen name="healing-music" options={{ href: null }} />
+      <Tabs.Screen name="elements"      options={{ href: null }} />
 
     </Tabs>
   );

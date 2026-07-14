@@ -104,6 +104,14 @@ const ITEMS: ExploreItem[] = [
     route: '/(tabs)/healing-music',
   },
   {
+    id: 'elements',
+    title: 'Elements',
+    description: 'Five sacred forces of earth, water, fire, air and ether',
+    icon: '◆',
+    color: '#16A085',
+    route: '/(tabs)/elements',
+  },
+  {
     id: 'categories',
     title: 'Categories',
     description: 'Browse all collections by intention',
