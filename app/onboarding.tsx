@@ -151,6 +151,15 @@ export default function OnboardingScreen() {
             </View>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.description}>{item.description}</Text>
+            {item.key === SLIDES[SLIDES.length - 1].key && (
+              <Text style={styles.disclaimer}>
+                SET Healing is a wellness app designed for relaxation and
+                personal well-being. It is not a medical device and does not
+                diagnose, treat, cure, or prevent any disease or medical
+                condition. Always consult a qualified healthcare
+                professional for medical advice.
+              </Text>
+            )}
           </View>
         )}
       />
@@ -257,6 +266,16 @@ const styles = StyleSheet.create({
     color: C.textMid,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  disclaimer: {
+    fontSize: 11,
+    fontStyle: 'italic',
+    fontWeight: '300',
+    color: C.textDim,
+    textAlign: 'center',
+    lineHeight: 16,
+    marginTop: 20,
+    paddingHorizontal: 8,
   },
 
   // Footer — dots + button

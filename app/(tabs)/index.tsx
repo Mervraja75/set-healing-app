@@ -241,6 +241,8 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      <Text style={styles.wellnessFooter}>For wellness purposes only · Not medical advice</Text>
+
       <View style={{ height: 48 }} />
     </ScrollView>
   );
@@ -298,6 +300,8 @@ const styles = StyleSheet.create({
 
   browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: 'rgba(201,168,76,0.04)' },
   browseBtnText: { fontSize: 11, color: C.goldBright, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '500' },
+
+  wellnessFooter: { fontSize: 10, color: C.textDim, textAlign: 'center', fontWeight: '300', opacity: 0.4, marginTop: 32 },
 
   containerTablet:        { paddingHorizontal: 40 },
   containerTabletPortrait: { paddingHorizontal: 60 },

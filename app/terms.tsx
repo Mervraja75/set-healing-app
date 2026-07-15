@@ -50,7 +50,7 @@ const SECTIONS = [
   },
   {
     title: 'Health Disclaimer',
-    body: 'SET Healing is a wellness and sound therapy app designed for relaxation and general well-being. The content — including sound frequencies, meditations, breathwork, and affirmations — is for wellness purposes only.\n\nSET Healing is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before beginning any wellness programme, particularly if you have a medical condition, are pregnant, or have a history of seizures or mental health conditions.\n\nDo not disregard or delay seeking professional medical advice because of something you heard, experienced, or read in this app.',
+    body: 'SET Healing is a wellness and sound therapy app designed for relaxation and general well-being. The content — including sound frequencies, meditations, breathwork, and affirmations — is for wellness purposes only.\n\nSET Healing is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before beginning any wellness programme, particularly if you have a medical condition, are pregnant, or have a history of seizures or mental health conditions.\n\nDo not disregard or delay seeking professional medical advice because of something you heard, experienced, or read in this app.\n\nThis app is not a medical device. Content is AI-assisted and intended for wellness and relaxation purposes only. Results may vary. Not intended to diagnose, treat, cure, or prevent any disease.',
     warning: true,
   },
   {

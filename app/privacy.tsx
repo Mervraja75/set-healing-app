@@ -57,6 +57,10 @@ const SECTIONS = [
     body: 'SET Healing is not directed to children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, please contact us immediately and we will take steps to remove that information.',
   },
   {
+    title: 'Health & Wellness Disclaimer',
+    body: 'SET Healing is intended for general wellness and relaxation purposes only. The frequencies, meditations, breathwork techniques, and other content provided in this app are not medical treatments and should not be used as a substitute for professional medical advice, diagnosis, or treatment. If you have a medical condition, please consult your healthcare provider before using this app.',
+  },
+  {
     title: 'Contact Us',
     body: 'SET Healing Sanctuary\n10405 N Scottsdale Rd Suite 5\nScottsdale, AZ 85253\nsethealing.com',
   },
