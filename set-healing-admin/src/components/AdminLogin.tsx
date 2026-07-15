@@ -1,5 +1,7 @@
 // src/components/AdminLogin.tsx
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
+import { auth } from '../services/firebase';
 
 type Props = {
   onLogin: () => void;
@@ -16,23 +18,17 @@ export default function AdminLogin({ onLogin }: Props) {
     setError(null);
     setLoading(true);
 
-    // UI-only: replace with real auth later
-    try {
-      await new Promise((res) => setTimeout(res, 600)); // fake delay
-      // basic validation
-      if (!email || !password) {
-        setError('Please provide email and password.');
-        setLoading(false);
-        return;
-      }
+    if (!email || !password) {
+      setError('Please provide email and password.');
+      setLoading(false);
+      return;
+    }
 
-      // TODO: replace with real admin auth (Firebase/Admin, Supabase, etc)
-      // For now just console and "success"
-      console.log('Admin login attempt', { email, password });
-      alert('Admin login (UI-only) — success (replace with real auth)');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       onLogin();
-    } catch (err) {
-      setError('Login failed (UI-only).');
+    } catch (err: any) {
+      setError(err?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,7 +73,7 @@ export default function AdminLogin({ onLogin }: Props) {
         </form>
 
         <div className="help-row">
-          <small className="muted">This is a UI-only admin login — connect auth later.</small>
+          <small className="muted">Sign in with your SET Healing admin account</small>
         </div>
       </div>
     </div>
