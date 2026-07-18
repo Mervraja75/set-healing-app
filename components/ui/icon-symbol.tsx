@@ -26,6 +26,9 @@ const MAPPING = {
   'mountain.2.fill': 'terrain',
   'drop.fill': 'water-drop',
   'flame.fill': 'local-fire-department',
+  'waveform.path.ecg': 'monitor-heart',
+  'person.fill': 'person',
+  'stethoscope': 'medical-services',
 } as IconMapping;
 
 /**

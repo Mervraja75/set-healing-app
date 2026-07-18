@@ -5,25 +5,14 @@
 // meditation reminders via expo-notifications
 // =======================================
 
-import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
+// Temporarily disabled: expo-notifications crashes in Expo Go on Android.
+// Re-enable this import (and remove the stubs below) before an EAS native build.
+// import * as Notifications from 'expo-notifications';
+
 import { getAuth } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 import { app, db } from '@/lib/firebase';
-
-/* ---------------------------------------
-   SECTION A — Foreground notification behavior
----------------------------------------- */
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
 
 /* ──────────────────────────────────────
    registerForPushNotifications
@@ -32,42 +21,7 @@ Notifications.setNotificationHandler({
    users/{uid}.pushToken in Firestore.
 ────────────────────────────────────────*/
 export async function registerForPushNotifications(): Promise<string | null> {
-  try {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-      console.warn('[NotificationService] Permission not granted for push notifications');
-      return null;
-    }
-
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-      });
-    }
-
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    const { data: token } = await Notifications.getExpoPushTokenAsync(
-      projectId ? { projectId } : undefined
-    );
-
-    const uid = getAuth(app).currentUser?.uid;
-    if (uid) {
-      await setDoc(doc(db, 'users', uid), { pushToken: token }, { merge: true });
-    }
-
-    return token;
-  } catch (error) {
-    console.warn('[NotificationService] registerForPushNotifications failed:', error);
-    return null;
-  }
+  return null;
 }
 
 /* ──────────────────────────────────────
@@ -76,19 +30,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
    at the given hour/minute (24h clock).
 ────────────────────────────────────────*/
 export async function scheduleMeditationReminder(hour: number, minute: number): Promise<void> {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Time to Heal 🌟',
-      body: 'Your daily healing session is ready',
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-      hour,
-      minute,
-      repeats: true,
-    },
-  });
+  return;
 }
 
 /* ──────────────────────────────────────
@@ -96,7 +38,7 @@ export async function scheduleMeditationReminder(hour: number, minute: number): 
    Cancels every scheduled local notification.
 ────────────────────────────────────────*/
 export async function cancelAllNotifications(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  return;
 }
 
 /* ──────────────────────────────────────
@@ -104,8 +46,5 @@ export async function cancelAllNotifications(): Promise<void> {
    Fires an immediate local notification.
 ────────────────────────────────────────*/
 export async function sendLocalNotification(title: string, body: string): Promise<void> {
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, sound: true },
-    trigger: null,
-  });
+  return;
 }

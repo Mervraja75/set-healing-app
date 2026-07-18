@@ -100,7 +100,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthContext] Role returned from getUserRole:', role);
       setUserRole(role);
 
-      registerForPushNotifications();
+      try {
+        registerForPushNotifications();
+      } catch (e) {
+        console.log('[AuthContext] registerForPushNotifications failed:', e);
+      }
     });
     return unsubscribe;
   }, []);
