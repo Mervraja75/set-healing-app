@@ -5,6 +5,7 @@
 // =======================================
 
 import { useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ScrollView, StyleSheet, Text, TouchableOpacity, View,
@@ -19,10 +20,10 @@ import { SkeletonBox } from '@/components/SkeletonBox';
 
 const C = {
   bg: '#0A0616', bgCard: '#1A0D2E', bgCardDeep: '#160A28', bgHero: '#1E0A3C',
-  goldBright: '#C9A84C', goldMid: '#C8920A',
+  goldBright: GOLD, goldMid: GOLD,
   textBright: '#FFFFFF', textMid: '#DDD0FF', textMuted: '#B09ACC', textDim: '#7A60A0',
-  borderGold: 'rgba(201, 168, 76, 0.15)', borderPurple: 'rgba(180, 140, 255, 0.10)',
-  glowGold: 'rgba(201, 168, 76, 0.08)', glowPurple: 'rgba(100, 50, 180, 0.15)',
+  borderGold: goldAlpha(0.15), borderPurple: 'rgba(180, 140, 255, 0.10)',
+  glowGold: goldAlpha(0.08), glowPurple: 'rgba(100, 50, 180, 0.15)',
 };
 
 type Track = {
@@ -262,7 +263,7 @@ const styles = StyleSheet.create({
   rule:     { height: 1, backgroundColor: C.borderGold, marginVertical: 20, marginHorizontal: 20 },
 
   heroCard:      { backgroundColor: C.bgHero, borderRadius: 24, padding: 24, marginBottom: 28, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
-  heroGlow:      { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: 'rgba(201,168,76,0.07)' },
+  heroGlow:      { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: goldAlpha(0.07) },
   heroBadgeRow:  { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
   heroDot:       { width: 5, height: 5, borderRadius: 999, backgroundColor: C.goldBright },
   heroBadgeText: { fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', color: C.goldMid, fontWeight: '500' },
@@ -290,15 +291,15 @@ const styles = StyleSheet.create({
   trackInfo:      { flex: 1 },
   trackName:      { fontSize: 14, fontWeight: '600', color: C.textBright, marginBottom: 3 },
   trackCat:       { fontSize: 9, color: C.textMuted, letterSpacing: 3, fontWeight: '400' },
-  trackBadge:     { backgroundColor: 'rgba(201,168,76,0.10)', borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
+  trackBadge:     { backgroundColor: goldAlpha(0.10), borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 },
   trackBadgeText: { fontSize: 9, color: C.goldBright, letterSpacing: 2, fontWeight: '600' },
 
   empty:     { backgroundColor: C.bgCardDeep, borderRadius: 18, padding: 24, borderWidth: 1, borderColor: C.borderPurple, alignItems: 'center', marginBottom: 20 },
   emptyText: { fontSize: 12, color: C.textMuted, letterSpacing: 2, fontWeight: '300' },
-  retryBtn:     { marginTop: 14, borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 10, paddingHorizontal: 22, backgroundColor: 'rgba(201,168,76,0.06)' },
+  retryBtn:     { marginTop: 14, borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 10, paddingHorizontal: 22, backgroundColor: goldAlpha(0.06) },
   retryBtnText: { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: C.goldBright, fontWeight: '600' },
 
-  browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: 'rgba(201,168,76,0.04)' },
+  browseBtn:     { borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingVertical: 16, alignItems: 'center', marginTop: 8, backgroundColor: goldAlpha(0.04) },
   browseBtnText: { fontSize: 11, color: C.goldBright, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '500' },
 
   wellnessFooter: { fontSize: 10, color: C.textDim, textAlign: 'center', fontWeight: '300', opacity: 0.4, marginTop: 32 },

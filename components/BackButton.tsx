@@ -4,13 +4,14 @@
 // =======================================
 
 import { Link, LinkProps, useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { memo } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 const C = {
-  goldBright:   '#D4A828',
+  goldBright:   GOLD,
   textMuted:    '#B09ACC',
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   goldAlpha(0.18),
   bgCard:       'rgba(37, 13, 61, 0.8)',
 };
 

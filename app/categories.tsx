@@ -7,6 +7,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
@@ -31,18 +32,18 @@ const C = {
   bgCardDeep:   '#160A28',
   bgHero:       '#1E0A3C',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 };
 
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     paddingVertical: 10,
     paddingHorizontal: 22,
-    backgroundColor: 'rgba(201,168,76,0.06)',
+    backgroundColor: goldAlpha(0.06),
   },
   retryBtnText: {
     fontSize: 11,
@@ -395,7 +396,7 @@ const styles = StyleSheet.create({
     color: C.goldBright,
   },
   trackCountBadge: {
-    backgroundColor: 'rgba(201,168,76,0.10)',
+    backgroundColor: goldAlpha(0.10),
     borderWidth: 1,
     borderColor: C.borderGold,
     borderRadius: 99,

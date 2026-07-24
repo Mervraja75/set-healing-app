@@ -5,6 +5,7 @@
 // =======================================
 
 import { useState } from 'react';
+import { GOLD, goldAlpha } from '../theme/colors';
 import UploadTrack from './UploadTrack';
 
 /* ---------------------------------------
@@ -16,18 +17,18 @@ const C = {
   bgCardDeep:   '#250D3D',
   bgHero:       '#2D0F50',
 
-  goldBright:   '#D4A828',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   goldAlpha(0.18),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(212, 168, 40, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 
   aurora:       '#7EFFD4',
@@ -113,7 +114,7 @@ function NavItem({
         padding: '11px 14px',
         borderRadius: 12,
         border: active ? `1px solid ${C.borderGold}` : '1px solid transparent',
-        background: active ? 'rgba(212,168,40,0.08)' : 'transparent',
+        background: active ? goldAlpha(0.08) : 'transparent',
         cursor: 'pointer',
         textAlign: 'left',
         marginBottom: 4,
@@ -380,7 +381,7 @@ export default function Dashboard() {
               style={{
                 marginTop: 16,
                 padding: '10px 22px',
-                background: 'rgba(212,168,40,0.08)',
+                background: goldAlpha(0.08),
                 color: C.goldBright,
                 border: `1px solid ${C.borderGold}`,
                 borderRadius: 99,

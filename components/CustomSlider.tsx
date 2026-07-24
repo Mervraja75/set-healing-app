@@ -4,17 +4,18 @@
 // =======================================
 
 import Slider from '@react-native-community/slider';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 const C = {
   bgCard:      '#250D3D',
-  goldBright:  '#D4A828',
+  goldBright:  GOLD,
   textBright:  '#FFFFFF',
   textMuted:   '#B09ACC',
   textDim:     '#7A60A0',
-  borderGold:  'rgba(212, 168, 40, 0.18)',
-  trackFill:   '#D4A828',
+  borderGold:  goldAlpha(0.18),
+  trackFill:   GOLD,
   trackEmpty:  'rgba(180, 140, 255, 0.15)',
 };
 

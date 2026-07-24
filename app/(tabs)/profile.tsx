@@ -4,6 +4,7 @@
 // =======================================
 
 import { useEffect, useState } from 'react';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import { Link, useRouter } from 'expo-router';
@@ -43,18 +44,18 @@ const C = {
   bgCardDeep:   '#160A28',
   bgHero:       '#1E0A3C',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 
   aurora:       '#7EFFD4',
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.2)',
+    borderColor: goldAlpha(0.2),
   },
   avatarRing2: {
     position: 'absolute',
@@ -459,7 +460,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.10)',
+    borderColor: goldAlpha(0.10),
   },
   title: {
     fontSize: 28,
@@ -489,7 +490,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   statusPillGuest: {
-    backgroundColor: 'rgba(201,168,76,0.08)',
+    backgroundColor: goldAlpha(0.08),
     borderColor: C.borderGold,
   },
   statusDot: {
@@ -536,7 +537,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 999,
-    backgroundColor: 'rgba(201,168,76,0.08)',
+    backgroundColor: goldAlpha(0.08),
   },
   upgradeBadgeRow: {
     flexDirection: 'row',
@@ -650,7 +651,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     paddingVertical: 15,
     alignItems: 'center',
-    backgroundColor: 'rgba(201,168,76,0.04)',
+    backgroundColor: goldAlpha(0.04),
   },
   ghostBtnText: {
     color: C.goldBright,
@@ -752,7 +753,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     marginTop: 10,
-    backgroundColor: 'rgba(201,168,76,0.12)',
+    backgroundColor: goldAlpha(0.12),
     borderWidth: 1,
     borderColor: C.goldBright,
     borderRadius: 99,
@@ -796,7 +797,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   adminPractitionerBtn: {
-    backgroundColor: 'rgba(201,168,76,0.10)',
+    backgroundColor: goldAlpha(0.10),
     borderWidth: 1,
     borderColor: C.goldBright,
     borderRadius: 99,
@@ -891,7 +892,7 @@ const styles = StyleSheet.create({
   },
   presetPillActive: {
     borderColor: C.goldBright,
-    backgroundColor: 'rgba(201,168,76,0.10)',
+    backgroundColor: goldAlpha(0.10),
   },
   presetPillLabel: {
     fontSize: 12,

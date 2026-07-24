@@ -8,6 +8,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { useEffect, useRef, useState } from 'react';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import {
   Animated,
   Easing,
@@ -29,18 +30,18 @@ const C = {
   bgCardDeep:   '#160A28',
   bgHero:       '#1E0A3C',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 };
 
@@ -74,7 +75,7 @@ const TECHNIQUES: Technique[] = [
     name: 'Box Breathing',
     subtitle: 'Nervous System Reset',
     phaseText: '4s inhale · 4s hold · 4s exhale · 4s hold',
-    accentColor: '#C9A84C',
+    accentColor: GOLD,
     phases: [
       { label: 'Inhale', duration: 4, scale: 'expand'   },
       { label: 'Hold',   duration: 4, scale: 'expand'   },
@@ -311,7 +312,7 @@ function BreathingTimer({
         style={[
           styles.startBtn,
           isRunning
-            ? { borderColor: C.borderGold, backgroundColor: 'rgba(201,168,76,0.08)' }
+            ? { borderColor: C.borderGold, backgroundColor: goldAlpha(0.08) }
             : { backgroundColor: technique.accentColor },
         ]}
       >

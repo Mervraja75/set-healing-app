@@ -9,6 +9,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { Tabs } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { Platform } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -20,8 +21,8 @@ import { useAuth } from '@/context/AuthContext';
 const C = {
   bg:        '#0A0616',
   tabBar:    '#1A0A2E',
-  tabBorder: 'rgba(201, 168, 76, 0.15)',
-  active:    '#C9A84C',   // gold — active tab
+  tabBorder: goldAlpha(0.15),
+  active:    GOLD,   // gold — active tab
   inactive:  '#4A2A6A',   // dim purple — inactive tab
 };
 

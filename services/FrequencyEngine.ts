@@ -8,6 +8,7 @@
 // =======================================
 
 import { Audio } from 'expo-av';
+import { GOLD } from '@/constants/Colors';
 
 /* ---------------------------------------
    SECTION A — Frequency Presets
@@ -96,10 +97,10 @@ export const FREQUENCY_RANGES: FrequencyRange[] = [
   { id: 'theta',     label: 'Theta',     min: 4,    max: 8,    color: '#5B8FD4', desc: 'Meditation · REM · Subconscious access'    },
   { id: 'alpha',     label: 'Alpha',     min: 8,    max: 14,   color: '#5BC4D4', desc: 'Relaxation · Flow state · Calm focus'      },
   { id: 'beta',      label: 'Beta',      min: 14,   max: 30,   color: '#7EFFD4', desc: 'Alertness · Active thinking · Clarity'     },
-  { id: 'gamma',     label: 'Gamma',     min: 30,   max: 100,  color: '#D4A828', desc: 'High cognition · Peak performance'         },
+  { id: 'gamma',     label: 'Gamma',     min: 30,   max: 100,  color: GOLD, desc: 'High cognition · Peak performance'         },
   { id: 'healing',   label: 'Healing',   min: 100,  max: 174,  color: '#FF6B35', desc: 'Cellular resonance · Regeneration'         },
   { id: 'solfeggio', label: 'Solfeggio', min: 174,  max: 963,  color: '#FF9F7A', desc: 'Sacred healing · Cellular resonance'       },
-  { id: 'cosmic',    label: 'Cosmic',    min: 963,  max: 1200, color: '#C9A84C', desc: 'Universal harmony · Cosmic alignment'      },
+  { id: 'cosmic',    label: 'Cosmic',    min: 963,  max: 1200, color: GOLD, desc: 'Universal harmony · Cosmic alignment'      },
   { id: 'rife',      label: 'Rife',      min: 1200, max: 5100, color: '#E74C3C', desc: 'Rife protocol · Targeted frequencies'      },
   { id: 'trauma',    label: 'Trauma',    min: 5100, max: 5500, color: '#9B59B6', desc: 'Somatic release · Trauma integration'      },
   { id: 'earth',     label: 'Earth',     min: 5500, max: 6000, color: '#16A085', desc: 'Schumann resonance · Earth harmony'        },

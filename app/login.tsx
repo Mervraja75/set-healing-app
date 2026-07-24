@@ -8,6 +8,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { Link, useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -36,19 +37,19 @@ const C = {
   bgCardDeep:   '#160A28',
   bgHero:       '#1E0A3C',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
   borderInput:  'rgba(180, 140, 255, 0.20)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.18)',
 };
 
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 999,
-    backgroundColor: 'rgba(201,168,76,0.06)',
+    backgroundColor: goldAlpha(0.06),
   },
   formTitle: {
     fontSize: 24,
@@ -568,7 +569,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     paddingVertical: 14,
     alignItems: 'center',
-    backgroundColor: 'rgba(201,168,76,0.04)',
+    backgroundColor: goldAlpha(0.04),
   },
   registerBtnText: {
     color: C.goldBright,

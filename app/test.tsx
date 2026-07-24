@@ -9,6 +9,7 @@
 // =======================================
 
 import { Audio } from 'expo-av';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -35,15 +36,15 @@ const C = {
   bgCard:       '#1A0D2E',
   bgCardDeep:   '#160A28',
   bgHero:       '#1E0A3C',
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
-  glowGold:     'rgba(201, 168, 76, 0.12)',
+  glowGold:     goldAlpha(0.12),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
   aurora:       '#7EFFD4',
 };
@@ -729,9 +730,9 @@ const styles = StyleSheet.create({
 
   glowTop:    { position: 'absolute', top: -100, alignSelf: 'center', width: 320, height: 320, borderRadius: 999, backgroundColor: C.glowGold },
   glowBottom: { position: 'absolute', bottom: 0,  alignSelf: 'center', width: 240, height: 240, borderRadius: 999, backgroundColor: C.glowPurple },
-  ringOuter:  { position: 'absolute', top: 108, alignSelf: 'center', width: 300, height: 300, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(201,168,76,0.10)' },
-  ringMid:    { position: 'absolute', top: 142, alignSelf: 'center', width: 232, height: 232, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(201,168,76,0.16)' },
-  ringInner:  { position: 'absolute', top: 176, alignSelf: 'center', width: 164, height: 164, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(201,168,76,0.24)' },
+  ringOuter:  { position: 'absolute', top: 108, alignSelf: 'center', width: 300, height: 300, borderRadius: 999, borderWidth: 1, borderColor: goldAlpha(0.10) },
+  ringMid:    { position: 'absolute', top: 142, alignSelf: 'center', width: 232, height: 232, borderRadius: 999, borderWidth: 1, borderColor: goldAlpha(0.16) },
+  ringInner:  { position: 'absolute', top: 176, alignSelf: 'center', width: 164, height: 164, borderRadius: 999, borderWidth: 1, borderColor: goldAlpha(0.24) },
   topBar:     { position: 'absolute', top: 55, left: 18, zIndex: 10 },
 
   playlistIndicator: { marginTop: 60, alignItems: 'center', gap: 8, marginBottom: -8 },
@@ -743,7 +744,7 @@ const styles = StyleSheet.create({
   artworkWrap:    { marginTop: 52, marginBottom: 28, alignItems: 'center', justifyContent: 'center', position: 'relative', width: 160, height: 160 },
   artwork:        { width: 120, height: 120, borderRadius: 999, backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderGold, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   artworkPlaying: { borderColor: C.goldBright, borderWidth: 1.5 },
-  artworkGlow:    { position: 'absolute', width: 80, height: 80, borderRadius: 999, backgroundColor: 'rgba(201,168,76,0.08)' },
+  artworkGlow:    { position: 'absolute', width: 80, height: 80, borderRadius: 999, backgroundColor: goldAlpha(0.08) },
   artworkSymbol:  { fontSize: 46, color: C.goldBright },
   freqRing:       { position: 'absolute', width: 140, height: 140, borderRadius: 999, borderWidth: 1.5, opacity: 0.6 },
 
@@ -785,7 +786,7 @@ const styles = StyleSheet.create({
 
   controlsRow:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 22 },
   ctrlPill:           { backgroundColor: C.bgCardDeep, borderWidth: 1, borderColor: C.borderPurple, borderRadius: 99, paddingVertical: 10, paddingHorizontal: 22 },
-  ctrlPillActive:     { backgroundColor: 'rgba(201,168,76,0.08)', borderColor: C.borderGold },
+  ctrlPillActive:     { backgroundColor: goldAlpha(0.08), borderColor: C.borderGold },
   ctrlPillText:       { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: C.textDim, fontWeight: '500' },
   ctrlPillTextActive: { color: C.goldBright },
 
@@ -807,7 +808,7 @@ const styles = StyleSheet.create({
 
   presetRow:            { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 18, paddingBottom: 4 },
   presetChip:           { backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderPurple, borderRadius: 99, paddingVertical: 7, paddingHorizontal: 14 },
-  presetChipActive:     { backgroundColor: 'rgba(201,168,76,0.10)', borderColor: C.borderGold },
+  presetChipActive:     { backgroundColor: goldAlpha(0.10), borderColor: C.borderGold },
   presetChipText:       { fontSize: 11, color: C.textDim, fontWeight: '500', letterSpacing: 0.5 },
   presetChipTextActive: { color: C.goldBright },
 

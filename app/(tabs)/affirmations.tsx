@@ -8,6 +8,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { useRef, useState } from 'react';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import {
   Animated,
   ScrollView,
@@ -27,18 +28,18 @@ const C = {
   bgCard:       '#1A0D2E',
   bgCardDeep:   '#160A28',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 };
 
@@ -58,7 +59,7 @@ const CATEGORIES: AffirmationCategory[] = [
     id: 'prosperity',
     name: 'Prosperity',
     subtitle: 'Divine Abundance · Financial Freedom',
-    color: '#C9A84C',
+    color: GOLD,
     affirmations: [
       'I am a magnet for abundance in all its forms.',
       'Money flows to me easily and effortlessly.',

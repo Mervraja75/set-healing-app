@@ -8,6 +8,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import { useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import {
   ScrollView,
   StyleSheet,
@@ -27,18 +28,18 @@ const C = {
   bgCard:       '#1A0D2E',
   bgCardDeep:   '#160A28',
 
-  goldBright:   '#C9A84C',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
 
-  glowGold:     'rgba(201, 168, 76, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 };
 
@@ -84,7 +85,7 @@ const ITEMS: ExploreItem[] = [
     title: 'Affirmations',
     description: 'Sacred words that rewire mind and heart',
     icon: '❝',
-    color: '#C9A84C',
+    color: GOLD,
     route: '/(tabs)/affirmations',
   },
   {
@@ -92,7 +93,7 @@ const ITEMS: ExploreItem[] = [
     title: 'Frequencies',
     description: 'Binaural and vibroacoustic sound sessions',
     icon: '◐',
-    color: '#C9A84C',
+    color: GOLD,
     route: '/(tabs)/healing',
   },
   {

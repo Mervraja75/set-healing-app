@@ -8,6 +8,7 @@
    SECTION A — Imports
 ---------------------------------------- */
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
@@ -39,9 +40,9 @@ const SET_THEME = {
     background:   '#0A0616',   // matches C.bg across all screens
     card:         '#1A0A2E',   // tab bar + header bg
     text:         '#FFFFFF',
-    border:       'rgba(201, 168, 76, 0.15)',
-    notification: '#C9A84C',
-    primary:      '#C9A84C',
+    border:       goldAlpha(0.15),
+    notification: GOLD,
+    primary:      GOLD,
   },
 };
 

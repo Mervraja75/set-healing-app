@@ -5,6 +5,7 @@
 // =======================================
 
 import { useRouter } from 'expo-router';
+import { GOLD, goldAlpha } from '@/constants/Colors';
 import {
   ScrollView,
   StyleSheet,
@@ -22,14 +23,14 @@ const C = {
   bgHero:       '#1E0A3C',
   bgWarning:    'rgba(220, 150, 40, 0.08)',
 
-  goldBright:   '#C9A84C',
+  goldBright:   GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(201, 168, 76, 0.15)',
+  borderGold:   goldAlpha(0.15),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
   borderWarning:'rgba(220, 150, 40, 0.25)',
 };

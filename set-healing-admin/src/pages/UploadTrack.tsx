@@ -5,6 +5,7 @@
 // =======================================
 
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { GOLD, goldAlpha } from '../theme/colors';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import React, { useState } from 'react';
 import { db, storage } from '../services/firebase';
@@ -18,19 +19,19 @@ const C = {
   bgCardDeep:   '#250D3D',
   bgHero:       '#2D0F50',
 
-  goldBright:   '#D4A828',
-  goldMid:      '#C8920A',
+  goldBright:   GOLD,
+  goldMid:      GOLD,
 
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
   textDim:      '#7A60A0',
 
-  borderGold:   'rgba(212, 168, 40, 0.18)',
+  borderGold:   goldAlpha(0.18),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
   borderInput:  'rgba(180, 140, 255, 0.20)',
 
-  glowGold:     'rgba(212, 168, 40, 0.08)',
+  glowGold:     goldAlpha(0.08),
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 
   aurora:       '#7EFFD4',
@@ -217,14 +218,14 @@ export default function UploadTrack() {
         <div style={{
           position: 'absolute', top: -60, right: -60,
           width: 200, height: 200, borderRadius: '50%',
-          background: 'rgba(212,168,40,0.06)', pointerEvents: 'none',
+          background: goldAlpha(0.06), pointerEvents: 'none',
         }} />
 
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
-            background: 'rgba(212,168,40,0.08)',
+            background: goldAlpha(0.08),
             border: `1px solid ${C.borderGold}`,
             borderRadius: 99, padding: '6px 14px', marginBottom: 16,
           }}>
@@ -347,7 +348,7 @@ export default function UploadTrack() {
                       ? `1px solid ${C.goldBright}`
                       : `1px solid ${C.borderPurple}`,
                     background: active
-                      ? 'rgba(212,168,40,0.10)'
+                      ? goldAlpha(0.10)
                       : C.bgHero,
                     cursor: 'pointer',
                     textAlign: 'center' as const,
@@ -399,7 +400,7 @@ export default function UploadTrack() {
               gap: 10,
               padding: '32px 20px',
               background: dragOver
-                ? 'rgba(212,168,40,0.08)'
+                ? goldAlpha(0.08)
                 : C.bgHero,
               border: `1px dashed ${dragOver ? C.goldBright : C.borderInput}`,
               borderRadius: 16,
@@ -480,7 +481,7 @@ export default function UploadTrack() {
           style={{
             width: '100%',
             padding: '16px 24px',
-            background: isbusy ? 'rgba(212,168,40,0.4)' : C.goldBright,
+            background: isbusy ? goldAlpha(0.4) : C.goldBright,
             color: C.bg,
             border: 'none',
             borderRadius: 99,
