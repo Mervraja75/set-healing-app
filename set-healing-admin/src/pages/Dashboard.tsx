@@ -203,7 +203,7 @@ export default function Dashboard() {
   }, []);
 
   if (view === 'upload') {
-    return <UploadTrack />;
+    return <UploadTrack onBack={() => setView('home')} />;
   }
 
   if (view === 'tracks') {

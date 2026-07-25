@@ -55,7 +55,7 @@ const CATEGORY_OPTIONS = [
 /* ---------------------------------------
    COMPONENT
 ---------------------------------------- */
-export default function UploadTrack() {
+export default function UploadTrack({ onBack }: { onBack?: () => void }) {
   /* State */
   const [title,          setTitle]          = useState('');
   const [category,       setCategory]       = useState('sleep');
@@ -220,6 +220,21 @@ export default function UploadTrack() {
           width: 200, height: 200, borderRadius: '50%',
           background: goldAlpha(0.06), pointerEvents: 'none',
         }} />
+
+        {/* Back link */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'transparent', border: 'none',
+              color: C.textDim, fontSize: 11, letterSpacing: 1,
+              cursor: 'pointer', padding: 0, marginBottom: 20,
+            }}
+          >
+            ← Back to Dashboard
+          </button>
+        )}
 
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
