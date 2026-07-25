@@ -4,8 +4,11 @@
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
-import { useState } from 'react';
+import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { db } from '../services/firebase';
 import { GOLD, goldAlpha } from '../theme/colors';
+import Tracks from './Tracks';
 import UploadTrack from './UploadTrack';
 
 /* ---------------------------------------
@@ -96,39 +99,54 @@ function NavItem({
   icon,
   label,
   active,
+  disabled,
   onClick,
 }: {
   icon: string;
   label: string;
   active?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      title={disabled ? 'Coming soon' : undefined}
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        justifyContent: 'space-between',
         width: '100%',
         padding: '11px 14px',
         borderRadius: 12,
         border: active ? `1px solid ${C.borderGold}` : '1px solid transparent',
         background: active ? goldAlpha(0.08) : 'transparent',
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         marginBottom: 4,
+        opacity: disabled ? 0.45 : 1,
       }}
     >
-      <span style={{ fontSize: 16, color: active ? C.goldBright : C.textDim }}>
-        {icon}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 16, color: active ? C.goldBright : C.textDim }}>
+          {icon}
+        </span>
+        <span style={{
+          fontSize: 12,
+          fontWeight: active ? 600 : 400,
+          color: active ? C.textBright : C.textDim,
+          letterSpacing: 0.3,
+        }}>{label}</span>
       </span>
-      <span style={{
-        fontSize: 12,
-        fontWeight: active ? 600 : 400,
-        color: active ? C.textBright : C.textDim,
-        letterSpacing: 0.3,
-      }}>{label}</span>
+      {disabled && (
+        <span style={{
+          fontSize: 8, letterSpacing: 0.5,
+          color: C.textDim, textTransform: 'uppercase',
+          border: `1px solid ${C.borderPurple}`,
+          borderRadius: 99, padding: '2px 6px',
+        }}>Soon</span>
+      )}
     </button>
   );
 }
@@ -136,11 +154,60 @@ function NavItem({
 /* ---------------------------------------
    MAIN COMPONENT
 ---------------------------------------- */
+type RecentTrack = {
+  id: string;
+  title: string;
+  category: string;
+  createdAt: Timestamp | null;
+};
+
+function formatDate(ts: Timestamp | null): string {
+  if (!ts) return 'Just now';
+  return ts.toDate().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+  });
+}
+
 export default function Dashboard() {
-  const [view, setView] = useState<'home' | 'upload' | string>('home');
+  const [view, setView] = useState<'home' | 'upload' | 'tracks' | string>('home');
+
+  const [totalTracks,  setTotalTracks]  = useState<number | null>(null);
+  const [recentTracks, setRecentTracks] = useState<RecentTrack[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, 'tracks'), orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setTotalTracks(snapshot.size);
+        setRecentTracks(snapshot.docs.slice(0, 5).map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            title: data.title ?? 'Untitled',
+            category: data.category ?? 'sleep',
+            createdAt: data.createdAt ?? null,
+          };
+        }));
+        setStatsLoading(false);
+      },
+      (err) => {
+        console.error('Failed to load dashboard stats:', err);
+        setStatsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   if (view === 'upload') {
     return <UploadTrack />;
+  }
+
+  if (view === 'tracks') {
+    return <Tracks onBack={() => setView('home')} />;
   }
 
   return (
@@ -207,10 +274,10 @@ export default function Dashboard() {
         {/* Nav items */}
         <NavItem icon="◉" label="Dashboard"    active={view === 'home'}   onClick={() => setView('home')} />
         <NavItem icon="◈" label="Upload Track" active={view === 'upload'} onClick={() => setView('upload')} />
-        <NavItem icon="◎" label="Tracks"       />
-        <NavItem icon="◐" label="Users"        />
-        <NavItem icon="◆" label="Analytics"    />
-        <NavItem icon="○" label="Settings"     />
+        <NavItem icon="◎" label="Tracks"       active={view === 'tracks'} onClick={() => setView('tracks')} />
+        <NavItem icon="◐" label="Users"        disabled />
+        <NavItem icon="◆" label="Analytics"    disabled />
+        <NavItem icon="○" label="Settings"     disabled />
 
         {/* Bottom status */}
         <div style={{ marginTop: 'auto', paddingTop: 20 }}>
@@ -273,10 +340,14 @@ export default function Dashboard() {
           display: 'flex', gap: 14, marginBottom: 36,
           flexWrap: 'wrap',
         }}>
-          <StatCard label="Total Tracks"   value="—"  sub="Tracks uploaded" />
-          <StatCard label="Active Users"   value="—"  sub="This month" />
-          <StatCard label="Premium Users"  value="—"  sub="Subscribed" />
-          <StatCard label="Sessions Today" value="—"  sub="Plays today" />
+          <StatCard
+            label="Total Tracks"
+            value={statsLoading ? '—' : String(totalTracks ?? 0)}
+            sub="Tracks uploaded"
+          />
+          <StatCard label="Active Users"   value="—"  sub="Not tracked yet" />
+          <StatCard label="Premium Users"  value="—"  sub="Not tracked yet" />
+          <StatCard label="Sessions Today" value="—"  sub="Not tracked yet" />
         </div>
 
         {/* Quick actions */}
@@ -306,32 +377,38 @@ export default function Dashboard() {
             ◈  Upload New Track
           </button>
 
-          <button style={{
-            padding: '13px 24px',
-            background: 'transparent',
-            color: C.goldBright,
-            border: `1px solid ${C.borderGold}`,
-            borderRadius: 99,
-            cursor: 'pointer',
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: 1,
-          }}>
+          <button
+            onClick={() => setView('tracks')}
+            style={{
+              padding: '13px 24px',
+              background: 'transparent',
+              color: C.goldBright,
+              border: `1px solid ${C.borderGold}`,
+              borderRadius: 99,
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: 1,
+            }}>
             ◎  View All Tracks
           </button>
 
-          <button style={{
-            padding: '13px 24px',
-            background: 'transparent',
-            color: C.goldBright,
-            border: `1px solid ${C.borderGold}`,
-            borderRadius: 99,
-            cursor: 'pointer',
-            fontSize: 12,
-            fontWeight: 500,
-            letterSpacing: 1,
-          }}>
-            ◐  Manage Users
+          <button
+            disabled
+            title="Coming soon"
+            style={{
+              padding: '13px 24px',
+              background: 'transparent',
+              color: C.textDim,
+              border: `1px solid ${C.borderPurple}`,
+              borderRadius: 99,
+              cursor: 'not-allowed',
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: 1,
+              opacity: 0.6,
+            }}>
+            ◐  Manage Users <span style={{ fontSize: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>· Soon</span>
           </button>
         </div>
 
@@ -366,34 +443,75 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* Loading state */}
+          {statsLoading && (
+            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+              <p style={{
+                margin: 0, fontSize: 12,
+                color: C.textDim, letterSpacing: 2,
+                textTransform: 'uppercase', fontWeight: 300,
+              }}>Loading…</p>
+            </div>
+          )}
+
           {/* Empty state */}
-          <div style={{
-            padding: '40px 20px',
-            textAlign: 'center',
-          }}>
-            <p style={{
-              margin: 0, fontSize: 12,
-              color: C.textDim, letterSpacing: 2,
-              textTransform: 'uppercase', fontWeight: 300,
-            }}>No tracks uploaded yet</p>
-            <button
-              onClick={() => setView('upload')}
+          {!statsLoading && recentTracks.length === 0 && (
+            <div style={{
+              padding: '40px 20px',
+              textAlign: 'center',
+            }}>
+              <p style={{
+                margin: 0, fontSize: 12,
+                color: C.textDim, letterSpacing: 2,
+                textTransform: 'uppercase', fontWeight: 300,
+              }}>No tracks uploaded yet</p>
+              <button
+                onClick={() => setView('upload')}
+                style={{
+                  marginTop: 16,
+                  padding: '10px 22px',
+                  background: goldAlpha(0.08),
+                  color: C.goldBright,
+                  border: `1px solid ${C.borderGold}`,
+                  borderRadius: 99,
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: 1,
+                }}
+              >
+                Upload your first track →
+              </button>
+            </div>
+          )}
+
+          {/* Rows */}
+          {!statsLoading && recentTracks.map((track) => (
+            <div
+              key={track.id}
               style={{
-                marginTop: 16,
-                padding: '10px 22px',
-                background: goldAlpha(0.08),
-                color: C.goldBright,
-                border: `1px solid ${C.borderGold}`,
-                borderRadius: 99,
-                cursor: 'pointer',
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: 1,
+                display: 'grid',
+                gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                padding: '14px 20px',
+                borderBottom: `1px solid ${C.borderPurple}`,
+                alignItems: 'center',
               }}
             >
-              Upload your first track →
-            </button>
-          </div>
+              <span style={{
+                fontSize: 13, fontWeight: 500, color: C.textBright,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>{track.title}</span>
+              <span style={{ fontSize: 12, color: C.textMuted, textTransform: 'capitalize' }}>
+                {track.category}
+              </span>
+              <span style={{ fontSize: 11, color: C.aurora, letterSpacing: 1, textTransform: 'uppercase' }}>
+                Published
+              </span>
+              <span style={{ fontSize: 12, color: C.textMuted }}>
+                {formatDate(track.createdAt)}
+              </span>
+            </div>
+          ))}
         </div>
 
       </main>
