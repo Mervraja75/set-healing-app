@@ -53,9 +53,72 @@ const CATEGORY_OPTIONS = [
 ];
 
 /* ---------------------------------------
+   FILE VALIDATION
+---------------------------------------- */
+const ALLOWED_AUDIO_MIME_TYPES = [
+  'audio/mpeg', 'audio/mp3',
+  'audio/wav', 'audio/x-wav', 'audio/wave', 'audio/vnd.wave',
+  'audio/aac', 'audio/x-aac',
+  'audio/mp4', 'audio/x-m4a',
+];
+const ALLOWED_AUDIO_EXTENSIONS = ['.mp3', '.wav', '.aac', '.m4a'];
+const LARGE_FILE_WARNING_BYTES = 50 * 1024 * 1024; // 50 MB
+
+function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.round(bytes / 1024)} KB`;
+}
+
+function validateAudioFile(file: File): { ok: boolean; error?: string; warning?: string } {
+  const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+  const typeOk = ALLOWED_AUDIO_MIME_TYPES.includes(file.type.toLowerCase());
+  const extOk = ALLOWED_AUDIO_EXTENSIONS.includes(ext);
+
+  if (!typeOk && !extOk) {
+    return {
+      ok: false,
+      error: `"${file.name}" isn't a supported audio format. Please use MP3, WAV, or AAC.`,
+    };
+  }
+
+  if (file.size > LARGE_FILE_WARNING_BYTES) {
+    return {
+      ok: true,
+      warning: `This file is ${formatFileSize(file.size)} — larger than the recommended 50 MB. Upload may take a while.`,
+    };
+  }
+
+  return { ok: true };
+}
+
+function friendlyUploadError(err: unknown): string {
+  const code = (err as { code?: string } | null)?.code;
+  switch (code) {
+    case 'storage/unauthorized':
+      return "You don't have permission to upload files. Please check your admin access.";
+    case 'storage/canceled':
+      return 'Upload was canceled.';
+    case 'storage/quota-exceeded':
+      return 'Storage quota exceeded. Please contact support.';
+    case 'storage/retry-limit-exceeded':
+      return 'Upload timed out — check your network connection and try again.';
+    case 'storage/unknown':
+      return 'An unknown storage error occurred. Please try again.';
+    default:
+      return 'Upload failed. Please check your connection and try again.';
+  }
+}
+
+/* ---------------------------------------
    COMPONENT
 ---------------------------------------- */
-export default function UploadTrack({ onBack }: { onBack?: () => void }) {
+export default function UploadTrack({
+  onBack,
+  onViewTracks,
+}: {
+  onBack?: () => void;
+  onViewTracks?: () => void;
+}) {
   /* State */
   const [title,          setTitle]          = useState('');
   const [category,       setCategory]       = useState('sleep');
@@ -65,17 +128,41 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
   const [progress,       setProgress]       = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [uploadedUrl,    setUploadedUrl]    = useState<string | null>(null);
+  const [uploadedTitle,  setUploadedTitle]  = useState<string | null>(null);
   const [error,          setError]          = useState<string | null>(null);
+  const [fileWarning,    setFileWarning]    = useState<string | null>(null);
   const [dragOver,       setDragOver]       = useState(false);
 
-  /* File picker */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* Clear transient upload/success state before picking a new file */
+  const resetTransientState = () => {
     setError(null);
+    setFileWarning(null);
     setUploadedUrl(null);
+    setUploadedTitle(null);
     setProgress(0);
     setUploadComplete(false);
     setIsSaving(false);
-    setFile(e.target.files?.[0] || null);
+  };
+
+  /* File picker */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    resetTransientState();
+    const selected = e.target.files?.[0] || null;
+    if (!selected) {
+      setFile(null);
+      return;
+    }
+
+    const result = validateAudioFile(selected);
+    if (!result.ok) {
+      setError(result.error!);
+      setFile(null);
+      e.target.value = '';
+      return;
+    }
+
+    setFile(selected);
+    if (result.warning) setFileWarning(result.warning);
   };
 
   /* Drag and drop */
@@ -83,15 +170,18 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
     e.preventDefault();
     setDragOver(false);
     const dropped = e.dataTransfer.files?.[0];
-    if (dropped && dropped.type.startsWith('audio/')) {
-      setError(null);
-      setUploadedUrl(null);
-      setProgress(0);
-      setUploadComplete(false);
-      setFile(dropped);
-    } else {
-      setError('Please drop a valid audio file.');
+    if (!dropped) return;
+
+    resetTransientState();
+
+    const result = validateAudioFile(dropped);
+    if (!result.ok) {
+      setError(result.error!);
+      return;
     }
+
+    setFile(dropped);
+    if (result.warning) setFileWarning(result.warning);
   };
 
   /* Upload */
@@ -120,14 +210,14 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
         },
         (err) => {
           console.error('Upload error:', err);
-          setError('Upload failed. Please try again.');
+          setError(friendlyUploadError(err));
           setIsUploading(false);
           setIsSaving(false);
         },
         async () => {
+          const uploadedTitleSnapshot = title;
           try {
             const url = await getDownloadURL(uploadTask.snapshot.ref);
-            setUploadedUrl(url);
             setIsUploading(false);
             setIsSaving(true);
 
@@ -141,24 +231,27 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
             const docRef = await addDoc(collection(db, 'tracks'), trackDoc);
             console.log('Saved track:', docRef.id, trackDoc);
 
+            setUploadedUrl(url);
+            setUploadedTitle(uploadedTitleSnapshot);
             setUploadComplete(true);
 
-            setTimeout(() => setUploadComplete(false), 2500);
-          } catch (err) {
-            console.error(err);
-            setError('File uploaded, but saving metadata failed.');
-          } finally {
-            setIsSaving(false);
+            // Reset the form so the next track can be uploaded immediately
             setTitle('');
             setCategory('sleep');
             setFile(null);
+            setFileWarning(null);
             setProgress(0);
+          } catch (err) {
+            console.error(err);
+            setError('File uploaded, but saving its details failed. Please try again.');
+          } finally {
+            setIsSaving(false);
           }
         }
       );
     } catch (err) {
       console.error(err);
-      setError('Something went wrong during upload.');
+      setError(friendlyUploadError(err));
       setIsUploading(false);
       setIsSaving(false);
     }
@@ -287,19 +380,55 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
         {/* Success */}
         {uploadedUrl && (
           <div style={{
-            marginBottom: 20, padding: '14px 16px',
+            marginBottom: 20, padding: '18px 20px',
             background: C.successBg,
             border: `1px solid ${C.successBorder}`,
-            borderRadius: 12,
+            borderRadius: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap' as const,
           }}>
-            <p style={{
-              margin: '0 0 4px', fontWeight: 600,
-              color: C.aurora, fontSize: 13,
-            }}>✓  Track uploaded successfully</p>
-            <p style={{
-              margin: 0, fontSize: 11,
-              color: C.textDim, wordBreak: 'break-all' as const,
-            }}>{uploadedUrl}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: 'rgba(126, 255, 212, 0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+                fontSize: 16, color: C.aurora,
+              }}>✓</div>
+              <div>
+                <p style={{
+                  margin: '0 0 3px', fontWeight: 600,
+                  color: C.aurora, fontSize: 13,
+                }}>Track uploaded successfully</p>
+                <p style={{
+                  margin: 0, fontSize: 13, fontWeight: 500,
+                  color: C.textBright,
+                }}>{uploadedTitle || 'Untitled track'}</p>
+              </div>
+            </div>
+
+            {onViewTracks && (
+              <button
+                onClick={onViewTracks}
+                style={{
+                  flexShrink: 0,
+                  padding: '9px 18px',
+                  background: 'transparent',
+                  color: C.aurora,
+                  border: '1px solid rgba(126, 255, 212, 0.35)',
+                  borderRadius: 99,
+                  cursor: 'pointer',
+                  fontSize: 11, fontWeight: 600,
+                  letterSpacing: 1,
+                  whiteSpace: 'nowrap' as const,
+                }}
+              >
+                View in Tracks →
+              </button>
+            )}
           </div>
         )}
 
@@ -425,7 +554,7 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
           >
             <input
               type="file"
-              accept="audio/*"
+              accept="audio/*,.mp3,.wav,.aac,.m4a"
               onChange={handleFileChange}
               style={{ display: 'none' }}
             />
@@ -439,7 +568,7 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
                 <p style={{
                   margin: 0, fontSize: 11,
                   color: C.textMuted,
-                }}>{Math.round(file.size / 1024)} KB · {file.type}</p>
+                }}>{formatFileSize(file.size)}{file.type ? ` · ${file.type}` : ''}</p>
               </>
             ) : (
               <>
@@ -454,6 +583,13 @@ export default function UploadTrack({ onBack }: { onBack?: () => void }) {
               </>
             )}
           </label>
+
+          {fileWarning && (
+            <p style={{
+              margin: '10px 2px 0', fontSize: 11,
+              color: C.goldMid,
+            }}>⚠  {fileWarning}</p>
+          )}
         </div>
 
         {/* Progress bar */}
