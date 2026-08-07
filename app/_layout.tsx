@@ -154,6 +154,15 @@ export default function RootLayout() {
               }}
             />
 
+            {/* Subscribe */}
+            <Stack.Screen
+              name="subscribe"
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
+            />
+
             {/* Legal screens */}
             <Stack.Screen
               name="privacy"
