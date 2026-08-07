@@ -33,7 +33,7 @@ const C = {
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
-  textDim:      '#7A60A0',
+  textDim:      '#9683BE',
 
   borderGold:   goldAlpha(0.18),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
@@ -45,6 +45,28 @@ const C = {
   errorBg:      'rgba(255, 80, 80, 0.08)',
   errorBorder:  'rgba(255, 80, 80, 0.25)',
   errorText:    '#FF8080',
+
+  shadowCard: '0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)',
+};
+
+/* ---------------------------------------
+   TYPE SCALE (mirrors Dashboard.tsx)
+---------------------------------------- */
+const T = {
+  eyebrow: {
+    fontSize: 10, letterSpacing: 3, textTransform: 'uppercase' as const,
+    color: C.textDim, fontWeight: 600,
+  },
+  h1: {
+    fontSize: 34, fontWeight: 800, color: C.textBright, letterSpacing: -0.8,
+  },
+  subtitle: {
+    fontSize: 14, fontWeight: 400, color: C.textMid,
+  },
+  tableHeader: {
+    fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' as const,
+    color: C.textDim, fontWeight: 600,
+  },
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -197,12 +219,13 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
         {/* Back link */}
         {onBack && (
           <button
+            className="sh-link"
             onClick={onBack}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: 'transparent', border: 'none',
               color: C.textDim, fontSize: 11, letterSpacing: 1,
-              cursor: 'pointer', padding: 0, marginBottom: 20,
+              cursor: 'pointer', padding: 0, marginBottom: 22,
             }}
           >
             ← Back to Dashboard
@@ -210,22 +233,10 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
         )}
 
         {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <p style={{
-            margin: '0 0 6px',
-            fontSize: 9, letterSpacing: 5,
-            textTransform: 'uppercase',
-            color: C.textDim, fontWeight: 300,
-          }}>Control Centre</p>
-          <h1 style={{
-            margin: '0 0 6px',
-            fontSize: 32, fontWeight: 700,
-            color: C.textBright, letterSpacing: -0.5,
-          }}>Tracks</h1>
-          <p style={{
-            margin: 0, fontSize: 13,
-            color: C.textMid, fontWeight: 300,
-          }}>
+        <div style={{ marginBottom: 30 }}>
+          <p style={{ ...T.eyebrow, margin: '0 0 8px' }}>Control Centre</p>
+          <h1 style={{ ...T.h1, margin: '0 0 8px' }}>Tracks</h1>
+          <p style={{ ...T.subtitle, margin: 0 }}>
             {loading
               ? 'Loading…'
               : isFiltered
@@ -254,6 +265,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
               color: C.textDim, fontSize: 13, pointerEvents: 'none',
             }}>⌕</span>
             <input
+              className="sh-field"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -280,6 +292,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
               return (
                 <button
                   key={cat}
+                  className={`sh-pill ${active ? 'sh-pill--active' : 'sh-pill--inactive'}`}
                   onClick={() => setCategoryFilter(cat)}
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -292,6 +305,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
                     letterSpacing: 0.3,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    boxShadow: active ? '0 3px 10px rgba(215,136,42,0.25)' : 'none',
                   }}
                 >
                   {cat !== 'all' && (
@@ -307,6 +321,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
 
           {/* Sort */}
           <select
+            className="sh-field"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as SortOrder)}
             style={{
@@ -347,22 +362,19 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
           border: `1px solid ${C.borderGold}`,
           borderRadius: 18,
           overflow: 'hidden',
+          boxShadow: C.shadowCard,
         }}>
           {/* Table header */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '2fr 1fr 1fr 2fr 1fr',
-            padding: '12px 20px',
+            padding: '14px 22px',
             borderBottom: `1px solid ${C.borderGold}`,
             background: C.bgHero,
             gap: 12,
           }}>
             {['Track', 'Category', 'Uploaded', 'Preview', ''].map((h) => (
-              <span key={h} style={{
-                fontSize: 9, letterSpacing: 3,
-                textTransform: 'uppercase',
-                color: C.textDim, fontWeight: 500,
-              }}>{h}</span>
+              <span key={h} style={T.tableHeader}>{h}</span>
             ))}
           </div>
 
@@ -400,37 +412,39 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
           )}
 
           {/* Rows */}
-          {!loading && visibleTracks.map((track) => {
+          {!loading && visibleTracks.map((track, i) => {
             const isConfirming = confirmId === track.id;
             const isDeleting = deletingId === track.id;
 
             return (
               <div
                 key={track.id}
+                className="sh-row"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '2fr 1fr 1fr 2fr 1fr',
                   gap: 12,
-                  padding: '14px 20px',
-                  borderBottom: `1px solid ${C.borderPurple}`,
+                  padding: '16px 22px',
+                  borderBottom: i === visibleTracks.length - 1 ? 'none' : `1px solid ${C.borderPurple}`,
                   alignItems: 'center',
                 }}
               >
                 <span style={{
-                  fontSize: 13, fontWeight: 500,
+                  fontSize: 13.5, fontWeight: 500,
                   color: C.textBright,
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>{track.title}</span>
 
                 <span style={{
-                  fontSize: 12, color: C.textMuted,
+                  fontSize: 12.5, color: C.textMuted,
                   display: 'flex', alignItems: 'center', gap: 6,
+                  textTransform: 'capitalize',
                 }}>
                   <span style={{ color: C.goldBright }}>{CATEGORY_ICONS[track.category] ?? '○'}</span>
                   {track.category}
                 </span>
 
-                <span style={{ fontSize: 12, color: C.textMuted }}>
+                <span style={{ fontSize: 12.5, color: C.textMuted }}>
                   {formatDate(track.createdAt)}
                 </span>
 
@@ -446,6 +460,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
                   {isConfirming ? (
                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                       <button
+                        className="sh-btn sh-btn-danger"
                         onClick={() => handleDelete(track)}
                         disabled={isDeleting}
                         style={{
@@ -462,6 +477,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
                         {isDeleting ? 'Deleting…' : 'Confirm'}
                       </button>
                       <button
+                        className="sh-btn sh-btn-ghost"
                         onClick={() => setConfirmId(null)}
                         disabled={isDeleting}
                         style={{
@@ -479,6 +495,7 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
                     </div>
                   ) : (
                     <button
+                      className="sh-btn sh-btn-ghost"
                       onClick={() => setConfirmId(track.id)}
                       style={{
                         padding: '6px 14px',

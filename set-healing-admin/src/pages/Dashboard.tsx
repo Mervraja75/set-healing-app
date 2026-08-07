@@ -26,7 +26,8 @@ const C = {
   textBright:   '#FFFFFF',
   textMid:      '#DDD0FF',
   textMuted:    '#B09ACC',
-  textDim:      '#7A60A0',
+  textDim:      '#9683BE',
+  textFaint:    '#6E5993',
 
   borderGold:   goldAlpha(0.18),
   borderPurple: 'rgba(180, 140, 255, 0.10)',
@@ -35,6 +36,34 @@ const C = {
   glowPurple:   'rgba(100, 50, 180, 0.15)',
 
   aurora:       '#7EFFD4',
+
+  shadowCard:    '0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)',
+  shadowSidebar: '10px 0 34px rgba(0,0,0,0.28)',
+  shadowStat:    '0 8px 22px rgba(0,0,0,0.3)',
+};
+
+/* ---------------------------------------
+   TYPE SCALE (shared across the dashboard)
+---------------------------------------- */
+const T = {
+  eyebrow: {
+    fontSize: 10, letterSpacing: 3, textTransform: 'uppercase' as const,
+    color: C.textDim, fontWeight: 600,
+  },
+  sectionLabel: {
+    fontSize: 11, letterSpacing: 2.5, textTransform: 'uppercase' as const,
+    color: C.textDim, fontWeight: 600,
+  },
+  h1: {
+    fontSize: 34, fontWeight: 800, color: C.textBright, letterSpacing: -0.8,
+  },
+  subtitle: {
+    fontSize: 14, fontWeight: 400, color: C.textMid,
+  },
+  tableHeader: {
+    fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' as const,
+    color: C.textDim, fontWeight: 600,
+  },
 };
 
 /* ---------------------------------------
@@ -44,48 +73,48 @@ function StatCard({
   label,
   value,
   sub,
+  live = false,
 }: {
   label: string;
   value: string;
   sub?: string;
+  /** Live cards (backed by real data) get the prominent gold treatment; placeholder cards read as dimmed/inactive. */
+  live?: boolean;
 }) {
   return (
-    <div style={{
-      background: C.bgCardDeep,
-      border: `1px solid ${C.borderGold}`,
+    <div className="sh-stat-card" style={{
+      background: live ? C.bgCardDeep : C.bgCard,
+      border: `1px solid ${live ? C.borderGold : C.borderPurple}`,
       borderRadius: 16,
-      padding: '20px 22px',
+      padding: '22px 24px',
       flex: 1,
-      minWidth: 140,
+      minWidth: 150,
       position: 'relative',
       overflow: 'hidden',
+      boxShadow: live ? C.shadowStat : 'none',
+      opacity: live ? 1 : 0.7,
     }}>
-      {/* Gold top bar */}
+      {/* Gold top bar — solid for live data, faint dashed hint for placeholders */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
-        height: 2, background: C.goldBright, opacity: 0.4,
+        height: 2,
+        background: live ? C.goldBright : C.borderPurple,
+        opacity: live ? 0.5 : 1,
       }} />
-      <p style={{
-        margin: '0 0 6px',
-        fontSize: 9,
-        letterSpacing: 4,
-        textTransform: 'uppercase',
-        color: C.textDim,
-        fontWeight: 400,
-      }}>{label}</p>
+      <p style={{ ...T.eyebrow, margin: '0 0 8px' }}>{label}</p>
       <p style={{
         margin: '0 0 4px',
-        fontSize: 28,
-        fontWeight: 700,
-        color: C.goldBright,
+        fontSize: 30,
+        fontWeight: 800,
+        color: live ? C.goldBright : C.textFaint,
         letterSpacing: -0.5,
       }}>{value}</p>
       {sub && (
         <p style={{
           margin: 0,
-          fontSize: 11,
-          color: C.textMuted,
-          fontWeight: 300,
+          fontSize: 11.5,
+          color: live ? C.textMuted : C.textFaint,
+          fontWeight: 400,
         }}>{sub}</p>
       )}
     </div>
@@ -110,6 +139,7 @@ function NavItem({
 }) {
   return (
     <button
+      className="sh-nav-item"
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       title={disabled ? 'Coming soon' : undefined}
@@ -121,11 +151,12 @@ function NavItem({
         padding: '11px 14px',
         borderRadius: 12,
         border: active ? `1px solid ${C.borderGold}` : '1px solid transparent',
-        background: active ? goldAlpha(0.08) : 'transparent',
+        background: active ? goldAlpha(0.09) : 'transparent',
+        boxShadow: active ? 'inset 0 1px 0 rgba(255,255,255,0.04)' : 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         marginBottom: 4,
-        opacity: disabled ? 0.45 : 1,
+        opacity: disabled ? 0.4 : 1,
       }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -133,9 +164,9 @@ function NavItem({
           {icon}
         </span>
         <span style={{
-          fontSize: 12,
+          fontSize: 12.5,
           fontWeight: active ? 600 : 400,
-          color: active ? C.textBright : C.textDim,
+          color: active ? C.textBright : C.textMuted,
           letterSpacing: 0.3,
         }}>{label}</span>
       </span>
@@ -243,12 +274,13 @@ export default function Dashboard() {
         flexShrink: 0,
         background: C.bgCard,
         borderRight: `1px solid ${C.borderGold}`,
-        padding: '32px 16px',
+        boxShadow: C.shadowSidebar,
+        padding: '32px 18px',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
         position: 'relative',
-        zIndex: 1,
+        zIndex: 2,
       }}>
 
         {/* Logo */}
@@ -261,14 +293,7 @@ export default function Dashboard() {
             letterSpacing: -1,
             lineHeight: 1,
           }}>SET</p>
-          <p style={{
-            margin: 0,
-            fontSize: 9,
-            letterSpacing: 5,
-            textTransform: 'uppercase',
-            color: C.textDim,
-            fontWeight: 300,
-          }}>Admin Panel</p>
+          <p style={{ ...T.eyebrow, margin: 0 }}>Admin Panel</p>
         </div>
 
         {/* Gold rule */}
@@ -307,31 +332,19 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Main content ── */}
-      <main style={{
+      <main className="sh-scroll" style={{
         flex: 1,
-        padding: '40px 36px',
+        padding: '44px 40px',
         overflowY: 'auto',
         position: 'relative',
         zIndex: 1,
       }}>
 
         {/* Page header */}
-        <div style={{ marginBottom: 32 }}>
-          <p style={{
-            margin: '0 0 6px',
-            fontSize: 9, letterSpacing: 5,
-            textTransform: 'uppercase',
-            color: C.textDim, fontWeight: 300,
-          }}>Control Centre</p>
-          <h1 style={{
-            margin: '0 0 6px',
-            fontSize: 32, fontWeight: 700,
-            color: C.textBright, letterSpacing: -0.5,
-          }}>Dashboard</h1>
-          <p style={{
-            margin: 0, fontSize: 13,
-            color: C.textMid, fontWeight: 300,
-          }}>Manage your SET Healing platform</p>
+        <div style={{ marginBottom: 34 }}>
+          <p style={{ ...T.eyebrow, margin: '0 0 8px' }}>Control Centre</p>
+          <h1 style={{ ...T.h1, margin: '0 0 8px' }}>Dashboard</h1>
+          <p style={{ ...T.subtitle, margin: 0 }}>Manage your SET Healing platform</p>
         </div>
 
         {/* Gold rule */}
@@ -342,10 +355,11 @@ export default function Dashboard() {
 
         {/* Stat cards */}
         <div style={{
-          display: 'flex', gap: 14, marginBottom: 36,
+          display: 'flex', gap: 16, marginBottom: 40,
           flexWrap: 'wrap',
         }}>
           <StatCard
+            live
             label="Total Tracks"
             value={statsLoading ? '—' : String(totalTracks ?? 0)}
             sub="Tracks uploaded"
@@ -356,15 +370,11 @@ export default function Dashboard() {
         </div>
 
         {/* Quick actions */}
-        <p style={{
-          margin: '0 0 14px',
-          fontSize: 9, letterSpacing: 5,
-          textTransform: 'uppercase',
-          color: C.textDim, fontWeight: 400,
-        }}>Quick Actions</p>
+        <p style={{ ...T.sectionLabel, margin: '0 0 16px' }}>Quick Actions</p>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 36 }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}>
           <button
+            className="sh-btn sh-btn-primary"
             onClick={() => setView('upload')}
             style={{
               padding: '14px 28px',
@@ -377,12 +387,14 @@ export default function Dashboard() {
               fontWeight: 700,
               letterSpacing: 2,
               textTransform: 'uppercase',
+              boxShadow: '0 4px 14px rgba(215,136,42,0.22)',
             }}
           >
             ◈  Upload New Track
           </button>
 
           <button
+            className="sh-btn sh-btn-secondary"
             onClick={() => setView('tracks')}
             style={{
               padding: '13px 24px',
@@ -399,6 +411,7 @@ export default function Dashboard() {
           </button>
 
           <button
+            className="sh-btn"
             disabled
             title="Coming soon"
             style={{
@@ -411,40 +424,32 @@ export default function Dashboard() {
               fontSize: 12,
               fontWeight: 500,
               letterSpacing: 1,
-              opacity: 0.6,
+              opacity: 0.55,
             }}>
             ◐  Manage Users <span style={{ fontSize: 8, letterSpacing: 0.5, textTransform: 'uppercase' }}>· Soon</span>
           </button>
         </div>
 
         {/* Recent activity placeholder */}
-        <p style={{
-          margin: '0 0 14px',
-          fontSize: 9, letterSpacing: 5,
-          textTransform: 'uppercase',
-          color: C.textDim, fontWeight: 400,
-        }}>Recent Activity</p>
+        <p style={{ ...T.sectionLabel, margin: '0 0 16px' }}>Recent Activity</p>
 
         <div style={{
           background: C.bgCardDeep,
           border: `1px solid ${C.borderGold}`,
           borderRadius: 18,
           overflow: 'hidden',
+          boxShadow: C.shadowCard,
         }}>
           {/* Table header */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '2fr 1fr 1fr 1fr',
-            padding: '12px 20px',
+            padding: '14px 22px',
             borderBottom: `1px solid ${C.borderGold}`,
             background: C.bgHero,
           }}>
             {['Track', 'Category', 'Status', 'Uploaded'].map((h) => (
-              <span key={h} style={{
-                fontSize: 9, letterSpacing: 3,
-                textTransform: 'uppercase',
-                color: C.textDim, fontWeight: 500,
-              }}>{h}</span>
+              <span key={h} style={T.tableHeader}>{h}</span>
             ))}
           </div>
 
@@ -471,6 +476,7 @@ export default function Dashboard() {
                 textTransform: 'uppercase', fontWeight: 300,
               }}>No tracks uploaded yet</p>
               <button
+                className="sh-btn sh-btn-secondary"
                 onClick={() => setView('upload')}
                 style={{
                   marginTop: 16,
@@ -491,28 +497,33 @@ export default function Dashboard() {
           )}
 
           {/* Rows */}
-          {!statsLoading && recentTracks.map((track) => (
+          {!statsLoading && recentTracks.map((track, i) => (
             <div
               key={track.id}
+              className="sh-row"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                padding: '14px 20px',
-                borderBottom: `1px solid ${C.borderPurple}`,
+                padding: '16px 22px',
+                borderBottom: i === recentTracks.length - 1 ? 'none' : `1px solid ${C.borderPurple}`,
                 alignItems: 'center',
               }}
             >
               <span style={{
-                fontSize: 13, fontWeight: 500, color: C.textBright,
+                fontSize: 13.5, fontWeight: 500, color: C.textBright,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>{track.title}</span>
-              <span style={{ fontSize: 12, color: C.textMuted, textTransform: 'capitalize' }}>
+              <span style={{ fontSize: 12.5, color: C.textMuted, textTransform: 'capitalize' }}>
                 {track.category}
               </span>
-              <span style={{ fontSize: 11, color: C.aurora, letterSpacing: 1, textTransform: 'uppercase' }}>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 10.5, color: C.aurora, letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600,
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.aurora }} />
                 Published
               </span>
-              <span style={{ fontSize: 12, color: C.textMuted }}>
+              <span style={{ fontSize: 12.5, color: C.textMuted }}>
                 {formatDate(track.createdAt)}
               </span>
             </div>
