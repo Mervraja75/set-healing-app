@@ -51,6 +51,10 @@ const CATEGORY_ICONS: Record<string, string> = {
   sleep: '◐', calm: '◎', focus: '◈', energy: '◆',
 };
 
+const KNOWN_CATEGORIES = ['sleep', 'calm', 'focus', 'energy'];
+
+type SortOrder = 'newest' | 'oldest' | 'title';
+
 /* ---------------------------------------
    TYPES
 ---------------------------------------- */
@@ -73,6 +77,10 @@ function formatDate(ts: Timestamp | null): string {
   });
 }
 
+function capitalize(s: string): string {
+  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
 /* ---------------------------------------
    COMPONENT
 ---------------------------------------- */
@@ -82,6 +90,10 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
   const [error,       setError]       = useState<string | null>(null);
   const [confirmId,   setConfirmId]   = useState<string | null>(null);
   const [deletingId,  setDeletingId]  = useState<string | null>(null);
+
+  const [searchQuery,     setSearchQuery]     = useState('');
+  const [categoryFilter,  setCategoryFilter]  = useState<string>('all');
+  const [sortOrder,       setSortOrder]       = useState<SortOrder>('newest');
 
   useEffect(() => {
     const q = query(collection(db, 'tracks'), orderBy('createdAt', 'desc'));
@@ -132,6 +144,31 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
       setConfirmId(null);
     }
   };
+
+  // Categories available in the filter bar: known ones first, then any
+  // unrecognized categories found in the live data, so it never hides tracks.
+  const categories = [
+    ...KNOWN_CATEGORIES,
+    ...Array.from(new Set(tracks.map((t) => t.category))).filter(
+      (c) => !KNOWN_CATEGORIES.includes(c)
+    ),
+  ];
+
+  const visibleTracks = tracks
+    .filter((t) =>
+      t.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    )
+    .filter((t) => categoryFilter === 'all' || t.category === categoryFilter)
+    .sort((a, b) => {
+      if (sortOrder === 'title') {
+        return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+      }
+      const aTime = a.createdAt?.toMillis() ?? 0;
+      const bTime = b.createdAt?.toMillis() ?? 0;
+      return sortOrder === 'oldest' ? aTime - bTime : bTime - aTime;
+    });
+
+  const isFiltered = searchQuery.trim() !== '' || categoryFilter !== 'all';
 
   return (
     <div style={{
@@ -188,13 +225,108 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
           <p style={{
             margin: 0, fontSize: 13,
             color: C.textMid, fontWeight: 300,
-          }}>{loading ? 'Loading…' : `${tracks.length} track${tracks.length === 1 ? '' : 's'} uploaded`}</p>
+          }}>
+            {loading
+              ? 'Loading…'
+              : isFiltered
+                ? `${visibleTracks.length} of ${tracks.length} track${tracks.length === 1 ? '' : 's'}`
+                : `${tracks.length} track${tracks.length === 1 ? '' : 's'} uploaded`}
+          </p>
         </div>
 
         {/* Gold rule */}
         <div style={{
           height: 1, background: C.borderGold, marginBottom: 28,
         }} />
+
+        {/* Search, filter & sort controls */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: 12,
+          marginBottom: 20,
+        }}>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 180 }}>
+            <span style={{
+              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+              color: C.textDim, fontSize: 13, pointerEvents: 'none',
+            }}>⌕</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by title…"
+              style={{
+                width: '100%',
+                background: C.bgCard,
+                border: `1px solid ${C.borderGold}`,
+                borderRadius: 99,
+                padding: '9px 14px 9px 34px',
+                fontSize: 13,
+                color: C.textBright,
+                fontFamily: 'inherit',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          {/* Category filter */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {['all', ...categories].map((cat) => {
+              const active = categoryFilter === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '6px 13px',
+                    background: active ? C.goldBright : 'transparent',
+                    border: `1px solid ${active ? C.goldBright : C.borderPurple}`,
+                    borderRadius: 99,
+                    color: active ? C.bg : C.textMuted,
+                    fontSize: 11, fontWeight: active ? 600 : 500,
+                    letterSpacing: 0.3,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {cat !== 'all' && (
+                    <span style={{ color: active ? C.bg : C.goldBright }}>
+                      {CATEGORY_ICONS[cat] ?? '○'}
+                    </span>
+                  )}
+                  {cat === 'all' ? 'All' : capitalize(cat)}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sort */}
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            style={{
+              marginLeft: 'auto',
+              background: C.bgCard,
+              border: `1px solid ${C.borderGold}`,
+              borderRadius: 99,
+              padding: '9px 14px',
+              fontSize: 12, fontWeight: 500,
+              color: C.textMid,
+              fontFamily: 'inherit',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="title">Title A-Z</option>
+          </select>
+        </div>
 
         {/* Error */}
         {error && (
@@ -256,8 +388,19 @@ export default function Tracks({ onBack }: { onBack?: () => void }) {
             </div>
           )}
 
+          {/* No results for current search/filter */}
+          {!loading && tracks.length > 0 && visibleTracks.length === 0 && (
+            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+              <p style={{
+                margin: 0, fontSize: 12,
+                color: C.textDim, letterSpacing: 2,
+                textTransform: 'uppercase', fontWeight: 300,
+              }}>No tracks match your search</p>
+            </div>
+          )}
+
           {/* Rows */}
-          {!loading && tracks.map((track) => {
+          {!loading && visibleTracks.map((track) => {
             const isConfirming = confirmId === track.id;
             const isDeleting = deletingId === track.id;
 
