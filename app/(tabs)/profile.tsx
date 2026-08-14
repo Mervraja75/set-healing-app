@@ -347,6 +347,18 @@ export default function ProfileScreen() {
           >
             <Text style={styles.previewOnboardingBtnText}>Preview Onboarding</Text>
           </TouchableOpacity>
+
+          {/* TEMP — Preview Subscribe Screen. Remove once the new paywall
+              design has been reviewed. */}
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Preview subscribe screen"
+            style={styles.previewOnboardingBtn}
+            onPress={() => router.push('/subscribe')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.previewOnboardingBtnText}>Preview Subscribe Screen</Text>
+          </TouchableOpacity>
         </View>
       )}
 

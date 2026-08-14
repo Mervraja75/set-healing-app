@@ -185,6 +185,9 @@ export default function TestScreen() {
   const [freqEnabled,   setFreqEnabled]  = useState(false);
   const [freqIntensity, setFreqIntensity]= useState(30);
 
+  // Day 67 — Bilateral (L/R panning) mode, off by default
+  const [bilateralEnabled, setBilateralEnabled] = useState(false);
+
   // Day 63 — slider position (0–100) drives Hz via log scale
   const [sliderPos, setSliderPos] = useState(() => hzToSlider(frequency));
 
@@ -459,6 +462,12 @@ export default function TestScreen() {
     if (freqEnabled && isPlaying) await frequencyEngine.setIntensity(v);
   };
 
+  const handleBilateralToggle = async () => {
+    const next = !bilateralEnabled;
+    setBilateralEnabled(next);
+    await frequencyEngine.setBilateralMode(next);
+  };
+
   /* ── Cleanup ── */
   useEffect(() => {
     return () => { teardown().catch(() => {}); };
@@ -695,6 +704,28 @@ export default function TestScreen() {
               <Text style={styles.sliderHint}>Blends the healing tone with the audio session</Text>
             </View>
 
+            <View style={styles.sliderDivider} />
+
+            {/* Bilateral panning — Day 67 */}
+            <View style={styles.freqCardHeader}>
+              <View>
+                <Text style={styles.sliderLabel}>Bilateral panning</Text>
+                <Text style={styles.sliderHint}>Alternates the tone left ↔ right ear</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.freqToggle, bilateralEnabled && styles.freqToggleActive]}
+                onPress={handleBilateralToggle}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.freqToggleText, bilateralEnabled && { color: activeRange.color }]}>
+                  {bilateralEnabled ? 'On' : 'Off'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {bilateralEnabled && (
+              <Text style={styles.headphoneNote}>🎧 Best with headphones</Text>
+            )}
+
             <View style={styles.presetRow}>
               {FREQUENCY_RANGES.map((range) => {
                 const active = activeRange.id === range.id;
@@ -805,6 +836,7 @@ const styles = StyleSheet.create({
   bassCardValue:  { fontSize: 20, fontWeight: '700', color: C.goldBright, letterSpacing: 0.3 },
   bassHint:       { fontSize: 11, color: C.textDim, fontWeight: '300', paddingHorizontal: 18, marginBottom: 8, lineHeight: 16 },
   bassRateHint:   { fontSize: 11, color: C.textDim, fontWeight: '300', lineHeight: 16, marginTop: 6 },
+  headphoneNote:  { fontSize: 11, color: C.aurora, fontWeight: '600', marginTop: 8, paddingHorizontal: 18 },
 
   presetRow:            { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 18, paddingBottom: 4 },
   presetChip:           { backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderPurple, borderRadius: 99, paddingVertical: 7, paddingHorizontal: 14 },

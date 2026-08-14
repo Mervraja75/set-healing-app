@@ -177,35 +177,131 @@ export function bassLevelToVolume(level: number): number {
 /* ---------------------------------------
    SECTION F — Lazy asset loader
 ---------------------------------------- */
+const TONE_MAP: Record<string, any> = {
+  // Delta
+  tone_001hz: require('../assets/tones/tone_001hz.mp3'), tone_002hz: require('../assets/tones/tone_002hz.mp3'), tone_003hz: require('../assets/tones/tone_003hz.mp3'),
+  tone_004hz: require('../assets/tones/tone_004hz.mp3'),
+  // Theta / Earth
+  tone_006hz: require('../assets/tones/tone_006hz.mp3'), tone_007hz: require('../assets/tones/tone_007hz.mp3'), 'tone_7.83hz': require('../assets/tones/tone_7.83hz.mp3'),
+  tone_008hz: require('../assets/tones/tone_008hz.mp3'),
+  // Alpha
+  tone_010hz: require('../assets/tones/tone_010hz.mp3'), tone_012hz: require('../assets/tones/tone_012hz.mp3'), tone_014hz: require('../assets/tones/tone_014hz.mp3'),
+  // Beta / Gamma
+  tone_020hz: require('../assets/tones/tone_020hz.mp3'), tone_030hz: require('../assets/tones/tone_030hz.mp3'), tone_040hz: require('../assets/tones/tone_040hz.mp3'),
+  tone_100hz: require('../assets/tones/tone_100hz.mp3'),
+  // Healing band
+  tone_111hz: require('../assets/tones/tone_111hz.mp3'), 'tone_136.1hz': require('../assets/tones/tone_136.1hz.mp3'), tone_160hz: require('../assets/tones/tone_160hz.mp3'),
+  // Solfeggio
+  tone_174hz: require('../assets/tones/tone_174hz.mp3'), tone_222hz: require('../assets/tones/tone_222hz.mp3'), tone_256hz: require('../assets/tones/tone_256hz.mp3'),
+  tone_285hz: require('../assets/tones/tone_285hz.mp3'), tone_304hz: require('../assets/tones/tone_304hz.mp3'), tone_396hz: require('../assets/tones/tone_396hz.mp3'),
+  tone_417hz: require('../assets/tones/tone_417hz.mp3'), tone_432hz: require('../assets/tones/tone_432hz.mp3'), tone_440hz: require('../assets/tones/tone_440hz.mp3'),
+  tone_444hz: require('../assets/tones/tone_444hz.mp3'), tone_465hz: require('../assets/tones/tone_465hz.mp3'), tone_528hz: require('../assets/tones/tone_528hz.mp3'),
+  tone_555hz: require('../assets/tones/tone_555hz.mp3'), tone_572hz: require('../assets/tones/tone_572hz.mp3'), tone_639hz: require('../assets/tones/tone_639hz.mp3'),
+  tone_727hz: require('../assets/tones/tone_727hz.mp3'), tone_741hz: require('../assets/tones/tone_741hz.mp3'), tone_777hz: require('../assets/tones/tone_777hz.mp3'),
+  tone_787hz: require('../assets/tones/tone_787hz.mp3'), tone_800hz: require('../assets/tones/tone_800hz.mp3'), tone_852hz: require('../assets/tones/tone_852hz.mp3'),
+  tone_880hz: require('../assets/tones/tone_880hz.mp3'), tone_963hz: require('../assets/tones/tone_963hz.mp3'),
+  // Cosmic / Rife high-spectrum
+  tone_994hz: require('../assets/tones/tone_994hz.mp3'), tone_1000hz: require('../assets/tones/tone_1000hz.mp3'), tone_1111hz: require('../assets/tones/tone_1111hz.mp3'),
+  tone_1150hz: require('../assets/tones/tone_1150hz.mp3'), tone_1550hz: require('../assets/tones/tone_1550hz.mp3'), tone_2720hz: require('../assets/tones/tone_2720hz.mp3'),
+  tone_5000hz: require('../assets/tones/tone_5000hz.mp3'),
+};
+
 function loadToneAsset(hz: number): any | null {
   const padded   = String(hz).padStart(3, '0');
   const filename = `tone_${padded}hz`;
-
-  // Replace nulls with require() after running generate-tones.js
-  const TONE_MAP: Record<string, any> = {
-    // Delta
-    tone_001hz: null, tone_002hz: null, tone_003hz: null, tone_004hz: null,
-    // Theta / Earth
-    tone_006hz: null, tone_007hz: null, 'tone_7.83hz': null, tone_008hz: null,
-    // Alpha
-    tone_010hz: null, tone_012hz: null, tone_014hz: null,
-    // Beta / Gamma
-    tone_020hz: null, tone_030hz: null, tone_040hz: null, tone_100hz: null,
-    // Healing band
-    tone_111hz: null, 'tone_136.1hz': null, tone_160hz: null,
-    // Solfeggio
-    tone_174hz: null, tone_222hz: null, tone_256hz: null, tone_285hz: null,
-    tone_304hz: null, tone_396hz: null, tone_417hz: null, tone_432hz: null,
-    tone_440hz: null, tone_444hz: null, tone_465hz: null, tone_528hz: null,
-    tone_555hz: null, tone_572hz: null, tone_639hz: null, tone_727hz: null,
-    tone_741hz: null, tone_777hz: null, tone_787hz: null, tone_800hz: null,
-    tone_852hz: null, tone_880hz: null, tone_963hz: null,
-    // Cosmic / Rife high-spectrum
-    tone_994hz: null, tone_1000hz: null, tone_1111hz: null, tone_1150hz: null,
-    tone_1550hz: null, tone_2720hz: null, tone_5000hz: null,
-  };
-
   return TONE_MAP[filename] ?? null;
+}
+
+/* ---------------------------------------
+   SECTION F.1 — Bilateral (L/R panning) assets
+   Day 67
+
+   expo-av's Audio.Sound.setVolumeAsync(volume, audioPan) cannot be used
+   for this: iOS has no native audioPan implementation at all (silent
+   no-op), and Android only wires audioPan through the legacy MediaPlayer
+   backend, not the default ExoPlayer backend it actually loads sounds
+   with. Neither expo-av nor expo-audio expose real stereo panning.
+
+   Instead, bilateral tones are pre-rendered stereo files where the pan
+   oscillation is baked into the waveform itself (see
+   scripts/generate-tones.js --bilateral). "Pan speed" is therefore a
+   choice among pre-rendered interval variants rather than a free-form
+   runtime value.
+---------------------------------------- */
+export const BILATERAL_PAN_INTERVALS_SEC = [0.5, 1, 2, 4] as const;
+export type BilateralPanInterval = typeof BILATERAL_PAN_INTERVALS_SEC[number];
+const DEFAULT_BILATERAL_INTERVAL_SEC: BilateralPanInterval = 1;
+
+export function nearestBilateralInterval(intervalSec: number): BilateralPanInterval {
+  return BILATERAL_PAN_INTERVALS_SEC.reduce((closest, opt) =>
+    Math.abs(opt - intervalSec) < Math.abs(closest - intervalSec) ? opt : closest
+  );
+}
+
+type BilateralAssetSlots = Record<BilateralPanInterval, any>;
+
+const BILATERAL_TONE_MAP: Record<string, BilateralAssetSlots> = {
+  // Delta
+  tone_001hz: { 0.5: require('../assets/tones/tone_001hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_001hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_001hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_001hz_bilateral_4s.mp3') },
+  tone_002hz: { 0.5: require('../assets/tones/tone_002hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_002hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_002hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_002hz_bilateral_4s.mp3') },
+  tone_003hz: { 0.5: require('../assets/tones/tone_003hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_003hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_003hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_003hz_bilateral_4s.mp3') },
+  tone_004hz: { 0.5: require('../assets/tones/tone_004hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_004hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_004hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_004hz_bilateral_4s.mp3') },
+  // Theta / Earth
+  tone_006hz: { 0.5: require('../assets/tones/tone_006hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_006hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_006hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_006hz_bilateral_4s.mp3') },
+  tone_007hz: { 0.5: require('../assets/tones/tone_007hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_007hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_007hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_007hz_bilateral_4s.mp3') },
+  'tone_7.83hz': { 0.5: require('../assets/tones/tone_7.83hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_7.83hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_7.83hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_7.83hz_bilateral_4s.mp3') },
+  tone_008hz: { 0.5: require('../assets/tones/tone_008hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_008hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_008hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_008hz_bilateral_4s.mp3') },
+  // Alpha
+  tone_010hz: { 0.5: require('../assets/tones/tone_010hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_010hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_010hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_010hz_bilateral_4s.mp3') },
+  tone_012hz: { 0.5: require('../assets/tones/tone_012hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_012hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_012hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_012hz_bilateral_4s.mp3') },
+  tone_014hz: { 0.5: require('../assets/tones/tone_014hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_014hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_014hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_014hz_bilateral_4s.mp3') },
+  // Beta / Gamma
+  tone_020hz: { 0.5: require('../assets/tones/tone_020hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_020hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_020hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_020hz_bilateral_4s.mp3') },
+  tone_030hz: { 0.5: require('../assets/tones/tone_030hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_030hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_030hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_030hz_bilateral_4s.mp3') },
+  tone_040hz: { 0.5: require('../assets/tones/tone_040hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_040hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_040hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_040hz_bilateral_4s.mp3') },
+  tone_100hz: { 0.5: require('../assets/tones/tone_100hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_100hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_100hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_100hz_bilateral_4s.mp3') },
+  // Healing band
+  tone_111hz: { 0.5: require('../assets/tones/tone_111hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_111hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_111hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_111hz_bilateral_4s.mp3') },
+  'tone_136.1hz': { 0.5: require('../assets/tones/tone_136.1hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_136.1hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_136.1hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_136.1hz_bilateral_4s.mp3') },
+  tone_160hz: { 0.5: require('../assets/tones/tone_160hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_160hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_160hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_160hz_bilateral_4s.mp3') },
+  // Solfeggio
+  tone_174hz: { 0.5: require('../assets/tones/tone_174hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_174hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_174hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_174hz_bilateral_4s.mp3') },
+  tone_222hz: { 0.5: require('../assets/tones/tone_222hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_222hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_222hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_222hz_bilateral_4s.mp3') },
+  tone_256hz: { 0.5: require('../assets/tones/tone_256hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_256hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_256hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_256hz_bilateral_4s.mp3') },
+  tone_285hz: { 0.5: require('../assets/tones/tone_285hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_285hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_285hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_285hz_bilateral_4s.mp3') },
+  tone_304hz: { 0.5: require('../assets/tones/tone_304hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_304hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_304hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_304hz_bilateral_4s.mp3') },
+  tone_396hz: { 0.5: require('../assets/tones/tone_396hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_396hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_396hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_396hz_bilateral_4s.mp3') },
+  tone_417hz: { 0.5: require('../assets/tones/tone_417hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_417hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_417hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_417hz_bilateral_4s.mp3') },
+  tone_432hz: { 0.5: require('../assets/tones/tone_432hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_432hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_432hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_432hz_bilateral_4s.mp3') },
+  tone_440hz: { 0.5: require('../assets/tones/tone_440hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_440hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_440hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_440hz_bilateral_4s.mp3') },
+  tone_444hz: { 0.5: require('../assets/tones/tone_444hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_444hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_444hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_444hz_bilateral_4s.mp3') },
+  tone_465hz: { 0.5: require('../assets/tones/tone_465hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_465hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_465hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_465hz_bilateral_4s.mp3') },
+  tone_528hz: { 0.5: require('../assets/tones/tone_528hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_528hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_528hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_528hz_bilateral_4s.mp3') },
+  tone_555hz: { 0.5: require('../assets/tones/tone_555hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_555hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_555hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_555hz_bilateral_4s.mp3') },
+  tone_572hz: { 0.5: require('../assets/tones/tone_572hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_572hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_572hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_572hz_bilateral_4s.mp3') },
+  tone_639hz: { 0.5: require('../assets/tones/tone_639hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_639hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_639hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_639hz_bilateral_4s.mp3') },
+  tone_727hz: { 0.5: require('../assets/tones/tone_727hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_727hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_727hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_727hz_bilateral_4s.mp3') },
+  tone_741hz: { 0.5: require('../assets/tones/tone_741hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_741hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_741hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_741hz_bilateral_4s.mp3') },
+  tone_777hz: { 0.5: require('../assets/tones/tone_777hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_777hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_777hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_777hz_bilateral_4s.mp3') },
+  tone_787hz: { 0.5: require('../assets/tones/tone_787hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_787hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_787hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_787hz_bilateral_4s.mp3') },
+  tone_800hz: { 0.5: require('../assets/tones/tone_800hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_800hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_800hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_800hz_bilateral_4s.mp3') },
+  tone_852hz: { 0.5: require('../assets/tones/tone_852hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_852hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_852hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_852hz_bilateral_4s.mp3') },
+  tone_880hz: { 0.5: require('../assets/tones/tone_880hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_880hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_880hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_880hz_bilateral_4s.mp3') },
+  tone_963hz: { 0.5: require('../assets/tones/tone_963hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_963hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_963hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_963hz_bilateral_4s.mp3') },
+  // Cosmic / Rife high-spectrum
+  tone_994hz: { 0.5: require('../assets/tones/tone_994hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_994hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_994hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_994hz_bilateral_4s.mp3') },
+  tone_1000hz: { 0.5: require('../assets/tones/tone_1000hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_1000hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_1000hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_1000hz_bilateral_4s.mp3') },
+  tone_1111hz: { 0.5: require('../assets/tones/tone_1111hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_1111hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_1111hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_1111hz_bilateral_4s.mp3') },
+  tone_1150hz: { 0.5: require('../assets/tones/tone_1150hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_1150hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_1150hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_1150hz_bilateral_4s.mp3') },
+  tone_1550hz: { 0.5: require('../assets/tones/tone_1550hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_1550hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_1550hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_1550hz_bilateral_4s.mp3') },
+  tone_2720hz: { 0.5: require('../assets/tones/tone_2720hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_2720hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_2720hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_2720hz_bilateral_4s.mp3') },
+  tone_5000hz: { 0.5: require('../assets/tones/tone_5000hz_bilateral_0_5s.mp3'), 1: require('../assets/tones/tone_5000hz_bilateral_1s.mp3'), 2: require('../assets/tones/tone_5000hz_bilateral_2s.mp3'), 4: require('../assets/tones/tone_5000hz_bilateral_4s.mp3') },
+};
+
+function loadBilateralToneAsset(hz: number, intervalSec: BilateralPanInterval): any | null {
+  const padded   = String(hz).padStart(3, '0');
+  const filename = `tone_${padded}hz`;
+  return BILATERAL_TONE_MAP[filename]?.[intervalSec] ?? null;
 }
 
 /* ---------------------------------------
@@ -228,6 +324,8 @@ export class FrequencyEngine {
   private lastIntensity:number             = 30;    // Day 66 — stored for restart
   private lastBassActive: boolean          = false; // Day 66 — stored for restart
   private restartTimer: ReturnType<typeof setTimeout> | null = null;
+  private bilateralEnabled:     boolean              = false;                        // Day 67
+  private bilateralIntervalSec: BilateralPanInterval = DEFAULT_BILATERAL_INTERVAL_SEC; // Day 67
 
   /* ── Day 66 — Internal start with retry ── */
   private async _startOnce(
@@ -236,13 +334,22 @@ export class FrequencyEngine {
     bassIsActive: boolean
   ): Promise<boolean> {
     const preset = getClosestPreset(hz);
-    const asset  = loadToneAsset(preset.hz);
+    const asset  = this.bilateralEnabled
+      ? loadBilateralToneAsset(preset.hz, this.bilateralIntervalSec)
+      : loadToneAsset(preset.hz);
 
     if (!asset) {
-      console.info(
-        `[FrequencyEngine] Tone for ${hz} Hz not ready. ` +
-        `Run: node scripts/generate-tones.js`
-      );
+      if (this.bilateralEnabled) {
+        console.info(
+          `[FrequencyEngine] Bilateral tone for ${hz} Hz @ ${this.bilateralIntervalSec}s/side not ready. ` +
+          `Run: node scripts/generate-tones.js --bilateral`
+        );
+      } else {
+        console.info(
+          `[FrequencyEngine] Tone for ${hz} Hz not ready. ` +
+          `Run: node scripts/generate-tones.js`
+        );
+      }
       return false;
     }
 
@@ -339,6 +446,32 @@ export class FrequencyEngine {
     if (newPreset.hz !== currentPreset.hz) {
       await this.start(hz, intensity, bassIsActive);
     }
+  }
+
+  /* ── Public: setBilateralMode (Day 67) ──
+     Toggles bilateral (L/R alternating) panning. Optional and separate
+     from normal playback — off by default, so existing start()/setFrequency()
+     callers are unaffected unless this is explicitly turned on.
+     If a tone is already playing, it restarts against the bilateral (or
+     mono) asset so the change takes effect immediately. ── */
+  async setBilateralMode(
+    enabled: boolean,
+    intervalSec: number = DEFAULT_BILATERAL_INTERVAL_SEC
+  ): Promise<void> {
+    this.bilateralEnabled     = enabled;
+    this.bilateralIntervalSec = nearestBilateralInterval(intervalSec);
+
+    if (this.shouldRun && this.sound) {
+      await this.start(this.currentHz || 440, this.lastIntensity, this.lastBassActive);
+    }
+  }
+
+  get isBilateralMode(): boolean {
+    return this.bilateralEnabled;
+  }
+
+  get bilateralInterval(): BilateralPanInterval {
+    return this.bilateralIntervalSec;
   }
 
   /* ── Public: stop ── */

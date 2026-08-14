@@ -100,6 +100,9 @@ export default function PractitionerScreen() {
   const [freqEnabled,   setFreqEnabled]   = useState(false);
   const [freqIntensity, setFreqIntensity] = useState(30);
 
+  // Day 67 — Bilateral (L/R panning) mode, off by default
+  const [bilateralEnabled, setBilateralEnabled] = useState(false);
+
   const { isTablet, isTabletLandscape, isTabletPortrait, spacing } = useResponsive();
 
   // Grid column widths derived from responsive state
@@ -134,6 +137,12 @@ export default function PractitionerScreen() {
   const handleFreqIntensityChange = async (v: number) => {
     setFreqIntensity(v);
     if (freqEnabled && isPlaying) await frequencyEngine.setIntensity(v);
+  };
+
+  const handleBilateralToggle = async () => {
+    const next = !bilateralEnabled;
+    setBilateralEnabled(next);
+    await frequencyEngine.setBilateralMode(next);
   };
 
   return (
@@ -358,6 +367,28 @@ export default function PractitionerScreen() {
           <ControlCard label="" value={freqIntensity} unit="%" min={0} max={100} onChange={handleFreqIntensityChange} description="" />
           <Text style={styles.bassRateHint}>Blends tone with healing audio track</Text>
         </View>
+
+        <View style={styles.sliderDivider} />
+
+        {/* Bilateral panning — Day 67 */}
+        <View style={styles.freqCardHeader}>
+          <View>
+            <Text style={styles.controlLabel}>Bilateral panning</Text>
+            <Text style={styles.bassRateHint}>Alternates the tone left ↔ right ear</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.freqToggle, bilateralEnabled && styles.freqToggleActive]}
+            onPress={handleBilateralToggle}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.freqToggleText, bilateralEnabled && styles.freqToggleTextActive]}>
+              {bilateralEnabled ? 'On' : 'Off'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {bilateralEnabled && (
+          <Text style={styles.headphoneNote}>🎧 Best with headphones</Text>
+        )}
       </View>
 
       {/* Footer */}
@@ -454,6 +485,7 @@ const styles = StyleSheet.create({
   freqToggleActive:     { backgroundColor: 'rgba(126,255,212,0.10)', borderColor: 'rgba(126,255,212,0.3)' },
   freqToggleText:       { fontSize: 11, color: C.textDim, fontWeight: '600', letterSpacing: 1 },
   freqToggleTextActive: { color: C.aurora },
+  headphoneNote:        { fontSize: 11, color: C.aurora, fontWeight: '600', marginTop: 8 },
   freqChip:             { backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderPurple, borderRadius: 99, paddingVertical: 6, paddingHorizontal: 12 },
   freqChipActive:       { backgroundColor: 'rgba(126,255,212,0.08)', borderColor: 'rgba(126,255,212,0.3)' },
   freqChipText:         { fontSize: 10, color: C.textDim, fontWeight: '500', letterSpacing: 1 },
