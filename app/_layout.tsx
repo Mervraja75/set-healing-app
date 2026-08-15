@@ -17,6 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { FavoritesProvider } from '@/context/FavoritesContext';
 import { PlayerProvider } from '@/context/PlayerContext';
 
 const ONBOARDING_KEY = 'onboarding_complete';
@@ -90,6 +91,7 @@ export default function RootLayout() {
     // Force our custom dark theme — never switches to DefaultTheme
     <ThemeProvider value={SET_THEME}>
       <AuthProvider>
+        <FavoritesProvider>
         <PlayerProvider>
 
           <Stack
@@ -145,6 +147,12 @@ export default function RootLayout() {
               options={{ headerShown: false }}
             />
 
+            {/* Favorites */}
+            <Stack.Screen
+              name="favorites"
+              options={{ headerShown: false }}
+            />
+
             {/* Paywall */}
             <Stack.Screen
               name="paywall"
@@ -182,6 +190,7 @@ export default function RootLayout() {
           </Stack>
 
         </PlayerProvider>
+        </FavoritesProvider>
       </AuthProvider>
 
       {/* Light icons on dark bg. backgroundColor targets Android status bar. */}

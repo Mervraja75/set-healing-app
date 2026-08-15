@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 
+import FavoriteButton from '@/components/FavoriteButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { useResponsive } from '@/hooks/useResponsive';
 
@@ -155,7 +156,20 @@ function CompositionCard({
               {composition.duration}
             </Text>
           </View>
-          <Text style={styles.cardArrow}>›</Text>
+          <View style={styles.cardBottomRight}>
+            <FavoriteButton
+              size="sm"
+              item={{
+                type: 'composition',
+                itemId: composition.id,
+                title: composition.title,
+                subtitle: composition.description,
+                accentColor: composition.accentColor,
+                sound: composition.sound,
+              }}
+            />
+            <Text style={styles.cardArrow}>›</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -176,6 +190,8 @@ export default function HealingMusicScreen() {
       title: c.title,
       description: c.description,
       sound: c.sound,
+      favoriteType: 'composition' as const,
+      accentColor: c.accentColor,
     }));
     setPlaylist(tracks, index);
     router.push('/test');
@@ -432,6 +448,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  cardBottomRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   durationBadge: {
     borderWidth: 1,

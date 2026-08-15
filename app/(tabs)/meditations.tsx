@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import FavoriteButton from '@/components/FavoriteButton';
 
 /* ---------------------------------------
    DESIGN TOKENS
@@ -153,8 +154,19 @@ function SessionCard({ session }: { session: MeditationSession }) {
             </View>
           </View>
 
-          {/* Right: duration badge + arrow */}
+          {/* Right: favorite + duration badge + arrow */}
           <View style={styles.cardRight}>
+            <FavoriteButton
+              size="sm"
+              item={{
+                type: 'meditation',
+                itemId: session.id,
+                title: session.title,
+                subtitle: session.description,
+                accentColor: session.accentColor,
+                sound: session.sound,
+              }}
+            />
             <View style={[styles.durationBadge, { borderColor: session.accentColor + '55' }]}>
               <Text style={[styles.durationText, { color: session.accentColor }]}>
                 {session.duration}

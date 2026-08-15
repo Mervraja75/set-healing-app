@@ -27,6 +27,7 @@ export type UserRole = 'guest' | 'customer' | 'admin';
 
 // SECTION 1B — User model
 export type AuthUser = {
+  uid: string;
   name: string;
   email: string;
 };
@@ -92,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthContext] Firebase email:', firebaseUser.email);
 
       setUser({
+        uid:   firebaseUser.uid,
         name:  firebaseUser.displayName ?? 'Member',
         email: firebaseUser.email ?? '',
       });
@@ -124,13 +126,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Role defaults to 'customer'; Firebase Auth listener may
   // override with 'admin' if the user also has a live session.
   const login = (email: string) => {
-    setUser({ name: 'Member', email });
+    setUser({ uid: auth.currentUser?.uid ?? '', name: 'Member', email });
     setUserRole('customer');
   };
 
   // SECTION 4C — Register (UI-only)
   const register = (name: string, email: string) => {
-    setUser({ name, email });
+    setUser({ uid: auth.currentUser?.uid ?? '', name, email });
     setUserRole('customer');
   };
 

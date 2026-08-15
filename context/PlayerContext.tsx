@@ -7,6 +7,8 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
+import { FavoriteType } from '@/services/FavoritesService';
+
 // ---------------------------------------
 // SECTION 1 — Types
 // ---------------------------------------
@@ -16,6 +18,10 @@ export type PlaylistTrack = {
   description: string;
   sound: string;
   audioUrl?: string;
+  // Day 102 — Favorites: tags this track's type so the player screen's
+  // heart button writes to the right favorites bucket. Defaults to 'track'.
+  favoriteType?: FavoriteType;
+  accentColor?: string;
 };
 
 type PlayerContextType = {

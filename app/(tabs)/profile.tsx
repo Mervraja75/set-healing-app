@@ -161,6 +161,21 @@ export default function ProfileScreen() {
 
       <View style={styles.goldRule} />
 
+      {/* ── My Favorites — visible for all signed-in users ── */}
+      {!isGuest && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="View your favorites"
+          style={styles.favoritesBtn}
+          onPress={() => router.push('/favorites')}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.favoritesBtnIcon}>♥</Text>
+          <Text style={styles.favoritesBtnText}>My Favorites</Text>
+          <Text style={styles.favoritesBtnArrow}>›</Text>
+        </TouchableOpacity>
+      )}
+
       {isAdmin ? (
         /* ── Admin: email + sign out ── */
         <View style={styles.adminInfoCard}>
@@ -530,6 +545,36 @@ const styles = StyleSheet.create({
     backgroundColor: C.borderGold,
     marginVertical: 20,
     marginHorizontal: 20,
+  },
+
+  // My Favorites row
+  favoritesBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: C.bgCardDeep,
+    borderWidth: 1,
+    borderColor: C.borderGold,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  favoritesBtnIcon: {
+    fontSize: 16,
+    color: GOLD,
+  },
+  favoritesBtnText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: C.textBright,
+    letterSpacing: 0.2,
+  },
+  favoritesBtnArrow: {
+    fontSize: 20,
+    color: C.textDim,
+    fontWeight: '300',
   },
 
   // Upgrade card

@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import FavoriteButton from '@/components/FavoriteButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { useResponsive } from '@/hooks/useResponsive';
 
@@ -170,7 +171,18 @@ function ElementCard({
             <Text style={[styles.subtitleText, { color: element.color }]}>{element.subtitle}</Text>
           </View>
 
-          {/* Expand chevron */}
+          {/* Favorite + expand chevron */}
+          <FavoriteButton
+            size="sm"
+            item={{
+              type: 'element',
+              itemId: element.id,
+              title: `${element.name} Element`,
+              subtitle: `${element.hz} Hz · ${element.subtitle}`,
+              accentColor: element.color,
+              sound: element.sound,
+            }}
+          />
           <Text style={[styles.chevron, isExpanded && styles.chevronUp]}>›</Text>
         </TouchableOpacity>
 
@@ -227,6 +239,8 @@ export default function ElementsScreen() {
         title: `${element.name} · ${element.hz} Hz`,
         description: `A ${element.hz} Hz vibroacoustic journey through the ${element.name} element — ${element.subtitle}`,
         sound: element.sound,
+        favoriteType: 'element',
+        accentColor: element.color,
       }],
       0
     );

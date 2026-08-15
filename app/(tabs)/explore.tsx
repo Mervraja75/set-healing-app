@@ -120,6 +120,14 @@ const ITEMS: ExploreItem[] = [
     color: '#27AE60',
     route: '/categories',
   },
+  {
+    id: 'favorites',
+    title: 'Favorites',
+    description: 'Everything you have saved, in one place',
+    icon: '♥',
+    color: '#E84393',
+    route: '/favorites',
+  },
 ];
 
 /* ---------------------------------------

@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import FavoriteButton from '@/components/FavoriteButton';
 
 // LayoutAnimation on Android requires this flag
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -227,7 +228,18 @@ function ChakraCard({
             </View>
           </View>
 
-          {/* Expand chevron */}
+          {/* Favorite + expand chevron */}
+          <FavoriteButton
+            size="sm"
+            item={{
+              type: 'chakra',
+              itemId: chakra.id,
+              title: `${chakra.name} Chakra`,
+              subtitle: `${chakra.hz} Hz · ${chakra.themes}`,
+              accentColor: chakra.color,
+              sound: chakra.sound,
+            }}
+          />
           <Text style={[styles.chevron, isExpanded && styles.chevronUp]}>›</Text>
         </TouchableOpacity>
 

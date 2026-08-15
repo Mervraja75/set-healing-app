@@ -8,14 +8,15 @@ import { useRouter } from 'expo-router';
 import { GOLD, goldAlpha } from '@/constants/Colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
 
+import FavoriteButton from '@/components/FavoriteButton';
 import { PlaylistTrack, usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { SkeletonBox } from '@/components/SkeletonBox';
 
 const C = {
@@ -32,9 +33,19 @@ type Track = {
 };
 
 const QUICK_ACTIONS: (PlaylistTrack & { icon: string })[] = [
-  { id: 'sleep', title: 'Sleep',  description: 'Slow frequencies for deep rest', sound: 'sleep', icon: '◐' },
-  { id: 'focus', title: 'Focus',  description: 'Frequencies for concentration',   sound: 'focus', icon: '◈' },
-  { id: 'calm',  title: 'Calm',   description: 'Relaxing sounds for peace',       sound: 'calm',  icon: '◎' },
+  { id: 'sleep', title: 'Sleep',  description: 'Slow frequencies for deep rest', sound: 'sleep', icon: '◐', favoriteType: 'track' },
+  { id: 'focus', title: 'Focus',  description: 'Frequencies for concentration',   sound: 'focus', icon: '◈', favoriteType: 'track' },
+  { id: 'calm',  title: 'Calm',   description: 'Relaxing sounds for peace',       sound: 'calm',  icon: '◎', favoriteType: 'track' },
+];
+
+type CategoryFilter = 'all' | 'sleep' | 'calm' | 'focus' | 'energy';
+
+const CATEGORY_FILTERS: { id: CategoryFilter; label: string }[] = [
+  { id: 'all',    label: 'All' },
+  { id: 'sleep',  label: 'Sleep' },
+  { id: 'calm',   label: 'Calm' },
+  { id: 'focus',  label: 'Focus' },
+  { id: 'energy', label: 'Energy' },
 ];
 
 function getCategoryDescription(cat: string) {
@@ -64,6 +75,9 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+
   const [reloadKey, setReloadKey] = useState(0);
   const handleRetry = () => setReloadKey((k) => k + 1);
 
@@ -73,7 +87,7 @@ export default function HomeScreen() {
       try {
         setLoading(true);
         setError(null);
-        const snap  = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc'), limit(10)));
+        const snap  = await getDocs(query(collection(db, 'tracks'), orderBy('createdAt', 'desc')));
         const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Track, 'id'>) }));
         if (mounted) setTracks(items);
       } catch { if (mounted) setError('Could not load tracks.'); }
@@ -88,11 +102,22 @@ export default function HomeScreen() {
   }, [tracks]);
   const newestTracks = useMemo(() => tracks.slice(0, 3), [tracks]);
 
+  // Day 102 — search + category filter
+  const isFiltering = searchQuery.trim() !== '' || selectedCategory !== 'all';
+  const filteredTracks = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return tracks.filter((t) =>
+      (selectedCategory === 'all' || t.category === selectedCategory) &&
+      (q === '' || t.title.toLowerCase().includes(q))
+    );
+  }, [tracks, searchQuery, selectedCategory]);
+
   const toPlaylist = (list: Track[]): PlaylistTrack[] =>
     list.map((t) => ({
       id: t.id, title: t.title,
       description: t.description ?? getCategoryDescription(t.category),
       sound: t.category, audioUrl: t.url,
+      favoriteType: 'track',
     }));
 
   // Day 55 — load full list as playlist, jump to tapped track
@@ -128,6 +153,17 @@ export default function HomeScreen() {
         <Text style={styles.trackCat}>{track.category.toUpperCase()}</Text>
       </View>
       {badge && <View style={styles.trackBadge}><Text style={styles.trackBadgeText}>{badge}</Text></View>}
+      <FavoriteButton
+        size="sm"
+        item={{
+          type: 'track',
+          itemId: track.id,
+          title: track.title,
+          subtitle: track.description ?? getCategoryDescription(track.category),
+          sound: track.category,
+          audioUrl: track.url,
+        }}
+      />
     </TouchableOpacity>
   );
 
@@ -145,7 +181,67 @@ export default function HomeScreen() {
       </View>
       <View style={styles.rule} />
 
-      {/* Two-column on tablet, single column on phone */}
+      {/* Search + category filter */}
+      <View style={styles.searchInputWrap}>
+        <Text style={styles.searchIcon}>⌕</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search tracks…"
+          placeholderTextColor={C.textDim}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Text style={styles.searchClear}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.filterChipsRow}>
+        {CATEGORY_FILTERS.map((c) => {
+          const active = selectedCategory === c.id;
+          return (
+            <TouchableOpacity
+              key={c.id}
+              style={[styles.filterChip, active && styles.filterChipActive]}
+              onPress={() => setSelectedCategory(c.id)}
+              activeOpacity={0.78}
+            >
+              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{c.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {isFiltering ? (
+        <>
+          <SectionLabel title={`Results${filteredTracks.length ? ` · ${filteredTracks.length}` : ''}`} />
+          {loading ? (
+            <View style={styles.trackList}>
+              {[0, 1, 2].map((i) => (
+                <View key={i} style={styles.trackCard}>
+                  <SkeletonBox width={40} height={40} borderRadius={999} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <SkeletonBox width="70%" height={14} />
+                    <SkeletonBox width="40%" height={10} />
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : filteredTracks.length === 0 ? (
+            <View style={styles.empty}><Text style={styles.emptyText}>No tracks match your search.</Text></View>
+          ) : (
+            <View style={styles.trackList}>
+              {filteredTracks.map((t) => renderTrack(t, filteredTracks))}
+            </View>
+          )}
+        </>
+      ) : (
+      /* Two-column on tablet, single column on phone */
       <View style={isTabletLandscape ? styles.tabletRow : undefined}>
 
         {/* Left column: hero card + quick actions */}
@@ -241,6 +337,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      )}
 
       <Text style={styles.wellnessFooter}>For wellness purposes only · Not medical advice</Text>
 
@@ -261,6 +358,24 @@ const styles = StyleSheet.create({
   logoFull: { fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: C.textDim, fontWeight: '300', marginBottom: 12 },
   tagline:  { fontSize: 13, color: C.textMid, textAlign: 'center', fontWeight: '300', lineHeight: 20 },
   rule:     { height: 1, backgroundColor: C.borderGold, marginVertical: 20, marginHorizontal: 20 },
+
+  searchInputWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: C.bgCardDeep, borderRadius: 14, borderWidth: 1, borderColor: C.borderGold,
+    paddingHorizontal: 16, height: 48, marginBottom: 12,
+  },
+  searchIcon:  { fontSize: 16, color: C.textDim, fontWeight: '600' },
+  searchInput: { flex: 1, fontSize: 14, color: C.textBright, fontWeight: '300', paddingVertical: 0 },
+  searchClear: { fontSize: 13, color: C.textDim, fontWeight: '600', paddingHorizontal: 2 },
+
+  filterChipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
+  filterChip: {
+    backgroundColor: C.bgCardDeep, borderWidth: 1, borderColor: C.borderPurple,
+    borderRadius: 99, paddingVertical: 8, paddingHorizontal: 16,
+  },
+  filterChipActive: { backgroundColor: goldAlpha(0.10), borderColor: C.borderGold },
+  filterChipText: { fontSize: 11, color: C.textDim, fontWeight: '500', letterSpacing: 0.5 },
+  filterChipTextActive: { color: C.goldBright },
 
   heroCard:      { backgroundColor: C.bgHero, borderRadius: 24, padding: 24, marginBottom: 28, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
   heroGlow:      { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: goldAlpha(0.07) },

@@ -15,6 +15,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import BackButton from '@/components/BackButton';
 import CustomSlider from '@/components/CustomSlider';
+import FavoriteButton from '@/components/FavoriteButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { useResponsive } from '@/hooks/useResponsive';
 import {
@@ -540,6 +541,22 @@ export default function TestScreen() {
 
           {/* Track info */}
           <View style={styles.trackInfo}>
+            {currentTrack && (
+              <View style={styles.trackFavoriteWrap}>
+                <FavoriteButton
+                  size="sm"
+                  item={{
+                    type: currentTrack.favoriteType ?? 'track',
+                    itemId: currentTrack.id,
+                    title: currentTrack.title,
+                    subtitle: currentTrack.description,
+                    accentColor: currentTrack.accentColor,
+                    sound: currentTrack.sound,
+                    audioUrl: currentTrack.audioUrl,
+                  }}
+                />
+              </View>
+            )}
             <Text style={styles.trackLabel}>{trackLabel}</Text>
             <Text style={[styles.trackTitle, isTabletPortrait && styles.trackTitleTabletP]}>{title}</Text>
             <Text style={styles.trackDesc}>{description}</Text>
@@ -785,7 +802,8 @@ const styles = StyleSheet.create({
   bassBarLi:{ left: 18, top: '50%' },
   bassBarRi:{ right: 18, top: '50%' },
 
-  trackInfo:       { alignItems: 'center', marginBottom: 24, paddingHorizontal: 12 },
+  trackInfo:       { alignItems: 'center', marginBottom: 24, paddingHorizontal: 12, position: 'relative' },
+  trackFavoriteWrap: { position: 'absolute', top: 0, right: 8, zIndex: 2 },
   trackLabel:      { fontSize: 9, letterSpacing: 5, textTransform: 'uppercase', color: C.textMuted, fontWeight: '400', marginBottom: 10 },
   trackTitle:      { fontSize: 28, fontWeight: '300', color: C.textBright, textAlign: 'center', letterSpacing: 0.3, marginBottom: 8 },
   trackDesc:       { fontSize: 13, color: C.textMid, textAlign: 'center', fontWeight: '300', lineHeight: 20, marginBottom: 8 },
