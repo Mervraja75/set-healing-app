@@ -19,6 +19,7 @@ import {
 
 import { useResponsive } from '@/hooks/useResponsive';
 
+import BackButton from '@/components/BackButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
@@ -174,6 +175,11 @@ export default function HealingScreen() {
       {/* Ambient glows */}
       <View style={styles.glowTopRight} />
       <View style={styles.glowMidLeft} />
+
+      {/* ── Back button ── */}
+      <View style={styles.topBar}>
+        <BackButton to="/(tabs)/explore" />
+      </View>
 
       {/* ── Header — always full width ── */}
       <View style={styles.header}>
@@ -332,6 +338,13 @@ const styles = StyleSheet.create({
     paddingTop: 68,
     paddingHorizontal: 22,
     backgroundColor: C.bg,
+  },
+
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
   },
 
   glowTopRight: {

@@ -1,7 +1,6 @@
 // =======================================
 // LAYOUT: Tabs (app/(tabs)/_layout.tsx)
 // Purpose: Bottom tab navigation
-// Day 99.1 — 5th Practitioner tab for admin role
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
@@ -13,7 +12,6 @@ import { GOLD, goldAlpha } from '@/constants/Colors';
 import { Platform } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useAuth } from '@/context/AuthContext';
 
 /* ---------------------------------------
    DESIGN TOKENS — match all screens
@@ -30,9 +28,6 @@ const C = {
    SECTION B — Tab Layout Component
 ---------------------------------------- */
 export default function TabLayout() {
-  const { userRole } = useAuth();
-  const isAdmin = userRole === 'admin';
-
   return (
     <Tabs
       screenOptions={{
@@ -79,17 +74,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── Healing ── */}
-      <Tabs.Screen
-        name="healing"
-        options={{
-          title: 'Healing',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="waveform.path.ecg" size={24} color={color} />
-          ),
-        }}
-      />
-
       {/* ── Explore ── */}
       <Tabs.Screen
         name="explore"
@@ -112,19 +96,9 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── Practitioner — visible for admin, hidden otherwise ── */}
-      <Tabs.Screen
-        name="practitioner"
-        options={{
-          href: isAdmin ? undefined : null,
-          title: 'Practitioner',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="stethoscope" size={22} color={color} />
-          ),
-        }}
-      />
-
       {/* ── Hidden screens — navigable but not in tab bar ── */}
+      <Tabs.Screen name="healing"       options={{ href: null }} />
+      <Tabs.Screen name="practitioner"  options={{ href: null }} />
       <Tabs.Screen name="meditations"   options={{ href: null }} />
       <Tabs.Screen name="breathwork"    options={{ href: null }} />
       <Tabs.Screen name="chakras"       options={{ href: null }} />

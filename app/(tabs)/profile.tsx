@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { cancelAllNotifications, scheduleMeditationReminder } from '@/services/NotificationService';
 
 /* ---------------------------------------
@@ -160,21 +161,6 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.goldRule} />
-
-      {/* ── My Favorites — visible for all signed-in users ── */}
-      {!isGuest && (
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="View your favorites"
-          style={styles.favoritesBtn}
-          onPress={() => router.push('/favorites')}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.favoritesBtnIcon}>♥</Text>
-          <Text style={styles.favoritesBtnText}>My Favorites</Text>
-          <Text style={styles.favoritesBtnArrow}>›</Text>
-        </TouchableOpacity>
-      )}
 
       {isAdmin ? (
         /* ── Admin: email + sign out ── */
@@ -330,27 +316,48 @@ export default function ProfileScreen() {
             <View style={styles.adminSectionLine} />
           </View>
 
-          {/* Practitioner Mode */}
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Open Practitioner Mode"
-            style={styles.adminPractitionerBtn}
-            onPress={() => router.push('/(tabs)/practitioner')}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.adminPractitionerBtnText}>Practitioner Mode  ›</Text>
-          </TouchableOpacity>
+          {/* Admin Dashboard + Practitioner Mode — equal-size square cards */}
+          <View style={styles.adminCardsRow}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Open Admin Dashboard"
+              style={styles.adminCard}
+              onPress={() => Linking.openURL('https://set-healing-admin.vercel.app')}
+              activeOpacity={0.85}
+            >
+              <View style={styles.adminCardContent}>
+                <View style={styles.adminCardIconWrap}>
+                  <IconSymbol name="square.grid.2x2.fill" size={20} color={GOLD} />
+                </View>
+                <View>
+                  <Text style={styles.adminCardLabel}>Admin Dashboard</Text>
+                  <View style={styles.adminCardFooter}>
+                    <Text style={styles.adminCardArrow}>→</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
 
-          {/* Admin Dashboard */}
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Open Admin Dashboard"
-            style={styles.adminDashBtn}
-            onPress={() => Linking.openURL('https://set-healing-admin.vercel.app')}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.adminDashBtnText}>Admin Dashboard  →</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Open Practitioner Mode"
+              style={styles.adminCard}
+              onPress={() => router.push('/(tabs)/practitioner')}
+              activeOpacity={0.85}
+            >
+              <View style={styles.adminCardContent}>
+                <View style={styles.adminCardIconWrap}>
+                  <IconSymbol name="stethoscope" size={20} color={GOLD} />
+                </View>
+                <View>
+                  <Text style={styles.adminCardLabel}>Practitioner Mode</Text>
+                  <View style={styles.adminCardFooter}>
+                    <Text style={styles.adminCardArrow}>→</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
 
           {/* Preview Onboarding — TEMP dev tool, admin-only */}
           <TouchableOpacity
@@ -545,36 +552,6 @@ const styles = StyleSheet.create({
     backgroundColor: C.borderGold,
     marginVertical: 20,
     marginHorizontal: 20,
-  },
-
-  // My Favorites row
-  favoritesBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: C.bgCardDeep,
-    borderWidth: 1,
-    borderColor: C.borderGold,
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  favoritesBtnIcon: {
-    fontSize: 16,
-    color: GOLD,
-  },
-  favoritesBtnText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: C.textBright,
-    letterSpacing: 0.2,
-  },
-  favoritesBtnArrow: {
-    fontSize: 20,
-    color: C.textDim,
-    fontWeight: '300',
   },
 
   // Upgrade card
@@ -853,38 +830,47 @@ const styles = StyleSheet.create({
     color: C.goldBright,
     fontWeight: '500',
   },
-  adminPractitionerBtn: {
+  adminCardsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  adminCard: {
+    flex: 1,
+    aspectRatio: 1,
+    backgroundColor: C.bgCardDeep,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: GOLD,
+    overflow: 'hidden',
+  },
+  adminCardContent: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  adminCardIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: goldAlpha(0.3),
     backgroundColor: goldAlpha(0.10),
-    borderWidth: 1,
-    borderColor: C.goldBright,
-    borderRadius: 99,
-    paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: C.goldBright,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    justifyContent: 'center',
   },
-  adminPractitionerBtnText: {
-    color: C.goldBright,
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 2,
-  },
-  adminDashBtn: {
-    borderWidth: 1,
-    borderColor: C.borderGold,
-    borderRadius: 99,
-    paddingVertical: 15,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  adminDashBtnText: {
-    color: C.textMid,
+  adminCardLabel: {
     fontSize: 13,
-    fontWeight: '500',
-    letterSpacing: 1,
+    fontWeight: '700',
+    color: C.textBright,
+    letterSpacing: 0.1,
+  },
+  adminCardFooter: {
+    alignItems: 'flex-end',
+  },
+  adminCardArrow: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: GOLD,
   },
 
   // Preview Onboarding — TEMP dev tool, admin-only

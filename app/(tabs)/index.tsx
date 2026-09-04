@@ -4,7 +4,7 @@
 // Theme: SET Healing — Royal Purple & Sacred Gold
 // =======================================
 
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { GOLD, goldAlpha } from '@/constants/Colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -32,10 +32,17 @@ type Track = {
   isPremium?: boolean; description?: string; createdAt?: any;
 };
 
-const QUICK_ACTIONS: (PlaylistTrack & { icon: string })[] = [
-  { id: 'sleep', title: 'Sleep',  description: 'Slow frequencies for deep rest', sound: 'sleep', icon: '◐', favoriteType: 'track' },
-  { id: 'focus', title: 'Focus',  description: 'Frequencies for concentration',   sound: 'focus', icon: '◈', favoriteType: 'track' },
-  { id: 'calm',  title: 'Calm',   description: 'Relaxing sounds for peace',       sound: 'calm',  icon: '◎', favoriteType: 'track' },
+type Collection = {
+  id: string; title: string; description: string; sound: string; icon: string;
+};
+
+// Day 103 — Collections list, merged in from the former Healing tab.
+// Includes Energy (Home's old quick-actions grid didn't).
+const COLLECTIONS: Collection[] = [
+  { id: 'sleep',  title: 'Sleep',  description: 'Slow frequencies for rest and deep sleep', sound: 'sleep',  icon: '◐' },
+  { id: 'calm',   title: 'Calm',   description: 'Ease your thoughts and slow down',          sound: 'calm',   icon: '◎' },
+  { id: 'focus',  title: 'Focus',  description: 'Sharpen attention and clarity',             sound: 'focus',  icon: '◈' },
+  { id: 'energy', title: 'Energy', description: 'Uplifting tones for alertness',             sound: 'energy', icon: '◆' },
 ];
 
 type CategoryFilter = 'all' | 'sleep' | 'calm' | 'focus' | 'energy';
@@ -56,6 +63,20 @@ function getCategoryDescription(cat: string) {
   return map[cat] ?? 'Uploaded healing session';
 }
 
+const getSortValue = (track: Track) => track.createdAt?.seconds ?? 0;
+
+function groupTracksByCategory(tracks: Track[]) {
+  const grouped: Record<string, Track[]> = {};
+  for (const track of tracks) {
+    if (!grouped[track.category]) grouped[track.category] = [];
+    grouped[track.category].push(track);
+  }
+  Object.keys(grouped).forEach((key) => {
+    grouped[key].sort((a, b) => getSortValue(b) - getSortValue(a));
+  });
+  return grouped;
+}
+
 function SectionLabel({ title }: { title: string }) {
   return (
     <View style={styles.sectionLabelRow}>
@@ -68,7 +89,7 @@ function SectionLabel({ title }: { title: string }) {
 
 export default function HomeScreen() {
   const router            = useRouter();
-  const { setPlaylist }   = usePlayer();
+  const { setPlaylist, setLastCategory } = usePlayer();
   const { isTabletLandscape, isTabletPortrait } = useResponsive();
 
   const [tracks,  setTracks]  = useState<Track[]>([]);
@@ -101,6 +122,7 @@ export default function HomeScreen() {
     return (pref.length ? pref : tracks).slice(0, 3);
   }, [tracks]);
   const newestTracks = useMemo(() => tracks.slice(0, 3), [tracks]);
+  const groupedTracks = useMemo(() => groupTracksByCategory(tracks), [tracks]);
 
   // Day 102 — search + category filter
   const isFiltering = searchQuery.trim() !== '' || selectedCategory !== 'all';
@@ -128,14 +150,17 @@ export default function HomeScreen() {
     router.push('/test');
   };
 
-  const handleQuickAction = (action: PlaylistTrack) => {
-    setPlaylist([action], 0);
+  const playCollection = (id: string, title: string, description: string, sound: string, audioUrl?: string) => {
+    setPlaylist([{ id, title, description, sound, audioUrl, favoriteType: 'track' }], 0);
     router.push('/test');
   };
 
   const handleHeroPress = () => {
     if (popularTracks.length > 0) setPlaylist(toPlaylist(popularTracks), 0);
-    else setPlaylist([QUICK_ACTIONS[0]], 0);
+    else {
+      const fallback = COLLECTIONS[0];
+      setPlaylist([{ id: fallback.id, title: fallback.title, description: fallback.description, sound: fallback.sound, favoriteType: 'track' }], 0);
+    }
     router.push('/test');
   };
 
@@ -146,7 +171,6 @@ export default function HomeScreen() {
       activeOpacity={0.78}
       onPress={() => handleTrackPress(track, list)}
     >
-      <View style={styles.trackAccent} />
       <View style={styles.trackIcon}><Text style={styles.trackIconText}>◉</Text></View>
       <View style={styles.trackInfo}>
         <Text style={styles.trackName}>{track.title}</Text>
@@ -259,16 +283,61 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <SectionLabel title="Choose your frequency" />
-          <View style={styles.quickGrid}>
-            {QUICK_ACTIONS.map((a) => (
-              <TouchableOpacity key={a.id} style={styles.quickCard} activeOpacity={0.78} onPress={() => handleQuickAction(a)}>
-                <View style={styles.quickBar} />
-                <Text style={styles.quickIcon}>{a.icon}</Text>
-                <Text style={styles.quickName}>{a.title}</Text>
-                <Text style={styles.quickDesc}>{a.description}</Text>
-              </TouchableOpacity>
-            ))}
+          <SectionLabel title="Collections" />
+          <View style={styles.collectionList}>
+            {COLLECTIONS.map((item) => {
+              const latestTrack  = groupedTracks[item.id]?.[0];
+              const displayTitle = latestTrack?.title ?? item.title;
+              const displayDesc  = latestTrack?.description ?? item.description;
+              const soundKey     = latestTrack?.category ?? item.sound;
+
+              const Card = (
+                <View style={styles.collectionCard}>
+                  <View style={styles.collectionCardInner}>
+                    <View style={styles.collectionIconWrap}>
+                      <Text style={styles.collectionIcon}>{item.icon}</Text>
+                    </View>
+                    <View style={styles.collectionTextBlock}>
+                      <View style={styles.collectionTitleRow}>
+                        <Text style={styles.collectionTitle}>{item.title}</Text>
+                        {latestTrack?.isPremium ? (
+                          <Text style={styles.lockIcon}>🔒</Text>
+                        ) : latestTrack ? (
+                          <View style={styles.newBadge}>
+                            <Text style={styles.newBadgeText}>New</Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text style={styles.collectionDesc}>{displayDesc}</Text>
+                      {latestTrack && (
+                        <Text style={styles.collectionLatest}>
+                          Latest: {latestTrack.title}
+                        </Text>
+                      )}
+                    </View>
+                    <Text style={styles.collectionArrow}>›</Text>
+                  </View>
+                </View>
+              );
+
+              const linkEl = latestTrack?.isPremium ? (
+                <Link href="/paywall" asChild>
+                  <TouchableOpacity activeOpacity={0.78}>{Card}</TouchableOpacity>
+                </Link>
+              ) : (
+                <TouchableOpacity
+                  activeOpacity={0.78}
+                  onPress={() => {
+                    setLastCategory(item.title);
+                    playCollection(latestTrack?.id ?? item.id, displayTitle, displayDesc, soundKey, latestTrack?.url);
+                  }}
+                >
+                  {Card}
+                </TouchableOpacity>
+              );
+
+              return <View key={item.id}>{linkEl}</View>;
+            })}
           </View>
           {!isTabletLandscape && <View style={styles.rule} />}
         </View>
@@ -377,7 +446,7 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 11, color: C.textDim, fontWeight: '500', letterSpacing: 0.5 },
   filterChipTextActive: { color: C.goldBright },
 
-  heroCard:      { backgroundColor: C.bgHero, borderRadius: 24, padding: 24, marginBottom: 28, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
+  heroCard:      { backgroundColor: C.bgHero, borderRadius: 24, padding: 24, marginBottom: 28, borderWidth: 1, borderColor: GOLD, overflow: 'hidden' },
   heroGlow:      { position: 'absolute', top: -50, right: -50, width: 160, height: 160, borderRadius: 999, backgroundColor: goldAlpha(0.07) },
   heroBadgeRow:  { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 },
   heroDot:       { width: 5, height: 5, borderRadius: 999, backgroundColor: C.goldBright },
@@ -391,16 +460,23 @@ const styles = StyleSheet.create({
   sectionLabelLine: { flex: 1, height: 1, backgroundColor: C.borderPurple },
   sectionLabelText: { fontSize: 9, letterSpacing: 5, textTransform: 'uppercase', color: C.textMuted, fontWeight: '400' },
 
-  quickGrid: { gap: 10, marginBottom: 24 },
-  quickCard: { backgroundColor: C.bgCardDeep, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: C.borderGold, overflow: 'hidden' },
-  quickBar:  { position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: C.goldBright, opacity: 0.7 },
-  quickIcon: { fontSize: 20, color: C.goldBright, marginBottom: 8 },
-  quickName: { fontSize: 18, fontWeight: '600', color: C.textBright, marginBottom: 4 },
-  quickDesc: { fontSize: 12, color: C.textMid, fontWeight: '300', lineHeight: 18 },
+  collectionList:      { gap: 12, marginBottom: 24 },
+  collectionCard:      { backgroundColor: C.bgCardDeep, borderRadius: 20, borderWidth: 1, borderColor: GOLD, overflow: 'hidden' },
+  collectionCardInner: { flexDirection: 'row', alignItems: 'center', padding: 18, gap: 14 },
+  collectionIconWrap:  { width: 48, height: 48, borderRadius: 999, backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderGold, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  collectionIcon:      { fontSize: 20, color: C.goldBright },
+  collectionTextBlock: { flex: 1 },
+  collectionTitleRow:  { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+  collectionTitle:     { fontSize: 17, fontWeight: '700', color: C.textBright, letterSpacing: 0.1 },
+  collectionDesc:      { fontSize: 12, color: C.textMid, fontWeight: '300', lineHeight: 18, marginBottom: 5 },
+  collectionLatest:    { fontSize: 11, color: C.textMuted, fontWeight: '300', letterSpacing: 0.3 },
+  collectionArrow:     { fontSize: 24, color: C.textDim, fontWeight: '300', flexShrink: 0 },
+  lockIcon:            { fontSize: 13 },
+  newBadge:            { backgroundColor: goldAlpha(0.10), borderWidth: 1, borderColor: C.borderGold, borderRadius: 99, paddingHorizontal: 8, paddingVertical: 2 },
+  newBadgeText:        { fontSize: 9, color: C.goldBright, letterSpacing: 1, fontWeight: '600' },
 
   trackList:      { marginBottom: 20 },
-  trackCard:      { backgroundColor: C.bgCardDeep, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: C.borderGold, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14, overflow: 'hidden' },
-  trackAccent:    { position: 'absolute', top: 0, left: 0, bottom: 0, width: 2, backgroundColor: C.goldBright, opacity: 0.6, borderTopLeftRadius: 18, borderBottomLeftRadius: 18 },
+  trackCard:      { backgroundColor: C.bgCardDeep, borderRadius: 18, padding: 16, borderWidth: 1, borderColor: GOLD, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 14, overflow: 'hidden' },
   trackIcon:      { width: 40, height: 40, borderRadius: 999, backgroundColor: C.bgHero, borderWidth: 1, borderColor: C.borderGold, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   trackIconText:  { fontSize: 16, color: C.goldBright },
   trackInfo:      { flex: 1 },

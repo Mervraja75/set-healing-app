@@ -7,7 +7,7 @@
 /* ---------------------------------------
    SECTION A — Imports
 ---------------------------------------- */
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { GOLD, goldAlpha } from '@/constants/Colors';
 import {
   ScrollView,
@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import BackButton from '@/components/BackButton';
 import FavoriteButton from '@/components/FavoriteButton';
 
 /* ---------------------------------------
@@ -184,7 +185,6 @@ function SessionCard({ session }: { session: MeditationSession }) {
    SECTION D — Screen Component
 ---------------------------------------- */
 export default function MeditationsScreen() {
-  const router = useRouter();
   const { isTabletLandscape, isTabletPortrait } = useResponsive();
 
   return (
@@ -201,9 +201,9 @@ export default function MeditationsScreen() {
       <View style={styles.glowMidLeft} />
 
       {/* ── Back button ── */}
-      <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} style={styles.backBtn}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+      <View style={styles.topBar}>
+        <BackButton to="/(tabs)/explore" />
+      </View>
 
       {/* ── Header ── */}
       <View style={styles.header}>
@@ -249,15 +249,11 @@ const styles = StyleSheet.create({
   containerTabletLandscape: { paddingHorizontal: 40 },
   containerTabletPortrait:  { paddingHorizontal: 60 },
 
-  backBtn: {
-    alignSelf: 'flex-start',
-    marginBottom: 16,
-  },
-  backText: {
-    fontSize: 15,
-    color: C.textMuted,
-    fontWeight: '400',
-    letterSpacing: 0.3,
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
   },
 
   glowTopRight: {

@@ -141,11 +141,8 @@ function ExploreCard({ item, size }: { item: ExploreItem; size: number }) {
     <TouchableOpacity
       activeOpacity={0.78}
       onPress={() => router.push(item.route as any)}
-      style={[styles.card, { width: size, height: size }]}
+      style={[styles.card, { width: size, height: size, borderColor: item.color }]}
     >
-      {/* Colored top accent strip */}
-      <View style={[styles.cardStrip, { backgroundColor: item.color }]} />
-
       {/* Card body — icon top, text/arrow bottom */}
       <View style={styles.cardContent}>
 
@@ -335,10 +332,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.borderGold,
     overflow: 'hidden',
-  },
-  cardStrip: {
-    height: 3,
-    opacity: 0.85,
   },
   // space-between pushes icon to top and text group to bottom
   cardContent: {

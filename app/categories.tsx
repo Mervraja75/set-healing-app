@@ -19,6 +19,7 @@ import {
 
 import { useResponsive } from '@/hooks/useResponsive';
 
+import BackButton from '@/components/BackButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
@@ -141,6 +142,11 @@ export default function CategoriesScreen() {
       <View style={styles.glowTopRight} />
       <View style={styles.glowBottomLeft} />
 
+      {/* ── Back button ── */}
+      <View style={styles.topBar}>
+        <BackButton to="/(tabs)/explore" />
+      </View>
+
       {/* ── Header ── */}
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Sound Energy Therapy</Text>
@@ -258,6 +264,13 @@ const styles = StyleSheet.create({
     paddingTop: 68,
     paddingHorizontal: 22,
     backgroundColor: C.bg,
+  },
+
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
   },
 
   glowTopRight: {

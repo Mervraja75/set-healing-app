@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 
 import { useResponsive } from '@/hooks/useResponsive';
+import BackButton from '@/components/BackButton';
 import FavoriteButton from '@/components/FavoriteButton';
 
 // LayoutAnimation on Android requires this flag
@@ -335,6 +336,11 @@ export default function ChakrasScreen() {
       <View style={styles.glowTopRight} />
       <View style={styles.glowMidLeft} />
 
+      {/* ── Back button ── */}
+      <View style={styles.topBar}>
+        <BackButton to="/(tabs)/explore" />
+      </View>
+
       {/* ── Header ── */}
       <View style={styles.header}>
         <Text style={styles.eyebrow}>Energy Centers</Text>
@@ -397,6 +403,13 @@ const styles = StyleSheet.create({
   },
   containerTabletLandscape: { paddingHorizontal: 40 },
   containerTabletPortrait:  { paddingHorizontal: 60 },
+
+  topBar: {
+    position: 'absolute',
+    top: 55,
+    left: 18,
+    zIndex: 10,
+  },
 
   glowTopRight: {
     position: 'absolute',
