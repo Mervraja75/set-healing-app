@@ -9,8 +9,7 @@ import { getReactNativePersistence, initializeAuth } from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
+  memoryLocalCache,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -44,18 +43,18 @@ export const auth = initializeAuth(app, {
 
 /* ---------------------------------------
    SECTION D — Firestore with local cache
-   Day 57: persistentLocalCache means tracks
-   load instantly on repeat visits even
-   without a network connection.
+   The JS SDK's persistentLocalCache is backed by
+   IndexedDB, which doesn't exist in React Native —
+   it was silently falling back to memory cache anyway.
+   memoryLocalCache makes that explicit instead of
+   throwing an "unimplemented" error first.
    Falls back gracefully if already initialized.
 ---------------------------------------- */
 let _db: ReturnType<typeof getFirestore>;
 
 try {
   _db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
+    localCache: memoryLocalCache(),
   });
 } catch {
   // Already initialized — just get the existing instance
